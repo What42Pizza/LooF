@@ -1,0 +1,32 @@
+#ignore_header
+
+$link BasicFunctions.LOOF as Basics
+
+
+
+
+
+#replaceStart "function " "skip\n$function "
+
+#replaceStart "call " "call $"
+#replaceStart "call $$" "call $"
+
+#replaceStart "if_ " "if (not"
+#replaceEnd " then" ")\nskip"
+
+#replace "  -> " "\npop ARGS, "
+
+#replace ";" "\n"
+
+#replaceStart ":" "call $Basics."
+
+
+
+#replace "Basics.print " "Basics.print, "
+#replace "Basics.exit " "Basics.exit, "
+#replace "Basics.addItem " "Basics.addItem, "
+#replace "Basics.removeIndex " "Basics.removeIndex, "
+#replace "Basics.addAll " "Basics.addAll, "
+#replace "Basics.cloneTable " "Basics.cloneTable, "
+#replace "Basics.deepCloneTable " "Basics.deepCloneTable, "
+#replace "Basics.ensureArgTypesAreCorrect " "Basics.ensureArgTypesAreCorrect, "

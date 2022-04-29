@@ -1,0 +1,202 @@
+function UpdateAllBalls  -> BallsData, BulletsData
+	AllBalls = BallsData["AllBalls"]
+	
+	// update balls
+	NewBalls = {}
+	BallsToRemove = {}
+	forEach CurrentBall, AllBalls, i
+		call UpdateBall, CurrentBall, BallsData, BulletsData, NewBalls  -> BallIsDestoryed
+		if (BallIsDestroyed)
+			:addItem BallsToRemove, i
+	repeat
+	
+	// remove destroyed balls
+	forEach Index, BallsToRemove
+		:removeIndex AllBalls, Index
+	repeat
+	
+	// add new balls
+	:addAll AllBalls, NewBalls
+	
+	return
+end
+
+
+
+
+
+function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
+	Size = CurrentBall["Size"]
+	XPos = CurrentBall["XPos"]
+	YPos = CurrentBall["YPos"]
+	XVel = CurrentBall["XVel"]
+	YVel = CurrentBall["YVel"]
+	
+	call GetBallRadius, CurrentBall, BallsData  -> Radius
+	
+	
+	// gravity
+	YVel = YVel + BallsData["Gravity"]
+	
+	
+	// floor bounce
+	BottomYPos = YPos + Radius / 2
+	if (BottomYPos > 1)
+		YVel = (BallsData["BounceVelOffset"] + BallsData["BounceVelScale"] * CurrentBall["Size"]) * -1
+	
+	
+	// left wall bounce
+	LeftXPos = XPos - Radius / 2
+	if (LeftXPos < 0)
+		XVel = abs XVel
+	
+	
+	// right wall bounce
+	RightXPos = XPos + Radius / 2
+	if (LeftXPos < 0)
+		XVel = abs XVel * -1
+	
+	
+	// move
+	XPos = XPos + XVel
+	YPos = YPos + YVel
+	
+	
+	// collide with bullets
+	AllBullets = BulletsData["AllBullets"]
+	CollisionDistance = Radius + BulletsData["Size"]
+	forEach CurrentBullet, AllBullets
+		call CheckIfBallCollidsWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData  -> BulletIsColliding
+		continueIf (not BulletIsColliding)
+		call CollideWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
+		returnIf BallIsDestroyed, {true}
+	repeat
+	
+	
+	// update values
+	CurrentBall["XPos"] = XPos
+	CurrentBall["YPos"] = YPos
+	CurrentBall["XVel"] = XVel
+	CurrentBall["YVel"] = YVel
+	
+	
+	// return with with BallIsDestroyed as false
+	return {false}
+end
+
+
+
+
+
+
+
+
+
+function CheckIfBallCollidsWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsData
+	call F.DistanceBetweenObjects, CurrentBall, CurrentBullet  -> Dsitance
+	call GetBallRadius, CurrentBall, BallsData  -> BallRadius
+	CollisionDistance = BallRadius + BulletsData["BulletRadius"]
+	return (Distance <= CollisionDistance)
+end
+
+
+
+function CollideWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
+	
+	// deal damage
+	BulletDamage = BulletsData["BulletDamage"]
+	CurrentBall["Health"] = CurrentBall["Health"] - BulletDamage
+	
+	// return if done
+	returnIf (CurrentBall["Health"] > 0), {false}
+	
+	// split ball
+	if (CurrentBall["Size"] > 0)
+		call SplitBall, CurrentBall, BallsData, NewBalls
+	
+	return {true}
+end
+
+
+
+function SplitBall  -> Ball, BallsData, NewBalls
+	
+	NewSize = Ball, ["Size"] - 1
+	NewHealth = Ball, ["Health"] / 2
+	NewXPos = Ball, ["XPos"]
+	NewYPos = Ball, ["YPos"]
+	NewXVel = Ball, ["XVel"]
+	NewYVel = BallsData["BounceYVel"] / 2
+	
+	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel, NewYVel  -> Ball1
+	call GetNewBallStruct "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel * -1, NewYVel  -> Ball2
+	
+	:addItem NewBalls, Ball1
+	:addItem NewBalls, Ball2
+	
+	return
+end
+
+
+
+
+
+
+
+
+
+
+function SpawnNewBalls  -> BallsData
+	call GetNumberOfSize0Balls, BallsData["AllBalls"]  -> NumberOfSize0Balls
+	if (NumberOfSize0Balls < BallsData["MaxSize0Balls"])
+		call SpawnNewBall, BallsData
+	return
+end
+
+
+
+function GetNumberOfSize0Balls  -> AllBalls
+	Total = 0
+	forEach CurrentBall, AllBalls
+		Total = Total + 2 ^ CurrentBall["Size"]
+	repeat
+	return {Total}
+end
+
+
+
+
+
+function SpawnNewBall  -> BallsData
+	StartingXPos = (chance 50) and -0.2 or 1.2
+	StartingYPos = 0.75 + random 0.25
+	Size = randomInt (BallsData["MaxBallSize"])
+	call GetNewBallStruct, "normal", Size, BallsData["StartingHealth"], StartingXPos, StartingYPos, 0, 0  -> NewBall
+	:addItem BallsData["AllBalls"], NewBall
+	return
+end
+
+
+
+function GetNewBallStruct
+	pop Args, Type, Size, Health, XPos, YPos, XVel, YVel
+	:ensureArgTypesAreCorrect, Args, {"string", "number", "number", "number", "number", "number", "number"}
+	NewBall = {}
+	NewBall["Type"] = Type
+	NewBall["Size"] = Size
+	NewBall["Health"] = Health
+	NewBall["StartingHealth"] = Health
+	NewBall["XPos"] = XPos
+	NewBall["YPos"] = YPos
+	NewBall["XVel"] = XVel
+	NewBall["YVel"] = YVel
+	return NewBall
+end
+
+
+
+function GetBallRadius  -> Ball, BallsData
+	BallSize = Ball["Size"]
+	BallRadius = (BallSize + 1) * BallsData["Size"]
+	return BallRadius
+end
