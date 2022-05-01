@@ -1,9 +1,0 @@
-#include Basics.LOOF
-//$link Functions.LOOF as F
-
-
-
-ExampleTable = {10, 20, "Example"}
-call F.ConvertTableToString, ExampleTable
-print
-exit
