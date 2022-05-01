@@ -157,22 +157,42 @@ boolean CharStartsNewToken (char CharIn) {
 
 
 
-boolean StringContainsLetters (String StringIn) {
-  char[] StringInChars = StringIn.toCharArray();
-  for (char CurrChar : StringInChars) {
-    if (CharIsLetter (CurrChar)) return true;
+boolean TokenIsNumber (String Token) {
+  char[] TokenChars = Token.toCharArray();
+  boolean HasDigits = false;
+  for (char CurrChar : TokenChars) {
+    if (CharIsDigit (CurrChar)) HasDigits = true;
+    if (!CharIsNumberChar (CurrChar)) return false;
   }
-  return false;
+  return HasDigits;
+  
 }
 
 
 
+boolean CharIsNumberChar (char CharIn) {
+  return
+    (CharIn >= '0' && CharIn <= '9') ||
+    CharIn == '.'
+  ;
+}
+
+boolean CharIsDigit (char CharIn) {
+  return
+    (CharIn >= '0' && CharIn <= '9')
+  ;
+}
+
+
+
+/*
 boolean CharIsLetter (char CharIn) {
   return
     (CharIn >= 'a' && CharIn <= 'z') ||
     (CharIn >= 'A' && CharIn <= 'Z')
   ;
 }
+*/
 
 
 
@@ -297,6 +317,70 @@ void StopTimer (String TimerName) {
 
 int GetTimerMillis (String TimerName) {
   return TimerCounts.get(TimerName);
+}
+
+
+
+
+
+
+
+
+
+
+String ConvertLooFStatementToString (LooFTokenBranch[] Statement) {
+  ArrayList <String> IndividualBranchStrings = new ArrayList <String> ();
+  for (LooFTokenBranch CurrentTokenBranch : Statement) {
+    IndividualBranchStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
+  }
+  return CombineStringsWithSeperator (IndividualBranchStrings, ", ");
+}
+
+
+
+
+
+String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
+  switch (TokenBranch.Type) {
+    
+    default:
+      throw (new RuntimeException ("Unknown LooFTokenBranch type: " + TokenBranch.Type));
+    
+    case (TokenBranchType_Number):
+      return "Number " + TokenBranch.NumberValue;
+    
+    case (TokenBranchType_String):
+      return "String \"" + TokenBranch.StringValue + "\"";
+    
+    case (TokenBranchType_Bool):
+      return "Bool " + TokenBranch.BoolValue;
+    
+    case (TokenBranchType_Name):
+      return "Name \"" + TokenBranch.StringValue + "\"";
+    
+    case (TokenBranchType_Table):
+      return "Table {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
+    
+    case (TokenBranchType_Formula):
+      return "Formula {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
+    
+    case (TokenBranchType_Index):
+      return "Index {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
+    
+  }
+}
+
+
+
+
+
+String ConvertLooFTokenBranchChildrenToString (LooFTokenBranch TokenBranch) {
+  ArrayList <String> Output = new ArrayList <String> ();
+  for (LooFTokenBranch CurrentChild : TokenBranch.Children) {
+    Output.add(ConvertLooFTokenBranchToString (CurrentChild));
+  }
+  return CombineStringsWithSeperator (Output, ", ");
+  
 }
 
 

@@ -1170,12 +1170,22 @@ class LooFCompiler {
   
   
   LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, LooFFileCodeData CodeData, int LineNumber) {
+    
+    // error if there are multiple "="-s
     if (FindTokenIndex ("=", CurrentLineTokens, AssignmentTokenIndex + 1) != -1) throw (new LooFCompileException (CodeData, LineNumber, "found two \"=\" tokens but only one can used per statement."));
-    if (StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token \"=\", variables cannot be named " + CurrentLineTokens.get(0) +"."));
+    
+    // handle "default " statements
+    if (CurrentLineTokens.get(0).equals("default")) {
+      CurrentLineTokens.set(AssignmentTokenIndex, ",");
+      return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, CodeData, LineNumber);
+    }
+    
+    // error if var name is invalid
+    if (StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token \"=\" / variables cannot be named \"" + CurrentLineTokens.get(0) +"\"."));
     
     
     // var name
-    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_Name, CurrentLineTokens.get(0));
+    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_String, CurrentLineTokens.get(0));
     
     
     // indexes
@@ -1183,15 +1193,17 @@ class LooFCompiler {
     ArrayList <LooFTokenBranch> TargetVarIndexes = new ArrayList <LooFTokenBranch> ();
     while (PossibleIndexIndex < AssignmentTokenIndex) {
       if (!CurrentLineTokens.get(PossibleIndexIndex).equals("[")) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
-      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, BlockEnds.get(PossibleIndexIndex) - 1, BlockEnds);
+      int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
+      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds);
       IndexFormula.Type = TokenBranchType_Index;
-      TargetVarIndexes.add(TokenBranchType_Index, IndexFormula);
+      TargetVarIndexes.add(IndexFormula);
+      PossibleIndexIndex = IndexEndIndex + 2;
     }
     if (PossibleIndexIndex != AssignmentTokenIndex) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
     
     
     // formula for new value
-    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockEnds);
+    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds);
     
     
     // assemble final statement
@@ -1213,22 +1225,47 @@ class LooFCompiler {
   
   LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFFileCodeData CodeData, int LineNumber) {
     if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown."));
-    ArrayList <LooFTokenBranch> Output = new ArrayList <LooFTokenBranch> ();
     
     
+    // statement name
+    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_Name, CurrentLineTokens.get(0));
     
-    return ArrayListToArray (Output, new LooFTokenBranch(0));
+    
+    // get args
+    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds);
+    
+    
+    // assemble final statement
+    LooFTokenBranch[] Output = new LooFTokenBranch[] {
+      StatementName,
+      StatementArgs
+    };
+    
+    
+    return Output;
+  }
+  
+  
+  
+  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+    
+    if (CurrentLineTokens.size() == 1) {
+      return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
+    }
+    
+    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds);
+    
   }
   
   
   
   
   
-  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
     ArrayList <LooFTokenBranch> FormulaChildren = new ArrayList <LooFTokenBranch> ();
     for (int i = FormulaBlockStart; i < FormulaBlockEnd + 1; i ++) {
       String CurrentToken = CurrentLineTokens.get(i);
-      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockEnds);
+      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds);
       FormulaChildren.add(NewChild);
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
@@ -1239,23 +1276,23 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
     
     switch (CurrentToken.charAt(0)) {
       
       // Type_Formula
       case ('('):
-        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockEnds);
+        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
       
       // Type_Index
       case ('['):
-        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockEnds);
+        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
         IndexFormula.Type = TokenBranchType_Index;
         return IndexFormula;
       
       // Type_Table
       case ('{'):
-        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockEnds);
+        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
       
     }
     
@@ -1265,13 +1302,13 @@ class LooFCompiler {
       return new LooFTokenBranch (TokenBranchType_String, StringValue);
     }
     
-    // Type_Name
-    if (StringContainsLetters (CurrentToken)) {
-      return new LooFTokenBranch (TokenBranchType_Name, CurrentToken);
+    // Type_Number
+    if (TokenIsNumber (CurrentToken)) {
+      return new LooFTokenBranch (Double.parseDouble(CurrentToken));
     }
     
-    // Type_Number
-    return new LooFTokenBranch (Double.parseDouble(CurrentToken));
+    // Type_Name
+    return new LooFTokenBranch (TokenBranchType_Name, CurrentToken);
     
   }
   
@@ -1279,8 +1316,44 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockEnds) {
-    return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
+  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+    int TableBlockLevel = BlockLevels.get(TableBlockStart);
+    ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
+    
+    int ItemStartIndex = TableBlockStart;
+    int PrevNextCommaIndex = ItemStartIndex - 1;
+    int NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, TableBlockStart, TableBlockEnd, TableBlockLevel, BlockLevels);
+    while (NextCommaIndex != -1) {
+      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds));
+      ItemStartIndex = NextCommaIndex + 1;
+      PrevNextCommaIndex = NextCommaIndex;
+      NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd, TableBlockLevel, BlockLevels);
+    }
+    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds));
+    
+    return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)));
+  }
+  
+  
+  
+  
+  
+  int GetNextCommaIndex (ArrayList <String> CurrentLineTokens, int StartIndex, int TableBlockEnd, int TableBlockLevel, ArrayList <Integer> BlockLevels) {
+    
+    int NextCommaIndex = FindTokenIndex (",", CurrentLineTokens, StartIndex, TableBlockEnd);
+    if (NextCommaIndex == -1) return -1;
+    int NextCommaLevel = BlockLevels.get(NextCommaIndex);
+    if (NextCommaLevel < TableBlockLevel) return -1;
+    
+    while (NextCommaLevel > TableBlockLevel) {
+      NextCommaIndex = FindTokenIndex (",", CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd);
+      if (NextCommaIndex == -1) return -1;
+      NextCommaLevel = BlockLevels.get(NextCommaIndex);
+      if (NextCommaLevel < TableBlockLevel) return -1;
+    }
+    
+    return NextCommaIndex;
+    
   }
   
   
@@ -1288,7 +1361,11 @@ class LooFCompiler {
   
   
   int FindTokenIndex (String TokenToFind, ArrayList <String> CurrentLineTokens, int StartIndex) {
-    for (int i = StartIndex; i < CurrentLineTokens.size(); i ++) {
+    return FindTokenIndex (TokenToFind, CurrentLineTokens, StartIndex, CurrentLineTokens.size() - 1);
+  }
+  
+  int FindTokenIndex (String TokenToFind, ArrayList <String> CurrentLineTokens, int StartIndex, int EndIndex) {
+    for (int i = StartIndex; i <= EndIndex; i ++) {
       if (CurrentLineTokens.get(i).equals(TokenToFind)) return i;
     }
     return -1;
@@ -1299,6 +1376,7 @@ class LooFCompiler {
   boolean StringIsInterpreterCall (String StringIn) {
     switch (StringIn) {
       
+      case ("default"):
       case ("push"):
       case ("pop"):
       case ("call"):
