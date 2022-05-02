@@ -26,7 +26,7 @@ class LooFEnvironment {
   HashMap <String, LooFFile> AllFiles;
   
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
-  ArrayList <HashMap <String, LooFDataValue>> AllVarListStacks = new ArrayList <HashMap <String, LooFDataValue>> ();
+  ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
   
   ArrayList <LooFDataValue[]> LockedArgumentDataValues = new ArrayList <LooFDataValue[]> ();
   
@@ -46,11 +46,13 @@ class LooFEnvironment {
 
 class LooFFile {
   
-  
-  
   String FullName;
+  LooFFileCodeData CodeData;
   
-  
+  public LooFFile (String FullName, LooFFileCodeData CodeData) {
+    this.FullName = FullName;
+    this.CodeData = CodeData;
+  }
   
 }
 
@@ -138,11 +140,11 @@ class LooFCompileSettings {
 class LooFCompileException extends RuntimeException {
   
   public LooFCompileException (LooFFileCodeData CodeData, int LineNumber, String Message) {
-    this (CodeData.CodeArrayList.get(LineNumber), CodeData.LineNumbers.get(LineNumber), CodeData.LineFileOrigins.get(LineNumber), CodeData.FullName, Message);
+    super (GetCompilerErrorMessage (CodeData, CodeData.FullName, CodeData.LineNumbers.get(LineNumber), Message));
   }
   
   public LooFCompileException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
-    super (GetErrorMessageToShow (LineOfCode, LineNumber, LineFileOrigin, FileName, Message));
+    super (GetCompilerErrorMessage (LineOfCode, LineNumber, LineFileOrigin, FileName, Message));
   }
   
   public LooFCompileException (String Message) {
@@ -159,12 +161,56 @@ class LooFCompileException extends RuntimeException {
 
 
 
-String GetErrorMessageToShow (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
+String GetCompilerErrorMessage (LooFFileCodeData CodeData, String FileName, int LineNumber, String Message) {
   
-  if (LineFileOrigin.equals(FileName))
-    return "File \"" + LineFileOrigin + "\" line " + LineNumber + "   (\"" + LineOfCode + "\") :   " + Message;
+  int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
+  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
+  String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
+  String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
   
-  return "File \"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\") line " + LineNumber + "  (\"" + LineOfCode + "\") :   " + Message;
+  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
+  String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
+  
+  return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
+  
+}
+
+
+
+String GetCompilerErrorMessage (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
+  
+  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
+  
+  return "File " + FileNameToShow + " line " + LineNumber + "   (\"" + LineOfCode + "\") :   " + Message;
+  
+}
+
+
+
+
+
+class LooFInterpreterException extends RuntimeException {
+  
+  public LooFInterpreterException (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
+    super (GetInterpreterErrorMessage (Environment, FileName, LineNumber, Message));
+  }
+  
+}
+
+
+
+String GetInterpreterErrorMessage (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
+  LooFFileCodeData CodeData = Environment.AllFiles.get(FileName).CodeData;
+  
+  int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
+  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
+  String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
+  String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
+  
+  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
+  String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
+  
+  return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
   
 }
 
@@ -187,37 +233,39 @@ class LooFDataValue {
   String StringValue;
   boolean BoolValue;
   ArrayList <LooFDataValue> TableValue;
+  HashMap <String, LooFDataValue> HashMapValue;
   
   ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
   
   
   
   public LooFDataValue() {
-    Type = DVType_Null;
+    Type = DataValueType_Null;
     LockLevels.add(0);
   }
   
   public LooFDataValue (double NumberValue) {
-    Type = DVType_Number;
+    Type = DataValueType_Number;
     this.NumberValue = NumberValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (String StringValue) {
-    Type = DVType_String;
+    Type = DataValueType_String;
     this.StringValue = StringValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (boolean BoolValue) {
-    Type = DVType_Bool;
+    Type = DataValueType_Bool;
     this.BoolValue = BoolValue;
     LockLevels.add(0);
   }
   
-  public LooFDataValue (ArrayList <LooFDataValue> TableValue) {
-    Type = DVType_Table;
+  public LooFDataValue (ArrayList <LooFDataValue> TableValue, HashMap <String, LooFDataValue> HashMapValue) {
+    Type = DataValueType_Table;
     this.TableValue = TableValue;
+    this.HashMapValue = HashMapValue;
     LockLevels.add(0);
   }
   
@@ -227,18 +275,26 @@ class LooFDataValue {
 
 
 
-final int DVType_Null = 0;
-final int DVType_Number = 1;
-final int DVType_String = 2;
-final int DVType_Bool = 3;
-final int DVType_Table = 4;
+final int DataValueType_Null = 0;
+final int DataValueType_Number = 1;
+final int DataValueType_String = 2;
+final int DataValueType_Bool = 3;
+final int DataValueType_Table = 4;
 
-final String[] DVTypeNames = {
+final String[] DataValueTypeNames = {
   "null",
   "number",
   "string",
   "bool",
   "table",
+};
+
+final String[] DataValueTypeNames_PlusA = {
+  "null",
+  "a number",
+  "a string",
+  "a bool",
+  "a table",
 };
 
 
@@ -300,4 +356,15 @@ final String[] TokenBranchTypeNames = {
   "Formula",
   "Index",
   "OutputVar",
+};
+
+final String[] TokenBranchTypeNames_PlusA = {
+  "a Number",
+  "a String",
+  "a Bool",
+  "a Table",
+  "a Name",
+  "a Formula",
+  "an Index",
+  "an OutputVar",
 };

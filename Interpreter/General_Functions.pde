@@ -26,6 +26,12 @@
 
 
 
+<T> T GetLastItemOf (ArrayList <T> Input) {
+  return Input.get(Input.size() - 1);
+}
+
+
+
 int[] ToPrimitive (Integer[] ArrayIn) {
   int[] ArrayOut = new int [ArrayIn.length];
   for (int i = 0; i < ArrayIn.length; i ++) {
@@ -399,22 +405,22 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
     TargetDataValue.Type = SourceDataValue.Type;
     switch (SourceDataValue.Type) {
       
-      case (DVType_Null):
+      case (DataValueType_Null):
         return;
       
-      case (DVType_Number):
+      case (DataValueType_Number):
         TargetDataValue.NumberValue = SourceDataValue.NumberValue;
         return;
       
-      case (DVType_String):
+      case (DataValueType_String):
         TargetDataValue.StringValue = SourceDataValue.StringValue;
         return;
       
-      case (DVType_Bool):
+      case (DataValueType_Bool):
         TargetDataValue.BoolValue = SourceDataValue.BoolValue;
         return;
       
-      case (DVType_Table):
+      case (DataValueType_Table):
         TargetDataValue.TableValue = SourceDataValue.TableValue;
         return;
       
@@ -430,7 +436,7 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
 
 void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
-  int CurrentLockLevel = LockLevels.get(LockLevels.size() - 1);
+  int CurrentLockLevel = GetLastItemOf (LockLevels);
   LockLevels.add(CurrentLockLevel + 1);
 }
 
@@ -446,4 +452,13 @@ void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
 void UnlockDataValue (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   LockLevels.set(LockLevels.size() - 1, 0);
+}
+
+
+
+
+
+boolean DataValueIsInteger (LooFDataValue DataValue) {
+  if (DataValue.Type != DataValueType_Number) return false;
+  return DataValue.NumberValue % 1 == 0;
 }
