@@ -367,6 +367,9 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_Index):
       return "Index {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
     
+    case (TokenBranchType_OutputVar):
+      return "Output Var \"" + TokenBranch.StringValue + "\"";
+    
   }
 }
 

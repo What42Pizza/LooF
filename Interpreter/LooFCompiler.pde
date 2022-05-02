@@ -68,7 +68,20 @@ class LooFCompiler {
     
     if (CompileSettings.ParserOutputPath != null) {
       StopTimer ("OnlyCompilation");
-      PrintParserOutput (AllCodeDatas, CompileSettings.LinkerOutputPath, "ParsedLOOF");
+      PrintParserOutput (AllCodeDatas, CompileSettings.ParserOutputPath, "ParsedLOOF");
+      StartTimer ("OnlyCompilation");
+    }
+    
+    
+    
+    // lex CodeData-s
+    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+      LexCodeData (CodeData);
+    }
+    
+    if (CompileSettings.LexerOutputPath != null) {
+      StopTimer ("OnlyCompilation");
+      PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "LexedLOOF");
       StartTimer ("OnlyCompilation");
     }
     
@@ -945,13 +958,8 @@ class LooFCompiler {
   
   
   void ParseCodeData (LooFFileCodeData CodeData, String[] CombinedTokens) {
-    
     TokenizeCode (CodeData);
-    
     CombineTokensForCode (CodeData, CombinedTokens);
-    
-    LexTokens (CodeData);
-    
   }
   
   
@@ -1135,12 +1143,16 @@ class LooFCompiler {
   
   
   
-  void LexTokens (LooFFileCodeData CodeData) {
+  void LexCodeData (LooFFileCodeData CodeData) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
-    LooFTokenBranch[][] CodeTokenTrees = new LooFTokenBranch [CodeTokens.size()] [];
-    for (int i = 0; i < CodeTokenTrees.length; i ++) {
-      LooFTokenBranch[] LexedTokens = GetLexedTokensForLine (CodeTokens.get(i), CodeData, i);
+    LooFTokenBranch[][] Statements = new LooFTokenBranch [CodeTokens.size()] [];
+    for (int i = 0; i < Statements.length; i ++) {
+      LooFTokenBranch[] Statement = GetLexedTokensForLine (CodeTokens.get(i), CodeData, i);
+      EnsureStatementIsValid (Statement, CodeData, i);
+      SimplifyStatement (Statement, CodeData, i);
+      Statements[i] = Statement;
     }
+    CodeData.Statements = Statements;
   }
   
   
@@ -1185,7 +1197,7 @@ class LooFCompiler {
     
     
     // var name
-    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_String, CurrentLineTokens.get(0));
+    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_OutputVar, CurrentLineTokens.get(0));
     
     
     // indexes
@@ -1298,7 +1310,7 @@ class LooFCompiler {
     
     // Type_String
     if (CurrentToken.charAt(0) == '"') {
-      String StringValue = CurrentToken.substring(1, CurrentToken.length() - 2);
+      String StringValue = CurrentToken.substring(1, CurrentToken.length() - 1);
       return new LooFTokenBranch (TokenBranchType_String, StringValue);
     }
     
@@ -1317,6 +1329,7 @@ class LooFCompiler {
   
   
   LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+    if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
     ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
     
@@ -1511,6 +1524,277 @@ class LooFCompiler {
   
   
   
+  void EnsureStatementIsValid (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+    switch (Statement[0].StringValue) {
+      
+      case ("default"): // assignments
+        return;
+      
+      case ("push"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("pop"):
+        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("call"):
+        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("return"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 1, CodeData, LineNumber);
+        return;
+      
+      case ("returnIf"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, 2, CodeData, LineNumber);
+        return;
+      
+      case ("if"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("skip"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("end"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("loop"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 3, CodeData, LineNumber);
+        return;
+      
+      case ("forEach"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 2, 3, CodeData, LineNumber);
+        return;
+      
+      case ("while"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("repeat"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("repeatIf"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("continue"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("continueIf"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("break"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("breakIf"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+      case ("error"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 2, CodeData, LineNumber);
+        return;
+      
+      case ("errorIf"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 3, CodeData, LineNumber);
+        return;
+      
+      case ("callOutside"):
+        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
+    }
+  }
+  
+  
+  
+  
+  
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+    LooFTokenBranch StatementArgs = Statement[1];
+    int NumberOfArgs = StatementArgs.Children.length;
+    if (NumberOfArgs != CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but " + (NumberOfArgs < CorrectNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
+  }
+  
+  
+  
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+    LooFTokenBranch StatementArgs = Statement[1];
+    int NumberOfArgs = StatementArgs.Children.length;
+    if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
+  }
+  
+  
+  
+  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+    LooFTokenBranch StatementArgs = Statement[1];
+    int NumberOfArgs = StatementArgs.Children.length;
+    if (NumberOfArgs < CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void SimplifyStatement (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+    SimplifyNestedFormulasForStatement (Statement);
+    SimplifyOutputVarsForStatement (Statement, CodeData, LineNumber);
+  }
+  
+  
+  
+  
+  
+  void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+    if (Statement[0].Type != TokenBranchType_Name) return;
+    switch (Statement[0].StringValue) {
+      
+      default:
+        throw (new RuntimeException ("INTERNAL ERROR: could not recognize statement type \"" + Statement[0].StringValue));
+      
+      case ("default"):
+        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
+        return;
+      
+      case ("push"):
+        return;
+      
+      case ("pop"):
+        SimplifyAllOutputVars (Statement, CodeData, LineNumber);
+        return;
+      
+      case ("call"):
+        return;
+      
+      case ("return"):
+        return;
+      
+      case ("returnIf"):
+        return;
+      
+      case ("if"):
+        return;
+      
+      case ("skip"):
+        return;
+      
+      case ("end"):
+        return;
+      
+      case ("loop"):
+        if (Statement[1].Children.length >= 1) {
+          SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
+        }
+        return;
+      
+      case ("forEach"):
+        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
+        if (Statement[1].Children.length == 3) {
+          SimplifySingleOutputVar (Statement, 2, CodeData, LineNumber);
+        }
+        return;
+      
+      case ("while"):
+        return;
+      
+      case ("repeat"):
+        return;
+      
+      case ("repeatIf"):
+        return;
+      
+      case ("continue"):
+        return;
+      
+      case ("continueIf"):
+        return;
+      
+      case ("break"):
+        return;
+      
+      case ("breakIf"):
+        return;
+      
+      case ("error"):
+        return;
+      
+      case ("errorIf"):
+        return;
+      
+      case ("callOutside"):
+        return;
+      
+    }
+  }
+  
+  
+  
+  void SimplifyAllOutputVars (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+    int NumberOfArgs = Statement[1].Children.length;
+    for (int i = 0; i < NumberOfArgs; i ++) {
+      SimplifySingleOutputVar (Statement, i, CodeData, LineNumber);
+    }
+  }
+  
+  
+  
+  
+  
+  void SimplifySingleOutputVar (LooFTokenBranch[] Statement, int OutputVarIndex, LooFFileCodeData CodeData, int LineNumber) {
+    LooFTokenBranch OutputArg = Statement[1].Children[OutputVarIndex];
+    LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
+    if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
+    LooFTokenBranch OutputVarToken = OutputArgChildren[0];
+    if (OutputVarToken.Type != TokenBranchType_Name) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.Type] + "."));
+    OutputVarToken.Type = TokenBranchType_OutputVar;
+    Statement[1].Children[OutputVarIndex] = OutputVarToken;
+  }
+  
+  
+  
+  
+  
+  void SimplifyNestedFormulasForStatement (LooFTokenBranch[] Statement) {
+    if (Statement.length == 1) return;
+    
+    // assignments
+    if (Statement[0].Type == TokenBranchType_OutputVar) {
+      Statement[Statement.length - 1] = GetSimplifyNestedFormulas (Statement[Statement.length - 1]);
+      return;
+    }
+    
+    // interpreter calls
+    LooFTokenBranch[] Args = Statement[1].Children;
+    for (int i = 0; i < Args.length; i ++) {
+      Args[i] = GetSimplifyNestedFormulas (Args[i]);
+    }
+    
+  }
+  
+  
+  
+  LooFTokenBranch GetSimplifyNestedFormulas (LooFTokenBranch TokenBranch) {
+    LooFTokenBranch[] Children = TokenBranch.Children;
+    if (Children.length != 1) return TokenBranch;
+    if (Children[0].Type != TokenBranchType_Formula) return TokenBranch;
+    return Children[0];
+  }
+  
+  
+  
+  
+  
   
   
   
@@ -1564,15 +1848,15 @@ class LooFCompiler {
         FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + Line);
       }
       
-      /*
-      for (int j = 0; j < 100; j ++) FileOutput.print('-'); FileOutput.println();
+      FileOutput.println();
+      for (int j = 0; j < 100; j ++) FileOutput.print('-');
+      FileOutput.println();
       HashMap <String, Integer> FunctionLocations = CodeData.FunctionLocations;
       Set <String> AllFunctionNames = FunctionLocations.keySet();
       for (String CurrFunctionName : AllFunctionNames) {
         int CurrFunctionLocation = FunctionLocations.get(CurrFunctionName);
         FileOutput.println ("Function \"" + CurrFunctionName + "\": " + CurrFunctionLocation);
       }
-      */
       
       FileOutput.flush();
       FileOutput.close();
@@ -1603,6 +1887,37 @@ class LooFCompiler {
         int LineNumber = LineNumbers.get(i);
         String LineFileOrigin = LineFileOrigins.get(i);
         FileOutput.println (LineFileOrigin + " " + LineNumber + ": \"" + CombineStringsWithSeperator (Line, "\"   \"") + "\"");
+      }
+      
+      FileOutput.flush();
+      FileOutput.close();
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void PrintLexerOutput (HashMap <String, LooFFileCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullName;
+      FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
+      PrintWriter FileOutput = createWriter (FileOutputName);
+      
+      LooFTokenBranch[][] Statements = CodeData.Statements;
+      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+      for (int i = 0; i < Statements.length; i ++) {
+        LooFTokenBranch[] Line = Statements[i];
+        int LineNumber = LineNumbers.get(i);
+        String LineFileOrigin = LineFileOrigins.get(i);
+        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (Line));
       }
       
       FileOutput.flush();

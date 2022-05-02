@@ -3,5 +3,5 @@ function DistanceBetweenObjects  -> Object1, Object2
 	DeltaY = Object1["YPos"] - Object2["YPos"]
 	DistanceSquared = DeltaX * DeltaX + DeltaY * DeltaY
 	Distance = sqrt (DistanceSquared)
-	return {Distance}
+	return Distance
 end

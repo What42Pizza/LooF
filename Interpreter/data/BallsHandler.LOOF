@@ -69,7 +69,7 @@ function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
 		call CheckIfBallCollidsWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData  -> BulletIsColliding
 		continueIf (not BulletIsColliding)
 		call CollideWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
-		returnIf BallIsDestroyed, {true}
+		returnIf BallIsDestroyed, true
 	repeat
 	
 	
@@ -81,7 +81,7 @@ function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
 	
 	
 	// return with with BallIsDestroyed as false
-	return {false}
+	return false
 end
 
 
@@ -108,13 +108,13 @@ function CollideWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsDat
 	CurrentBall["Health"] = CurrentBall["Health"] - BulletDamage
 	
 	// return if done
-	returnIf (CurrentBall["Health"] > 0), {false}
+	returnIf (CurrentBall["Health"] > 0), false
 	
 	// split ball
 	if (CurrentBall["Size"] > 0)
 		call SplitBall, CurrentBall, BallsData, NewBalls
 	
-	return {true}
+	return true
 end
 
 
@@ -160,7 +160,7 @@ function GetNumberOfSize0Balls  -> AllBalls
 	forEach CurrentBall, AllBalls
 		Total = Total + 2 ^ CurrentBall["Size"]
 	repeat
-	return {Total}
+	return Total
 end
 
 

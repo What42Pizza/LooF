@@ -64,7 +64,7 @@ class LooFFileCodeData {
   String[] OriginalCode;
   ArrayList <String> CodeArrayList;
   ArrayList <ArrayList <String>> CodeTokens = new ArrayList <ArrayList <String>> ();
-  LooFTokenBranch[][] CodeTokenTrees;
+  LooFTokenBranch[][] Statements;
   ArrayList <Integer> LineNumbers;
   ArrayList <String> LineFileOrigins;
   
@@ -120,7 +120,7 @@ class LooFCompileSettings {
   String PreProcessorOutputPath = null;
   String LinkerOutputPath = null;
   String ParserOutputPath = null;
-  String FinalOutputPath = null;
+  String LexerOutputPath = null;
   
 }
 
@@ -280,3 +280,15 @@ final int TokenBranchType_Table = 3;
 final int TokenBranchType_Name = 4;
 final int TokenBranchType_Formula = 5;
 final int TokenBranchType_Index = 6;
+final int TokenBranchType_OutputVar = 7;
+
+final String[] TokenBranchTypeNames = {
+  "Number",
+  "String",
+  "Bool",
+  "Table",
+  "Name",
+  "Formula",
+  "Index",
+  "OutputVar",
+};

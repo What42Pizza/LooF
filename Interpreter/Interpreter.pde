@@ -39,8 +39,8 @@ void setup() {
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
   //CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.LinkerOutputPath = dataPath("") + "/CompilerOutputs";
-  CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
-  CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
+  //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
   
   LooFInterpreter.AddNewEnvironment(new File (dataPath("")), CompileSettings);
   
