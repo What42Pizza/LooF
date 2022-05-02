@@ -423,3 +423,27 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
       
     }
 }
+
+
+
+
+
+void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
+  ArrayList <Integer> LockLevels = DataValue.LockLevels;
+  int CurrentLockLevel = LockLevels.get(LockLevels.size() - 1);
+  LockLevels.add(CurrentLockLevel + 1);
+}
+
+
+
+void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
+  ArrayList <Integer> LockLevels = DataValue.LockLevels;
+  LockLevels.remove(LockLevels.size() - 1);
+}
+
+
+
+void UnlockDataValue (LooFDataValue DataValue) {
+  ArrayList <Integer> LockLevels = DataValue.LockLevels;
+  LockLevels.set(LockLevels.size() - 1, 0);
+}

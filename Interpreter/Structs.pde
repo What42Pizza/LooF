@@ -28,6 +28,8 @@ class LooFEnvironment {
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> AllVarListStacks = new ArrayList <HashMap <String, LooFDataValue>> ();
   
+  ArrayList <LooFDataValue[]> LockedArgumentDataValues = new ArrayList <LooFDataValue[]> ();
+  
   
   
   public LooFEnvironment (HashMap <String, LooFFile> AllFiles) {
@@ -186,30 +188,37 @@ class LooFDataValue {
   boolean BoolValue;
   ArrayList <LooFDataValue> TableValue;
   
+  ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
+  
   
   
   public LooFDataValue() {
     Type = DVType_Null;
+    LockLevels.add(0);
   }
   
   public LooFDataValue (double NumberValue) {
     Type = DVType_Number;
     this.NumberValue = NumberValue;
+    LockLevels.add(0);
   }
   
   public LooFDataValue (String StringValue) {
     Type = DVType_String;
     this.StringValue = StringValue;
+    LockLevels.add(0);
   }
   
   public LooFDataValue (boolean BoolValue) {
     Type = DVType_Bool;
     this.BoolValue = BoolValue;
+    LockLevels.add(0);
   }
   
   public LooFDataValue (ArrayList <LooFDataValue> TableValue) {
     Type = DVType_Table;
     this.TableValue = TableValue;
+    LockLevels.add(0);
   }
   
   

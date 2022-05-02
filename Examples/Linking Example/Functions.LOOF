@@ -11,5 +11,5 @@ function ConvertTableToString  -> TableIn, Seperator
 		StringOut = StringOut .. Sepeator .. (toString TableIn[i])
 	repeat
 	
-	return {StringOut}
+	return StringOut
 end

@@ -421,6 +421,21 @@ timeSince VALUE (number)
 
 
 
+Order of operations:  (if not specified, right to left; evaluates parenthesis and tables as (and if) needed)
+
+1: Indexe queries
+2: Evaluator functions (left to right)
+3: ^
+4: %
+5: * and /
+6: + and -
+7: ==, >, < !=, >=, and <=
+8: and, or, not, and xor
+
+
+
+
+
 
 
 

@@ -121,11 +121,11 @@ end
 
 function SplitBall  -> Ball, BallsData, NewBalls
 	
-	NewSize = Ball, ["Size"] - 1
-	NewHealth = Ball, ["Health"] / 2
-	NewXPos = Ball, ["XPos"]
-	NewYPos = Ball, ["YPos"]
-	NewXVel = Ball, ["XVel"]
+	NewSize = Ball["Size"] - 1
+	NewHealth = Ball["Health"] / 2
+	NewXPos = Ball["XPos"]
+	NewYPos = Ball["YPos"]
+	NewXVel = Ball["XVel"]
 	NewYVel = BallsData["BounceYVel"] / 2
 	
 	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel, NewYVel  -> Ball1
@@ -178,9 +178,8 @@ end
 
 
 
-function GetNewBallStruct
-	pop Args, Type, Size, Health, XPos, YPos, XVel, YVel
-	:ensureArgTypesAreCorrect, Args, {"string", "number", "number", "number", "number", "number", "number"}
+function GetNewBallStruct  -> Type, Size, Health, XPos, YPos, XVel, YVel
+	:ensureArgTypesAreCorrect ARGS, {"string", "number", "number", "number", "number", "number", "number"}
 	NewBall = {}
 	NewBall["Type"] = Type
 	NewBall["Size"] = Size
