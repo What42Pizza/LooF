@@ -1,0 +1,8 @@
+GeneralFunctions.LOOF 0: Name "skip", Table {}
+GeneralFunctions.LOOF 0: Name "pop", Table {Output Var "ARGS", Output Var "Object1", Output Var "Object2"}
+GeneralFunctions.LOOF 1: Output Var "DeltaX", Formula {Name "Object1", Index {String "XPos"}, Name "-", Name "Object2", Index {String "XPos"}}
+GeneralFunctions.LOOF 2: Output Var "DeltaY", Formula {Name "Object1", Index {String "YPos"}, Name "-", Name "Object2", Index {String "YPos"}}
+GeneralFunctions.LOOF 3: Output Var "DistanceSquared", Formula {Name "DeltaX", Name "*", Name "DeltaX", Name "+", Name "DeltaY", Name "*", Name "DeltaY"}
+GeneralFunctions.LOOF 4: Output Var "Distance", Formula {Name "sqrt", Formula {Name "DistanceSquared"}}
+GeneralFunctions.LOOF 5: Name "return", Table {Formula {Name "Distance"}}
+GeneralFunctions.LOOF 6: Name "end", Table {}

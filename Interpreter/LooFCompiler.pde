@@ -1390,6 +1390,7 @@ class LooFCompiler {
     switch (StringIn) {
       
       case ("default"):
+      case ("unlock"):
       case ("push"):
       case ("pop"):
       case ("call"):
@@ -1527,8 +1528,14 @@ class LooFCompiler {
   void EnsureStatementIsValid (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
     switch (Statement[0].StringValue) {
       
-      case ("default"): // assignments
+      default: // assignments
         return;
+      
+      case ("default"):
+        return;
+      
+      case ("unlock"):
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
       
       case ("push"):
         EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
@@ -1666,6 +1673,9 @@ class LooFCompiler {
       case ("default"):
         SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
         return;
+      
+      case ("unlock"):
+        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
       
       case ("push"):
         return;

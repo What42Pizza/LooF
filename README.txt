@@ -188,6 +188,9 @@ VAR_NAME [VALUE (int)] ... = VALUE
 default VAR_NAME = VALUE
 	Sets VAR_NAME to VALUE only if VAR_NAME is null
 
+unlock VAR_NAME
+	Unlocks VAR_NAME so that it and its idexes can be re-assigned
+
 
 
 push VALUE

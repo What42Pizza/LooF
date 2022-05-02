@@ -1,0 +1,36 @@
+Main.LOOF 0: Output Var "Settings", Formula {Table {}}
+Main.LOOF 1: Output Var "Settings", Index {String "TargetFramerate"}, Formula {Number 60.0}
+Main.LOOF 18: Output Var "BallsData", Formula {Table {}}
+Main.LOOF 19: Output Var "BallsData", Index {String "AllBalls"}, Formula {Table {}}
+Main.LOOF 20: Output Var "BallsData", Index {String "StartingHealth"}, Formula {Number 5.0}
+Main.LOOF 21: Output Var "BallsData", Index {String "MaxSize0Balls"}, Formula {Number 10.0}
+Main.LOOF 22: Output Var "BallsData", Index {String "Size"}, Formula {Number 0.05}
+Main.LOOF 23: Output Var "BallsData", Index {String "Gravity"}, Formula {Number 0.05}
+Main.LOOF 24: Output Var "BallsData", Index {String "BounceVelOffset"}, Formula {Number 0.5}
+Main.LOOF 25: Output Var "BallsData", Index {String "BounceVelScale"}, Formula {Number 0.05}
+Main.LOOF 27: Output Var "BulletsData", Formula {Table {}}
+Main.LOOF 28: Output Var "BulletsData", Index {String "AllBullets"}, Formula {Table {}}
+Main.LOOF 29: Output Var "BulletsData", Index {String "Damage"}, Formula {Number 1.0}
+Main.LOOF 30: Output Var "BulletsData", Index {String "Size"}, Formula {Number 0.01}
+Main.LOOF 31: Output Var "BulletsData", Index {String "LeftoverSpawnAmount"}, Formula {Number 0.0}
+Main.LOOF 35: Output Var "GameData", Formula {Table {}}
+Main.LOOF 36: Output Var "GameData", Index {String "Playing"}, Formula {Name "false"}
+Main.LOOF 37: Output Var "GameData", Index {String "Paused"}, Formula {Name "false"}
+Main.LOOF 38: Output Var "GameData", Index {String "PlayerIsAlive"}, Formula {Name "false"}
+Main.LOOF 39: Output Var "GameData", Index {String "Score"}, Formula {Number 0.0}
+Main.LOOF 41: Output Var "PrevFrameSecond", Formula {Name "timeSince", Number 0.0}
+Main.LOOF 42: Output Var "TargetFrameDelta", Formula {Number 1.0, Name "/", Name "TargetFramerate"}
+Main.LOOF 53: Name "loop", Table {}
+Main.LOOF 55: Name "call", Table {Formula {Number 28.0}, Formula {Name "GameData"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
+Main.LOOF 57: Name "callOutside", Table {Formula {String "interpreter"}, Formula {String "pause until"}, Formula {Name "PrevFrameSecond", Name "+", Name "Settings", Index {String "TargetFrameDelta"}}}
+Main.LOOF 58: Output Var "PrevFrameSecond", Formula {Name "timeSince", Number 0.0}
+Main.LOOF 60: Name "end", Table {}
+Main.LOOF 66: Name "skip", Table {}
+Main.LOOF 66: Name "pop", Table {Output Var "ARGS", Output Var "GameData", Output Var "BallsData", Output Var "BulletsData"}
+Main.LOOF 68: Name "if", Table {Formula {Name "not", Formula {Name "GameData", Index {String "Playing"}, Name "and", Name "not", Name "GameData", Index {String "Paused"}}}}
+Main.LOOF 68: Name "skip", Table {}
+Main.LOOF 69: Name "call", Table {Formula {String "BallsHandler.LOOF"}, Formula {Number 1.0}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
+Main.LOOF 70: Name "call", Table {Formula {String "BallsHandler.LOOF"}, Formula {Number 89.0}, Formula {Name "BallsData"}}
+Main.LOOF 71: Name "end", Table {}
+Main.LOOF 73: Name "return", Table {}
+Main.LOOF 74: Name "end", Table {}
