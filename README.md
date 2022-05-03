@@ -4,9 +4,13 @@
 
 ### This is a language that is loosely functional. It's interpreted, loosely typed, and has (mostly) mutable data.
 
-
+<br>
+<br>
+<br>
 
 ## Example code:
+
+<br>
 
 ### Factorial:
 
@@ -28,6 +32,8 @@ call Factorial, 10
 :print
 :exit
 ```
+
+<br>
 
 ### Linking example:
 
