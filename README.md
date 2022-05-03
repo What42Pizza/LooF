@@ -1,6 +1,6 @@
 # LooF
 
-\
+<br>
 
 ### This is a language that is loosely functional. It's interpreted, loosely typed, and has (mostly) mutable data.
 
