@@ -175,39 +175,23 @@ boolean TokenIsInt (String Token) {
 
 boolean TokenIsFloat (String Token) {
   char[] TokenChars = Token.toCharArray();
-  boolean HasDigits = false;
+  boolean HasPeriod = false;
   for (char CurrChar : TokenChars) {
-    if (CharIsDigit (CurrChar)) HasDigits = true;
-    if (!CharIsNumberChar (CurrChar)) return false;
+    if (!CharIsDigit (CurrChar)) {
+      if (CurrChar == '.') {
+        if (HasPeriod) return false;
+        HasPeriod = true;
+        continue;
+      }
+      return false;
+    }
   }
-  return HasDigits;
-}
-
-
-
-boolean CharIsNumberChar (char CharIn) {
-  return
-    (CharIn >= '0' && CharIn <= '9') ||
-    CharIn == '.'
-  ;
+  return true;
 }
 
 boolean CharIsDigit (char CharIn) {
-  return
-    (CharIn >= '0' && CharIn <= '9')
-  ;
+  return CharIn >= '0' && CharIn <= '9';
 }
-
-
-
-/*
-boolean CharIsLetter (char CharIn) {
-  return
-    (CharIn >= 'a' && CharIn <= 'z') ||
-    (CharIn >= 'A' && CharIn <= 'Z')
-  ;
-}
-*/
 
 
 
@@ -361,17 +345,17 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     default:
       throw (new RuntimeException ("Unknown LooFTokenBranch type: " + TokenBranch.Type));
     
-    case (TokenBranchType_Number):
-      return "Number " + TokenBranch.NumberValue;
+    case (TokenBranchType_Int):
+      return "Int " + TokenBranch.IntValue;
+    
+    case (TokenBranchType_Float):
+      return "Float " + TokenBranch.FloatValue;
     
     case (TokenBranchType_String):
       return "String \"" + TokenBranch.StringValue + "\"";
     
     case (TokenBranchType_Bool):
       return "Bool " + TokenBranch.BoolValue;
-    
-    case (TokenBranchType_Name):
-      return "Name \"" + TokenBranch.StringValue + "\"";
     
     case (TokenBranchType_Table):
       return "Table {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
@@ -382,8 +366,17 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_Index):
       return "Index {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
     
+    case (TokenBranchType_Name):
+      return "Name \"" + TokenBranch.StringValue + "\"";
+    
     case (TokenBranchType_OutputVar):
       return "OutputVar \"" + TokenBranch.StringValue + "\"";
+    
+    case (TokenBranchType_Operation):
+      return "Operation \"" + TokenBranch.StringValue + "\"";
+    
+    case (TokenBranchType_Function):
+      return "Function \"" + TokenBranch.StringValue + "\"";
     
   }
 }
@@ -417,8 +410,12 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
       case (DataValueType_Null):
         return;
       
-      case (DataValueType_Number):
-        TargetDataValue.NumberValue = SourceDataValue.NumberValue;
+      case (DataValueType_Int):
+        TargetDataValue.IntValue = SourceDataValue.IntValue;
+        return;
+      
+      case (DataValueType_Float):
+        TargetDataValue.FloatValue = SourceDataValue.FloatValue;
         return;
       
       case (DataValueType_String):
@@ -461,13 +458,4 @@ void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
 void UnlockDataValue (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   LockLevels.set(LockLevels.size() - 1, 0);
-}
-
-
-
-
-
-boolean DataValueIsInteger (LooFDataValue DataValue) {
-  if (DataValue.Type != DataValueType_Number) return false;
-  return DataValue.NumberValue % 1 == 0;
 }

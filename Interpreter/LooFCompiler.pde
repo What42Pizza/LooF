@@ -30,15 +30,15 @@ class LooFCompiler {
     
     // start CodeData-s
     LooFLoadedFilesData LoadedFilesData = LoadFilesIntoNewCodeDatas (CodeFolder);
-    HashMap <String, LooFFileCodeData> AllCodeDatas = LoadedFilesData.AllCodeDatas;
+    HashMap <String, LooFCodeData> AllCodeDatas = LoadedFilesData.AllCodeDatas;
     String[] HeaderFileContents = LoadedFilesData.HeaderFileContents;
     
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     
     
     
     // pre-process CodeData-s
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
       PreProcessCodeData (CodeData, AllCodeDatas, HeaderFileContents);
     }
     
@@ -62,7 +62,7 @@ class LooFCompiler {
     
     
     // parse CodeData-s
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
       ParseCodeData (CodeData, CombinedTokens);
     }
     
@@ -75,7 +75,7 @@ class LooFCompiler {
     
     
     // lex CodeData-s
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
       LexCodeData (CodeData);
     }
     
@@ -84,6 +84,22 @@ class LooFCompiler {
       PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "LexedLOOF");
       StartTimer ("OnlyCompilation");
     }
+    
+    
+    
+    // create LooFFile-s
+    HashMap <String, LooFFile> AllFiles = new HashMap <String, LooFFile> ();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FullFileName = CodeData.FullFileName;
+      LooFFile NewFile = new LooFFile (FullFileName, CodeData);
+      AllFiles.put(FullFileName, NewFile);
+    }
+    
+    
+    
+    // create environement
+    LooFEnvironment NewEnvironment = new LooFEnvironment (AllFiles);
+    
     
     
     
@@ -96,7 +112,7 @@ class LooFCompiler {
     
     
     
-    return null;
+    return NewEnvironment;
     
   }
   
@@ -114,7 +130,7 @@ class LooFCompiler {
     
     
     // vars used
-    HashMap <String, LooFFileCodeData> AllCodeDatas = new HashMap <String, LooFFileCodeData> ();
+    HashMap <String, LooFCodeData> AllCodeDatas = new HashMap <String, LooFCodeData> ();
     String[] HeaderFileContents = new String [0];
     File[] AllFiles;
     String[] AllFullFileNames;
@@ -159,7 +175,7 @@ class LooFCompiler {
     
     // create CodeData-s
     for (int i = 0; i < AllFiles.length; i ++) {
-      AllCodeDatas.put(AllFullFileNames[i], new LooFFileCodeData (AllFileContents[i], AllFullFileNames[i]));
+      AllCodeDatas.put(AllFullFileNames[i], new LooFCodeData (AllFileContents[i], AllFullFileNames[i]));
     }
     
     
@@ -179,7 +195,7 @@ class LooFCompiler {
   
   
   
-  void PreProcessCodeData (LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, String[] HeaderFileContents) {
+  void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents) {
     
     //Log.println ("Pre-processing code...");
     if (HeaderFileContents.length > 0) {
@@ -215,7 +231,7 @@ class LooFCompiler {
   
   
   
-  void InsertHeader (LooFFileCodeData CodeData, String[] HeaderFileContents) {
+  void InsertHeader (LooFCodeData CodeData, String[] HeaderFileContents) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -236,7 +252,7 @@ class LooFCompiler {
     for (int i = 0; i < HeaderFileLength; i ++) {
       Code.add(i, HeaderFileContents[i]);
       LineNumbers.add(i, i - HeaderFileLength);
-      LineFileOrigins.add(i, CodeData.FullName);
+      LineFileOrigins.add(i, CodeData.FullFileName);
     }
     
   }
@@ -250,7 +266,7 @@ class LooFCompiler {
   
   
   
-  void RemoveInitialTrim (LooFFileCodeData CodeData) {
+  void RemoveInitialTrim (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
@@ -268,7 +284,7 @@ class LooFCompiler {
   
   
   
-  void ProcessReplaces (LooFFileCodeData CodeData) {
+  void ProcessReplaces (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
@@ -306,7 +322,7 @@ class LooFCompiler {
   
   
   
-  ReturnValue GetReplacementData (LooFFileCodeData CodeData, int i, int SearchStart) {
+  ReturnValue GetReplacementData (LooFCodeData CodeData, int i, int SearchStart) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -357,7 +373,7 @@ class LooFCompiler {
   
   
   
-  void ReplaceAllStringOccurancesInCode (LooFFileCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, boolean OnlyStart, boolean OnlyEnd) {
+  void ReplaceAllStringOccurancesInCode (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, boolean OnlyStart, boolean OnlyEnd) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     int LinesToJumpPerReplace = ReplaceAfter.length - 1;
     for (int i = 0; i < Code.size(); i ++) {
@@ -392,7 +408,7 @@ class LooFCompiler {
   
   
   
-  void ReplaceAllStringOccurancesInLine (LooFFileCodeData CodeData, String CurrentLine, int i, ArrayList <Integer> AllReplacementPositions, String ReplaceBefore, String[] ReplaceAfter) {
+  void ReplaceAllStringOccurancesInLine (LooFCodeData CodeData, String CurrentLine, int i, ArrayList <Integer> AllReplacementPositions, String ReplaceBefore, String[] ReplaceAfter) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -436,7 +452,7 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludes (LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, int HeaderLength) {
+  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -449,13 +465,13 @@ class LooFCompiler {
         String FileName = CurrentLine.substring(9);
         
         // get file to include
-        String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullName);
-        if (FullFileName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullName, "could not include the file " + FileName + " because the file could not be found."));
-        LooFFileCodeData FileToInclude = AllCodeDatas.get(FullFileName);
+        String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName);
+        if (FullFileName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName, "could not include the file " + FileName + " because the file could not be found."));
+        LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
         
         // get code to include and data about it
         String[] FileToIncludeContents = FileToInclude.OriginalCode;
-        String FileToIncludeName = FileToInclude.FullName;
+        String FileToIncludeName = FileToInclude.FullFileName;
         int LineNumberOffset = FileToInclude.IncludesHeader ? HeaderLength * -1 : 0;
         int StartIndex = FileToInclude.IncludesHeader ? 0 : 1;
         
@@ -479,7 +495,7 @@ class LooFCompiler {
   
   
   
-  String GetFullFileNameFromPartialFileName (String PartialFileName, HashMap <String, LooFFileCodeData> AllCodeDatas, String CurrentLine, int LineNumber, String LineFileOrigin, String FileName) {
+  String GetFullFileNameFromPartialFileName (String PartialFileName, HashMap <String, LooFCodeData> AllCodeDatas, String CurrentLine, int LineNumber, String LineFileOrigin, String FileName) {
     Set <String> AllFullFileNames = AllCodeDatas.keySet();
     String FoundFullFileName = null;
     for (String CurrentFullFileName : AllFullFileNames) {
@@ -500,13 +516,13 @@ class LooFCompiler {
   
   
   
-  void ProcessIfStatements (LooFFileCodeData CodeData) {
+  void ProcessIfStatements (LooFCodeData CodeData) {
     ProcessIfStatements (CodeData, 0, CodeData.CodeArrayList.size());
   }
   
   
   
-  void ProcessIfStatements (LooFFileCodeData CodeData, int StartIndex, int EndIndex) {
+  void ProcessIfStatements (LooFCodeData CodeData, int StartIndex, int EndIndex) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = StartIndex; i < min (EndIndex, Code.size()); i ++) {
       String CurrentLine = Code.get(i).trim();
@@ -514,14 +530,14 @@ class LooFCompiler {
       
       if (CurrentLine.startsWith("#if_equal ")) {
         String IfStatementData = CurrentLine.substring (10);
-        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_equal", CodeData.FullName);
+        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_equal", CodeData.FullFileName);
         if (!IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
         continue;
       }
       
       if (CurrentLine.startsWith("#if_not_equal ")) {
         String IfStatementData = CurrentLine.substring (14);
-        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_not_equal", CodeData.FullName);
+        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_not_equal", CodeData.FullFileName);
         if (IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
         continue;
       }
@@ -531,7 +547,7 @@ class LooFCompiler {
   
   
   
-  boolean CheckIfIfStatementArgumentsMatch (LooFFileCodeData CodeData, String IfStatementData, int LineNumber, String PreProcessorStatementType, String FullFileName) {
+  boolean CheckIfIfStatementArgumentsMatch (LooFCodeData CodeData, String IfStatementData, int LineNumber, String PreProcessorStatementType, String FullFileName) {
     ArrayList <String> IfStatementArguments = GetSpaceSeperatedStrings (IfStatementData);
     int NumberOfArguments = IfStatementArguments.size();
     if (NumberOfArguments != 2) throw (new LooFCompileException (CodeData, LineNumber, PreProcessorStatementType + " takes 2 string arguments, but found " + NumberOfArguments + (NumberOfArguments == 1 ? " was" : " were") + " found."));
@@ -556,7 +572,7 @@ class LooFCompiler {
   
   
   
-  void RemoveCodeUntilEndIf (LooFFileCodeData CodeData, int StartIndex) {
+  void RemoveCodeUntilEndIf (LooFCodeData CodeData, int StartIndex) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -583,7 +599,7 @@ class LooFCompiler {
       i --;
     }
     
-    throw (new LooFCompileException (FirstLine, FirstLineNumber, FirstLineFileOrigin, CodeData.FullName, "could not find matching \"#end_if\" for \"#if_...\" preprocessor statement."));
+    throw (new LooFCompileException (FirstLine, FirstLineNumber, FirstLineFileOrigin, CodeData.FullFileName, "could not find matching \"#end_if\" for \"#if_...\" preprocessor statement."));
   }
   
   
@@ -595,7 +611,7 @@ class LooFCompiler {
   
   
   
-  void RemoveComments (LooFFileCodeData CodeData) {
+  void RemoveComments (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     int CodeSize = Code.size();
     for (int i = 0; i < CodeSize; i ++) {
@@ -654,7 +670,7 @@ class LooFCompiler {
   
   
   
-  void RemoveExcessWhitespace (LooFFileCodeData CodeData) {
+  void RemoveExcessWhitespace (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -690,7 +706,7 @@ class LooFCompiler {
   
   
   
-  void CheckForIncorrectPreProcessorStatements (LooFFileCodeData CodeData) {
+  void CheckForIncorrectPreProcessorStatements (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       if (Code.get(i).startsWith("#")) {
@@ -708,7 +724,7 @@ class LooFCompiler {
   
   
   
-  void CombineSeperatedLists (LooFFileCodeData CodeData) {
+  void CombineSeperatedLists (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -743,17 +759,17 @@ class LooFCompiler {
   
   
   
-  void LinkAllCodeDatas (HashMap <String, LooFFileCodeData> AllCodeDatas) {
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+  void LinkAllCodeDatas (HashMap <String, LooFCodeData> AllCodeDatas) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     
     // simplify linking statements
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
       FindLinkedFiles (CodeData, AllCodeDatas);
       FindFunctionLocations (CodeData);
     }
     
     // replace function references
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
       ReplaceFunctionCalls (CodeData, AllCodeDatas);
     }
     
@@ -768,7 +784,7 @@ class LooFCompiler {
   
   
   
-  void FindLinkedFiles (LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas) {
+  void FindLinkedFiles (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -788,7 +804,7 @@ class LooFCompiler {
         String LinkFileName = LinkData[1];
         
         // add to LinkedFiles
-        if (LinkedFiles.containsKey(LinkShortenedName)) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullName, "the shortened link name \"" + LinkShortenedName + "\" is already in use for file \"" + LinkedFiles.get(LinkShortenedName) + "\"."));
+        if (LinkedFiles.containsKey(LinkShortenedName)) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName, "the shortened link name \"" + LinkShortenedName + "\" is already in use for file \"" + LinkedFiles.get(LinkShortenedName) + "\"."));
         LinkedFiles.put(LinkShortenedName, LinkFileName);
         
         i --;
@@ -798,14 +814,14 @@ class LooFCompiler {
   
   
   
-  String[] GetLinkData (String CurrentLine, int LineNumber, String LineFileOrigin, LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas) {
+  String[] GetLinkData (String CurrentLine, int LineNumber, String LineFileOrigin, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     // get the name of the file being linked
     int FoundSeperatorIndex = CurrentLine.indexOf(" as ");
     int LinkedFileNameEnd = (FoundSeperatorIndex == -1) ? CurrentLine.length() : FoundSeperatorIndex;
     String LinkedFileName = CurrentLine.substring(6, LinkedFileNameEnd);
-    String LinkedFileFullName = GetFullFileNameFromPartialFileName (LinkedFileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullName);
-    if (LinkedFileFullName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullName, "could not link the file \"" + LinkedFileName + " because the file could not be found."));
+    String LinkedFileFullName = GetFullFileNameFromPartialFileName (LinkedFileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName);
+    if (LinkedFileFullName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName, "could not link the file \"" + LinkedFileName + " because the file could not be found."));
     
     // return if done
     if (FoundSeperatorIndex == -1) return new String[] {RemoveFileExtention (LinkedFileFullName), LinkedFileFullName};
@@ -824,7 +840,7 @@ class LooFCompiler {
   
   
   
-  void FindFunctionLocations (LooFFileCodeData CodeData) {
+  void FindFunctionLocations (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -856,7 +872,7 @@ class LooFCompiler {
   
   
   
-  void ReplaceFunctionCalls (LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas) {
+  void ReplaceFunctionCalls (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
@@ -870,7 +886,7 @@ class LooFCompiler {
   
   
   
-  String ReplaceFunctionCallsForLine (String CurrentLine, LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, int LineNumber) {
+  String ReplaceFunctionCallsForLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     int CurrentFunctionCallStart = CurrentLine.indexOf('$');
     while (CurrentFunctionCallStart != -1) {
       CurrentLine = ReplaceSingleFunctionCall (CurrentLine, CurrentFunctionCallStart, CodeData, AllCodeDatas, LineNumber);
@@ -883,7 +899,7 @@ class LooFCompiler {
   
   
   
-  String ReplaceSingleFunctionCall (String CurrentLine, int CurrentFunctionCallStart, LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, int LineNumber) {
+  String ReplaceSingleFunctionCall (String CurrentLine, int CurrentFunctionCallStart, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     int CurrentFunctionCallEnd = GetFunctionCallEnd (CurrentLine, CurrentFunctionCallStart);
     String BeforeFunctionCall = CurrentLine.substring(0, CurrentFunctionCallStart);
     String FunctionCallData = CurrentLine.substring(CurrentFunctionCallStart + 1, CurrentFunctionCallEnd);
@@ -908,7 +924,7 @@ class LooFCompiler {
   
   
   
-  String GetLinkedFunctionCall (String FunctionCallData, LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, int LineNumber) {
+  String GetLinkedFunctionCall (String FunctionCallData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     int LastPeriodIndex = FunctionCallData.lastIndexOf('.');
     if (LastPeriodIndex == -1) {
       return GetLinkedFunctionCall_WithinFile (FunctionCallData, CodeData, LineNumber);
@@ -918,7 +934,7 @@ class LooFCompiler {
   
   
   
-  String GetLinkedFunctionCall_WithinFile (String FunctionCallData, LooFFileCodeData CodeData, int LineNumber) {
+  String GetLinkedFunctionCall_WithinFile (String FunctionCallData, LooFCodeData CodeData, int LineNumber) {
     Integer FunctionLocation = CodeData.FunctionLocations.get(FunctionCallData);
     if (FunctionLocation == null) throw (new LooFCompileException (CodeData, LineNumber, "the function \"" + FunctionCallData + "\" is not defined or could not be found."));
     return FunctionLocation.toString();
@@ -926,7 +942,7 @@ class LooFCompiler {
   
   
   
-  String GetLinkedFunctionCall_OutsideFile (String FunctionCallData, int LastPeriodIndex, LooFFileCodeData CodeData, HashMap <String, LooFFileCodeData> AllCodeDatas, int LineNumber) {
+  String GetLinkedFunctionCall_OutsideFile (String FunctionCallData, int LastPeriodIndex, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     
     // get data from FunctionCallData
     String FunctionName = FunctionCallData.substring(LastPeriodIndex + 1);
@@ -937,7 +953,7 @@ class LooFCompiler {
     if (FullFileName == null) throw (new LooFCompileException (CodeData, LineNumber, "no file was found linked as \"" + ShortenedFileName + "\"."));
     
     // get linked file
-    LooFFileCodeData LinkedCodeData = AllCodeDatas.get(FullFileName);
+    LooFCodeData LinkedCodeData = AllCodeDatas.get(FullFileName);
     if (LinkedCodeData == null) throw (new RuntimeException ("INTERNAL ERROR: LooFCompiler.GetLinkedFunctionCall_OutsideFile found that the file linked as \"" + ShortenedFileName + "\" points to the non-existant file \"" + FullFileName + "\"."));
     
     // get location of function
@@ -957,7 +973,7 @@ class LooFCompiler {
   
   
   
-  void ParseCodeData (LooFFileCodeData CodeData, String[] CombinedTokens) {
+  void ParseCodeData (LooFCodeData CodeData, String[] CombinedTokens) {
     TokenizeCode (CodeData);
     CombineTokensForCode (CodeData, CombinedTokens);
   }
@@ -971,7 +987,7 @@ class LooFCompiler {
   
   
   
-  void TokenizeCode (LooFFileCodeData CodeData) {
+  void TokenizeCode (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     for (int i = 0; i < Code.size(); i ++) {
@@ -990,7 +1006,7 @@ class LooFCompiler {
   
   
   
-  ArrayList <String> TokenizeLine (String CurrentLine, LooFFileCodeData CodeData, int LineNumber) {
+  ArrayList <String> TokenizeLine (String CurrentLine, LooFCodeData CodeData, int LineNumber) {
     ArrayList <String> CurrentLineTokens = new ArrayList <String> ();
     int CurrentLineLength = CurrentLine.length();
     String CurrToken = CurrentLine.charAt(0) + "";
@@ -1032,7 +1048,7 @@ class LooFCompiler {
   
   
   
-  int GetEndQuoteIndex (String CurrentLine, int i, LooFFileCodeData CodeData, int LineNumber) {
+  int GetEndQuoteIndex (String CurrentLine, int i, LooFCodeData CodeData, int LineNumber) {
     int EndQuoteIndex = i;
     int FakeEndQuoteIndex = i - 1;
     while (EndQuoteIndex == FakeEndQuoteIndex + 1) {
@@ -1054,7 +1070,7 @@ class LooFCompiler {
   
   
   
-  void CombineTokensForCode (LooFFileCodeData CodeData, String[] CombinedTokens) {
+  void CombineTokensForCode (LooFCodeData CodeData, String[] CombinedTokens) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     for (int i = 0; i < CodeTokens.size(); i ++) {
       ArrayList <String> CurrentLineTokens = CodeTokens.get(i);
@@ -1143,7 +1159,7 @@ class LooFCompiler {
   
   
   
-  void LexCodeData (LooFFileCodeData CodeData) {
+  void LexCodeData (LooFCodeData CodeData) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     LooFTokenBranch[][] Statements = new LooFTokenBranch [CodeTokens.size()] [];
     for (int i = 0; i < Statements.length; i ++) {
@@ -1159,7 +1175,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine (ArrayList <String> CurrentLineTokens, LooFFileCodeData CodeData, int LineNumber) {
+  LooFTokenBranch[] GetLexedTokensForLine (ArrayList <String> CurrentLineTokens, LooFCodeData CodeData, int LineNumber) {
     
     // get basic data
     ReturnValue BlocksData = GetAllBlockLevelsAndEnds (CurrentLineTokens, CodeData, LineNumber);
@@ -1181,7 +1197,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, LooFFileCodeData CodeData, int LineNumber) {
+  LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, LooFCodeData CodeData, int LineNumber) {
     
     // error if there are multiple "="-s
     if (FindTokenIndex ("=", CurrentLineTokens, AssignmentTokenIndex + 1) != -1) throw (new LooFCompileException (CodeData, LineNumber, "found two \"=\" tokens but only one can used per statement."));
@@ -1206,7 +1222,7 @@ class LooFCompiler {
     while (PossibleIndexIndex < AssignmentTokenIndex) {
       if (!CurrentLineTokens.get(PossibleIndexIndex).equals("[")) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
       int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
-      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds);
+      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, CodeData, LineNumber);
       IndexFormula.Type = TokenBranchType_Index;
       TargetVarIndexes.add(IndexFormula);
       PossibleIndexIndex = IndexEndIndex + 2;
@@ -1215,7 +1231,7 @@ class LooFCompiler {
     
     
     // formula for new value
-    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds);
+    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
     
     
     // assemble final statement
@@ -1235,8 +1251,8 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFFileCodeData CodeData, int LineNumber) {
-    if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown."));
+  LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+    if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown / statement is missing \"=\"."));
     
     
     // statement name
@@ -1244,7 +1260,7 @@ class LooFCompiler {
     
     
     // get args
-    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds);
+    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, CodeData, LineNumber);
     
     
     // assemble final statement
@@ -1259,13 +1275,13 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
     
     if (CurrentLineTokens.size() == 1) {
       return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
     }
     
-    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds);
+    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
     
   }
   
@@ -1273,11 +1289,11 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
     ArrayList <LooFTokenBranch> FormulaChildren = new ArrayList <LooFTokenBranch> ();
     for (int i = FormulaBlockStart; i < FormulaBlockEnd + 1; i ++) {
       String CurrentToken = CurrentLineTokens.get(i);
-      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds);
+      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, CodeData, LineNumber);
       FormulaChildren.add(NewChild);
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
@@ -1288,23 +1304,70 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
     
     switch (CurrentToken.charAt(0)) {
       
       // Type_Formula
       case ('('):
-        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
+        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
       
       // Type_Index
       case ('['):
-        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
+        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
         IndexFormula.Type = TokenBranchType_Index;
         return IndexFormula;
       
       // Type_Table
       case ('{'):
-        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds);
+        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+      
+    }
+    
+    // Type_Operation and Type_Function
+    switch (CurrentToken) {
+      
+      case ("+"):
+      case ("-"):
+      case ("*"):
+      case ("/"):
+      case ("^"):
+      case ("%"):
+      case (".."):
+      case ("=="):
+      case (">"):
+      case ("<"):
+      case ("!="):
+      case (">="):
+      case ("<="):
+      case ("and"):
+      case ("or"):
+      case ("not"):
+      case ("xor"):
+        return new LooFTokenBranch (TokenBranchType_Operation, CurrentToken);
+      
+      case ("round"):
+      case ("floor"):
+      case ("ceil"):
+      case ("sqrt"):
+      case ("min"):
+      case ("max"):
+      case ("random"):
+      case ("randomInt"):
+      case ("chance"):
+      case ("typeof"):
+      case ("lengthOf"):
+      case ("endOf"):
+      case ("keysOf"):
+      case ("valuesOf"):
+      case ("randomItem"):
+      case ("randomValue"):
+      case ("toInt"):
+      case ("toFloat"):
+      case ("toChars"):
+      case ("toBool"):
+      case ("timeSince"):
+        return new LooFTokenBranch (TokenBranchType_Function, CurrentToken);
       
     }
     
@@ -1324,6 +1387,14 @@ class LooFCompiler {
       return new LooFTokenBranch (Double.parseDouble(CurrentToken));
     }
     
+    // error if periods are missused
+    int FoundPeriodIndex = CurrentToken.indexOf('.');
+    if (FoundPeriodIndex != -1) {
+      int FoundSecondPeriodIndex = CurrentToken.indexOf('.', FoundPeriodIndex + 1);
+      if (FoundSecondPeriodIndex != -1) throw (new LooFCompileException (CodeData, LineNumber, TokenNumber, "a token cannot have more than one period."));
+      throw (new LooFCompileException (CodeData, LineNumber, TokenNumber, "a token can only have a include a period if it is a float."));
+    }
+    
     // Type_Name
     return new LooFTokenBranch (TokenBranchType_Name, CurrentToken);
     
@@ -1333,7 +1404,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds) {
+  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
     if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
     ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
@@ -1342,12 +1413,12 @@ class LooFCompiler {
     int PrevNextCommaIndex = ItemStartIndex - 1;
     int NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, TableBlockStart, TableBlockEnd, TableBlockLevel, BlockLevels);
     while (NextCommaIndex != -1) {
-      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds));
+      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds, CodeData, LineNumber));
       ItemStartIndex = NextCommaIndex + 1;
       PrevNextCommaIndex = NextCommaIndex;
       NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd, TableBlockLevel, BlockLevels);
     }
-    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds));
+    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, CodeData, LineNumber));
     
     return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)));
   }
@@ -1428,7 +1499,7 @@ class LooFCompiler {
   
   
   
-  ReturnValue GetAllBlockLevelsAndEnds (ArrayList <String> CurrentLineTokens, LooFFileCodeData CodeData, int LineNumber) {
+  ReturnValue GetAllBlockLevelsAndEnds (ArrayList <String> CurrentLineTokens, LooFCodeData CodeData, int LineNumber) {
     ArrayList <Integer> BlockLevels = new ArrayList <Integer> ();
     ArrayList <Integer> BlockEnds = CreateFilledArrayList (CurrentLineTokens.size(), -1);
     ArrayList <Integer> BlockTypes = new ArrayList <Integer> ();
@@ -1530,7 +1601,7 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementIsValid (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+  void EnsureStatementIsValid (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
     switch (Statement[0].StringValue) {
       
       default: // assignments
@@ -1629,7 +1700,7 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch StatementArgs = Statement[1];
     int NumberOfArgs = StatementArgs.Children.length;
     if (NumberOfArgs != CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but " + (NumberOfArgs < CorrectNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
@@ -1637,7 +1708,7 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch StatementArgs = Statement[1];
     int NumberOfArgs = StatementArgs.Children.length;
     if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
@@ -1645,7 +1716,7 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFFileCodeData CodeData, int LineNumber) {
+  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch StatementArgs = Statement[1];
     int NumberOfArgs = StatementArgs.Children.length;
     if (NumberOfArgs < CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
@@ -1659,7 +1730,7 @@ class LooFCompiler {
   
   
   
-  void SimplifyStatement (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+  void SimplifyStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
     SimplifyNestedFormulasForStatement (Statement);
     SimplifyOutputVarsForStatement (Statement, CodeData, LineNumber);
   }
@@ -1668,7 +1739,7 @@ class LooFCompiler {
   
   
   
-  void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+  void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
     if (Statement[0].Type != TokenBranchType_Name) return;
     switch (Statement[0].StringValue) {
       
@@ -1755,7 +1826,7 @@ class LooFCompiler {
   
   
   
-  void SimplifyAllOutputVars (LooFTokenBranch[] Statement, LooFFileCodeData CodeData, int LineNumber) {
+  void SimplifyAllOutputVars (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
     int NumberOfArgs = Statement[1].Children.length;
     for (int i = 0; i < NumberOfArgs; i ++) {
       SimplifySingleOutputVar (Statement, i, CodeData, LineNumber);
@@ -1766,7 +1837,7 @@ class LooFCompiler {
   
   
   
-  void SimplifySingleOutputVar (LooFTokenBranch[] Statement, int OutputVarIndex, LooFFileCodeData CodeData, int LineNumber) {
+  void SimplifySingleOutputVar (LooFTokenBranch[] Statement, int OutputVarIndex, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch OutputArg = Statement[1].Children[OutputVarIndex];
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
@@ -1815,10 +1886,10 @@ class LooFCompiler {
   
   
   
-  void PrintPreProcessorOutput (HashMap <String, LooFFileCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
-      String FileOutputName = OutputPath + "/" + CodeData.FullName;
+  void PrintPreProcessorOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
       PrintWriter FileOutput = createWriter (FileOutputName);
       
@@ -1846,10 +1917,10 @@ class LooFCompiler {
   
   
   
-  void PrintLinkerOutput (HashMap <String, LooFFileCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
-      String FileOutputName = OutputPath + "/" + CodeData.FullName;
+  void PrintLinkerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
       PrintWriter FileOutput = createWriter (FileOutputName);
       
@@ -1887,10 +1958,10 @@ class LooFCompiler {
   
   
   
-  void PrintParserOutput (HashMap <String, LooFFileCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
-      String FileOutputName = OutputPath + "/" + CodeData.FullName;
+  void PrintParserOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
       PrintWriter FileOutput = createWriter (FileOutputName);
       
@@ -1918,10 +1989,10 @@ class LooFCompiler {
   
   
   
-  void PrintLexerOutput (HashMap <String, LooFFileCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
-    Collection <LooFFileCodeData> AllCodeDatasCollection = AllCodeDatas.values();
-    for (LooFFileCodeData CodeData : AllCodeDatasCollection) {
-      String FileOutputName = OutputPath + "/" + CodeData.FullName;
+  void PrintLexerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
       PrintWriter FileOutput = createWriter (FileOutputName);
       

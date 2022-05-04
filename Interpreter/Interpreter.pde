@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 05/02/22
+// Last updated 05/04/22
 
 
 
@@ -17,24 +17,6 @@ PrintWriter Log;
 
 
 void setup() {
-  
-  LooFFileCodeData CodeData = new LooFFileCodeData (new String[] {""}, "TestFileCodeData");
-  ArrayList <String> Tokens = ArrayToArrayList (new String[] {
-    "push",
-    "[",
-    "0",
-    "]",
-    ",",
-    "(",
-    "5",
-    "+",
-    "3",
-    ")",
-    "*",
-    "10"
-  });
-  LooFTokenBranch[] Statement = LooFCompiler.GetLexedTokensForLine (Tokens, CodeData, 0);
-  println (ConvertLooFStatementToString (Statement));
   
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
   //CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";

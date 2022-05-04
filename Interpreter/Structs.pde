@@ -47,9 +47,9 @@ class LooFEnvironment {
 class LooFFile {
   
   String FullName;
-  LooFFileCodeData CodeData;
+  LooFCodeData CodeData;
   
-  public LooFFile (String FullName, LooFFileCodeData CodeData) {
+  public LooFFile (String FullName, LooFCodeData CodeData) {
     this.FullName = FullName;
     this.CodeData = CodeData;
   }
@@ -60,9 +60,9 @@ class LooFFile {
 
 
 
-class LooFFileCodeData {
+class LooFCodeData {
   
-  String FullName;
+  String FullFileName;
   boolean IncludesHeader;
   
   String[] OriginalCode;
@@ -75,12 +75,12 @@ class LooFFileCodeData {
   HashMap <String, Integer> FunctionLocations = new HashMap <String, Integer> ();
   HashMap <String, String> LinkedFiles = new HashMap <String, String> ();
   
-  public LooFFileCodeData (String[] Code, String FullName) {
-    this.FullName = FullName;
+  public LooFCodeData (String[] Code, String FullFileName) {
+    this.FullFileName = FullFileName;
     this.OriginalCode = Code;
     this.CodeArrayList = new ArrayList <String> (Arrays.asList (Code));
     this.LineNumbers = CreateNumberedIntegerList (Code.length);
-    this.LineFileOrigins = CreateFilledArrayList (Code.length, FullName);
+    this.LineFileOrigins = CreateFilledArrayList (Code.length, FullFileName);
   }
   
 }
@@ -91,10 +91,10 @@ class LooFFileCodeData {
 
 class LooFLoadedFilesData {
   
-  HashMap <String, LooFFileCodeData> AllCodeDatas;
+  HashMap <String, LooFCodeData> AllCodeDatas;
   String[] HeaderFileContents;
   
-  public LooFLoadedFilesData (HashMap <String, LooFFileCodeData> AllCodeDatas, String[] HeaderFileContents) {
+  public LooFLoadedFilesData (HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents) {
     this.AllCodeDatas = AllCodeDatas;
     this.HeaderFileContents = HeaderFileContents;
   }
@@ -139,8 +139,12 @@ class LooFCompileSettings {
 
 class LooFCompileException extends RuntimeException {
   
-  public LooFCompileException (LooFFileCodeData CodeData, int LineNumber, String Message) {
-    super (GetCompilerErrorMessage (CodeData, CodeData.FullName, CodeData.LineNumbers.get(LineNumber), Message));
+  public LooFCompileException (LooFCodeData CodeData, int LineNumber, String Message) {
+    super (GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message));
+  }
+  
+  public LooFCompileException (LooFCodeData CodeData, int LineNumber, int TokenNumber, String Message) {
+    super (GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenNumber, Message));
   }
   
   public LooFCompileException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
@@ -161,15 +165,19 @@ class LooFCompileException extends RuntimeException {
 
 
 
-String GetCompilerErrorMessage (LooFFileCodeData CodeData, String FileName, int LineNumber, String Message) {
+String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenNumber, String Message) {
   
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
   
-  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
-  String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
+  if (OriginalLineOfCode.length() > 50) OriginalLineOfCode = OriginalLineOfCode.substring(0, 50) + "...";
+  if (LineOfCode.length() > 50) LineOfCode = LineOfCode.substring(0, 50) + " ...";
+  
+  String FileNameToShow = (FileName.equals(LineFileOrigin))   ?   ("\"" + FileName + "\"")   :   ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
+  String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode))   ?   ("\"" + LineOfCode + "\"")   :   ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
+  LineOfCodeToShow += (TokenNumber != null)   ?   ("; token \"" + CodeData.CodeTokens.get(LineNumber).get(TokenNumber) + "\"")   :   "";
   
   return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
   
@@ -200,7 +208,7 @@ class LooFInterpreterException extends RuntimeException {
 
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
-  LooFFileCodeData CodeData = Environment.AllFiles.get(FileName).CodeData;
+  LooFCodeData CodeData = Environment.AllFiles.get(FileName).CodeData;
   
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
@@ -359,10 +367,12 @@ final int TokenBranchType_Float = 1;
 final int TokenBranchType_String = 2;
 final int TokenBranchType_Bool = 3;
 final int TokenBranchType_Table = 4;
-final int TokenBranchType_Name = 5;
-final int TokenBranchType_Formula = 6;
-final int TokenBranchType_Index = 7;
+final int TokenBranchType_Formula = 5;
+final int TokenBranchType_Index = 6;
+final int TokenBranchType_Name = 7;
 final int TokenBranchType_OutputVar = 8;
+final int TokenBranchType_Operation = 9;
+final int TokenBranchType_Function = 10;
 
 final String[] TokenBranchTypeNames = {
   "Int",

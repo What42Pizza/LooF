@@ -42,7 +42,7 @@ string
 
 boolean (or bool)
 
-table (with both an array part and a HashMap part)
+table (with both an array part and a hashmap part)
 
 <br>
 <br>

@@ -75,8 +75,8 @@ These use the value directly following the function. If the function takes in mu
 - **toInt VALUE**
 - **toFloat VALUE**
 - **toString VALUE**
-- **toChars VALUE**
 - **toBool VALUE**
+- **toChars VALUE**
 
 <br>
 

@@ -1,134 +1,135 @@
 BallsHandler.LOOF 0: Name "skip", Table {}
-BallsHandler.LOOF 0: Name "pop", Table {Output Var "ARGS", Output Var "BallsData", Output Var "BulletsData"}
-BallsHandler.LOOF 1: Output Var "AllBalls", Formula {Name "BallsData", Index {String "AllBalls"}}
-BallsHandler.LOOF 2: Name "unlock", Table {Output Var "BulletsData"}
-BallsHandler.LOOF 5: Output Var "NewBalls", Formula {Table {}}
-BallsHandler.LOOF 6: Output Var "BallsToRemove", Formula {Table {}}
-BallsHandler.LOOF 7: Name "forEach", Table {Output Var "CurrentBall", Formula {Name "AllBalls"}, Output Var "i"}
-BallsHandler.LOOF 8: Name "call", Table {Formula {Number 19.0}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}, Formula {Name "NewBalls"}}
-BallsHandler.LOOF 8: Name "pop", Table {Output Var "ARGS", Output Var "BallIsDestoryed"}
-BallsHandler.LOOF 9: Name "if", Table {Formula {Name "BallIsDestroyed"}}
-BallsHandler.LOOF 10: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 10.0}, Formula {Name "BallsToRemove"}, Formula {Name "i"}}
-BallsHandler.LOOF 11: Name "repeat", Table {}
-BallsHandler.LOOF 14: Name "forEach", Table {Output Var "Index", Formula {Name "BallsToRemove"}}
-BallsHandler.LOOF 15: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 15.0}, Formula {Name "AllBalls"}, Formula {Name "Index"}}
-BallsHandler.LOOF 16: Name "repeat", Table {}
-BallsHandler.LOOF 19: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 23.0}, Formula {Name "AllBalls"}, Formula {Name "NewBalls"}}
-BallsHandler.LOOF 21: Name "return", Table {}
-BallsHandler.LOOF 22: Name "end", Table {}
-BallsHandler.LOOF 28: Name "skip", Table {}
-BallsHandler.LOOF 28: Name "pop", Table {Output Var "ARGS", Output Var "CurrentBall", Output Var "BallsData", Output Var "BulletsData", Output Var "NewBalls"}
-BallsHandler.LOOF 29: Output Var "Size", Formula {Name "CurrentBall", Index {String "Size"}}
-BallsHandler.LOOF 30: Output Var "XPos", Formula {Name "CurrentBall", Index {String "XPos"}}
-BallsHandler.LOOF 31: Output Var "YPos", Formula {Name "CurrentBall", Index {String "YPos"}}
-BallsHandler.LOOF 32: Output Var "XVel", Formula {Name "CurrentBall", Index {String "XVel"}}
-BallsHandler.LOOF 33: Output Var "YVel", Formula {Name "CurrentBall", Index {String "YVel"}}
-BallsHandler.LOOF 35: Name "call", Table {Formula {Number 129.0}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}}
-BallsHandler.LOOF 35: Name "pop", Table {Output Var "ARGS", Output Var "Radius"}
-BallsHandler.LOOF 39: Output Var "YVel", Formula {Name "YVel", Name "+", Name "BallsData", Index {String "Gravity"}}
-BallsHandler.LOOF 43: Output Var "BottomYPos", Formula {Name "YPos", Name "+", Name "Radius", Name "/", Number 2.0}
-BallsHandler.LOOF 44: Name "if", Table {Formula {Name "BottomYPos", Name ">", Number 1.0}}
-BallsHandler.LOOF 45: Output Var "YVel", Formula {Formula {Name "BallsData", Index {String "BounceVelOffset"}, Name "+", Name "BallsData", Index {String "BounceVelScale"}, Name "*", Name "CurrentBall", Index {String "Size"}}, Name "*", Name "-", Number 1.0}
-BallsHandler.LOOF 49: Output Var "LeftXPos", Formula {Name "XPos", Name "-", Name "Radius", Name "/", Number 2.0}
-BallsHandler.LOOF 50: Name "if", Table {Formula {Name "LeftXPos", Name "<", Number 0.0}}
-BallsHandler.LOOF 51: Output Var "XVel", Formula {Name "abs", Name "XVel"}
-BallsHandler.LOOF 55: Output Var "RightXPos", Formula {Name "XPos", Name "+", Name "Radius", Name "/", Number 2.0}
-BallsHandler.LOOF 56: Name "if", Table {Formula {Name "LeftXPos", Name "<", Number 0.0}}
-BallsHandler.LOOF 57: Output Var "XVel", Formula {Name "abs", Name "XVel", Name "*", Name "-", Number 1.0}
-BallsHandler.LOOF 61: Output Var "XPos", Formula {Name "XPos", Name "+", Name "XVel"}
-BallsHandler.LOOF 62: Output Var "YPos", Formula {Name "YPos", Name "+", Name "YVel"}
-BallsHandler.LOOF 66: Output Var "AllBullets", Formula {Name "BulletsData", Index {String "AllBullets"}}
-BallsHandler.LOOF 67: Output Var "CollisionDistance", Formula {Name "Radius", Name "+", Name "BulletsData", Index {String "Size"}}
-BallsHandler.LOOF 68: Name "forEach", Table {Output Var "CurrentBullet", Formula {Name "AllBullets"}}
-BallsHandler.LOOF 69: Name "call", Table {Formula {Number 55.0}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
-BallsHandler.LOOF 69: Name "pop", Table {Output Var "ARGS", Output Var "BulletIsColliding"}
-BallsHandler.LOOF 70: Name "continueIf", Table {Formula {Name "not", Name "BulletIsColliding"}}
-BallsHandler.LOOF 71: Name "call", Table {Formula {Number 64.0}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}, Formula {Name "NewBalls"}}
-BallsHandler.LOOF 72: Name "returnIf", Table {Formula {Name "BallIsDestroyed"}, Formula {Name "true"}}
-BallsHandler.LOOF 73: Name "repeat", Table {}
-BallsHandler.LOOF 77: Output Var "CurrentBall", Index {String "XPos"}, Formula {Name "XPos"}
-BallsHandler.LOOF 78: Output Var "CurrentBall", Index {String "YPos"}, Formula {Name "YPos"}
-BallsHandler.LOOF 79: Output Var "CurrentBall", Index {String "XVel"}, Formula {Name "XVel"}
-BallsHandler.LOOF 80: Output Var "CurrentBall", Index {String "YVel"}, Formula {Name "YVel"}
-BallsHandler.LOOF 84: Name "return", Table {Formula {Name "false"}}
-BallsHandler.LOOF 85: Name "end", Table {}
-BallsHandler.LOOF 95: Name "skip", Table {}
-BallsHandler.LOOF 95: Name "pop", Table {Output Var "ARGS", Output Var "CurrentBall", Output Var "CurrentBullet", Output Var "BallsData", Output Var "BulletsData"}
-BallsHandler.LOOF 96: Name "call", Table {Formula {String "GeneralFunctions.LOOF"}, Formula {Number 1.0}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}}
-BallsHandler.LOOF 96: Name "pop", Table {Output Var "ARGS", Output Var "Dsitance"}
-BallsHandler.LOOF 97: Name "call", Table {Formula {Number 129.0}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}}
-BallsHandler.LOOF 97: Name "pop", Table {Output Var "ARGS", Output Var "BallRadius"}
-BallsHandler.LOOF 98: Output Var "CollisionDistance", Formula {Name "BallRadius", Name "+", Name "BulletsData", Index {String "BulletRadius"}}
-BallsHandler.LOOF 99: Name "return", Table {Formula {Name "Distance", Name "<=", Name "CollisionDistance"}}
-BallsHandler.LOOF 100: Name "end", Table {}
-BallsHandler.LOOF 104: Name "skip", Table {}
-BallsHandler.LOOF 104: Name "pop", Table {Output Var "ARGS", Output Var "CurrentBall", Output Var "CurrentBullet", Output Var "BallsData", Output Var "BulletsData", Output Var "NewBalls"}
-BallsHandler.LOOF 107: Output Var "BulletDamage", Formula {Name "BulletsData", Index {String "BulletDamage"}}
-BallsHandler.LOOF 108: Output Var "CurrentBall", Index {String "Health"}, Formula {Name "CurrentBall", Index {String "Health"}, Name "-", Name "BulletDamage"}
-BallsHandler.LOOF 111: Name "returnIf", Table {Formula {Name "CurrentBall", Index {String "Health"}, Name ">", Number 0.0}, Formula {Name "false"}}
-BallsHandler.LOOF 114: Name "if", Table {Formula {Name "CurrentBall", Index {String "Size"}, Name ">", Number 0.0}}
-BallsHandler.LOOF 115: Name "call", Table {Formula {Number 73.0}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}, Formula {Name "NewBalls"}}
-BallsHandler.LOOF 117: Name "return", Table {Formula {Name "true"}}
-BallsHandler.LOOF 118: Name "end", Table {}
-BallsHandler.LOOF 122: Name "skip", Table {}
-BallsHandler.LOOF 122: Name "pop", Table {Output Var "ARGS", Output Var "Ball", Output Var "BallsData", Output Var "NewBalls"}
-BallsHandler.LOOF 124: Output Var "NewSize", Formula {Name "Ball", Index {String "Size"}, Name "-", Number 1.0}
-BallsHandler.LOOF 125: Output Var "NewHealth", Formula {Name "Ball", Index {String "Health"}, Name "/", Number 2.0}
-BallsHandler.LOOF 126: Output Var "NewXPos", Formula {Name "Ball", Index {String "XPos"}}
-BallsHandler.LOOF 127: Output Var "NewYPos", Formula {Name "Ball", Index {String "YPos"}}
-BallsHandler.LOOF 128: Output Var "NewXVel", Formula {Name "Ball", Index {String "XVel"}}
-BallsHandler.LOOF 129: Output Var "NewYVel", Formula {Name "BallsData", Index {String "BounceYVel"}, Name "/", Number 2.0}
-BallsHandler.LOOF 131: Name "call", Table {Formula {Number 115.0}, Formula {String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel"}, Formula {Name "NewYVel"}}
-BallsHandler.LOOF 131: Name "pop", Table {Output Var "ARGS", Output Var "Ball1"}
-BallsHandler.LOOF 132: Name "call", Table {Formula {Number 115.0, String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel", Name "*", Name "-", Number 1.0}, Formula {Name "NewYVel"}}
-BallsHandler.LOOF 132: Name "pop", Table {Output Var "ARGS", Output Var "Ball2"}
-BallsHandler.LOOF 134: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 10.0}, Formula {Name "NewBalls"}, Formula {Name "Ball1"}}
-BallsHandler.LOOF 135: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 10.0}, Formula {Name "NewBalls"}, Formula {Name "Ball2"}}
-BallsHandler.LOOF 137: Name "return", Table {}
-BallsHandler.LOOF 138: Name "end", Table {}
-BallsHandler.LOOF 149: Name "skip", Table {}
-BallsHandler.LOOF 149: Name "pop", Table {Output Var "ARGS", Output Var "BallsData"}
-BallsHandler.LOOF 150: Name "call", Table {Formula {Number 97.0}, Formula {Name "BallsData", Index {String "AllBalls"}}}
-BallsHandler.LOOF 150: Name "pop", Table {Output Var "ARGS", Output Var "NumberOfSize0Balls"}
-BallsHandler.LOOF 151: Name "if", Table {Formula {Name "NumberOfSize0Balls", Name "<", Name "BallsData", Index {String "MaxSize0Balls"}}}
-BallsHandler.LOOF 152: Name "call", Table {Formula {Number 105.0}, Formula {Name "BallsData"}}
-BallsHandler.LOOF 153: Name "return", Table {}
-BallsHandler.LOOF 154: Name "end", Table {}
-BallsHandler.LOOF 158: Name "skip", Table {}
-BallsHandler.LOOF 158: Name "pop", Table {Output Var "ARGS", Output Var "AllBalls"}
-BallsHandler.LOOF 159: Output Var "Total", Formula {Number 0.0}
-BallsHandler.LOOF 160: Name "forEach", Table {Output Var "CurrentBall", Formula {Name "AllBalls"}}
-BallsHandler.LOOF 161: Output Var "Total", Formula {Name "Total", Name "+", Number 2.0, Name "^", Name "CurrentBall", Index {String "Size"}}
-BallsHandler.LOOF 162: Name "repeat", Table {}
-BallsHandler.LOOF 163: Name "return", Table {Formula {Name "Total"}}
-BallsHandler.LOOF 164: Name "end", Table {}
-BallsHandler.LOOF 170: Name "skip", Table {}
-BallsHandler.LOOF 170: Name "pop", Table {Output Var "ARGS", Output Var "BallsData"}
-BallsHandler.LOOF 171: Output Var "StartingXPos", Formula {Formula {Name "chance", Number 50.0}, Name "and", Name "-", Number 0.2, Name "or", Number 1.2}
-BallsHandler.LOOF 172: Output Var "StartingYPos", Formula {Number 0.75, Name "+", Name "random", Number 0.25}
-BallsHandler.LOOF 173: Output Var "Size", Formula {Name "randomInt", Formula {Name "BallsData", Index {String "MaxBallSize"}}}
-BallsHandler.LOOF 174: Name "call", Table {Formula {Number 115.0}, Formula {String "normal"}, Formula {Name "Size"}, Formula {Name "BallsData", Index {String "StartingHealth"}}, Formula {Name "StartingXPos"}, Formula {Name "StartingYPos"}, Formula {Number 0.0}, Formula {Number 0.0}}
-BallsHandler.LOOF 174: Name "pop", Table {Output Var "ARGS", Output Var "NewBall"}
-BallsHandler.LOOF 175: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 10.0}, Formula {Name "BallsData", Index {String "AllBalls"}}, Formula {Name "NewBall"}}
-BallsHandler.LOOF 176: Name "return", Table {}
-BallsHandler.LOOF 177: Name "end", Table {}
-BallsHandler.LOOF 181: Name "skip", Table {}
-BallsHandler.LOOF 181: Name "pop", Table {Output Var "ARGS", Output Var "Type", Output Var "Size", Output Var "Health", Output Var "XPos", Output Var "YPos", Output Var "XVel", Output Var "YVel"}
-BallsHandler.LOOF 182: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Number 63.0}, Formula {Name "ARGS"}, Formula {Table {Formula {String "string"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}}}}
-BallsHandler.LOOF 183: Output Var "NewBall", Formula {Table {}}
-BallsHandler.LOOF 184: Output Var "NewBall", Index {String "Type"}, Formula {Name "Type"}
-BallsHandler.LOOF 185: Output Var "NewBall", Index {String "Size"}, Formula {Name "Size"}
-BallsHandler.LOOF 186: Output Var "NewBall", Index {String "Health"}, Formula {Name "Health"}
-BallsHandler.LOOF 187: Output Var "NewBall", Index {String "StartingHealth"}, Formula {Name "Health"}
-BallsHandler.LOOF 188: Output Var "NewBall", Index {String "XPos"}, Formula {Name "XPos"}
-BallsHandler.LOOF 189: Output Var "NewBall", Index {String "YPos"}, Formula {Name "YPos"}
-BallsHandler.LOOF 190: Output Var "NewBall", Index {String "XVel"}, Formula {Name "XVel"}
-BallsHandler.LOOF 191: Output Var "NewBall", Index {String "YVel"}, Formula {Name "YVel"}
-BallsHandler.LOOF 192: Name "return", Table {Formula {Name "NewBall"}}
-BallsHandler.LOOF 193: Name "end", Table {}
-BallsHandler.LOOF 197: Name "skip", Table {}
-BallsHandler.LOOF 197: Name "pop", Table {Output Var "ARGS", Output Var "Ball", Output Var "BallsData"}
-BallsHandler.LOOF 198: Output Var "BallSize", Formula {Name "Ball", Index {String "Size"}}
-BallsHandler.LOOF 199: Output Var "BallRadius", Formula {Formula {Name "BallSize", Name "+", Number 1.0}, Name "*", Name "BallsData", Index {String "Size"}}
-BallsHandler.LOOF 200: Name "return", Table {Formula {Name "BallRadius"}}
-BallsHandler.LOOF 201: Name "end", Table {}
+BallsHandler.LOOF 0: Name "pop", Table {OutputVar "ARGS", OutputVar "BallsData", OutputVar "BulletsData"}
+BallsHandler.LOOF 1: OutputVar "Test", Formula {Name "5.0.0"}
+BallsHandler.LOOF 2: OutputVar "AllBalls", Formula {Name "BallsData", Index {String "AllBalls"}}
+BallsHandler.LOOF 3: Name "unlock", Table {OutputVar "BulletsData"}
+BallsHandler.LOOF 6: OutputVar "NewBalls", Formula {Table {}}
+BallsHandler.LOOF 7: OutputVar "BallsToRemove", Formula {Table {}}
+BallsHandler.LOOF 8: Name "forEach", Table {OutputVar "CurrentBall", Formula {Name "AllBalls"}, OutputVar "i"}
+BallsHandler.LOOF 9: Name "call", Table {Formula {Int 20}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}, Formula {Name "NewBalls"}}
+BallsHandler.LOOF 9: Name "pop", Table {OutputVar "ARGS", OutputVar "BallIsDestoryed"}
+BallsHandler.LOOF 10: Name "if", Table {Formula {Name "BallIsDestroyed"}}
+BallsHandler.LOOF 11: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "BallsToRemove"}, Formula {Name "i"}}
+BallsHandler.LOOF 12: Name "repeat", Table {}
+BallsHandler.LOOF 15: Name "forEach", Table {OutputVar "Index", Formula {Name "BallsToRemove"}}
+BallsHandler.LOOF 16: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 15}, Formula {Name "AllBalls"}, Formula {Name "Index"}}
+BallsHandler.LOOF 17: Name "repeat", Table {}
+BallsHandler.LOOF 20: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 23}, Formula {Name "AllBalls"}, Formula {Name "NewBalls"}}
+BallsHandler.LOOF 22: Name "return", Table {}
+BallsHandler.LOOF 23: Name "end", Table {}
+BallsHandler.LOOF 29: Name "skip", Table {}
+BallsHandler.LOOF 29: Name "pop", Table {OutputVar "ARGS", OutputVar "CurrentBall", OutputVar "BallsData", OutputVar "BulletsData", OutputVar "NewBalls"}
+BallsHandler.LOOF 30: OutputVar "Size", Formula {Name "CurrentBall", Index {String "Size"}}
+BallsHandler.LOOF 31: OutputVar "XPos", Formula {Name "CurrentBall", Index {String "XPos"}}
+BallsHandler.LOOF 32: OutputVar "YPos", Formula {Name "CurrentBall", Index {String "YPos"}}
+BallsHandler.LOOF 33: OutputVar "XVel", Formula {Name "CurrentBall", Index {String "XVel"}}
+BallsHandler.LOOF 34: OutputVar "YVel", Formula {Name "CurrentBall", Index {String "YVel"}}
+BallsHandler.LOOF 36: Name "call", Table {Formula {Int 130}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}}
+BallsHandler.LOOF 36: Name "pop", Table {OutputVar "ARGS", OutputVar "Radius"}
+BallsHandler.LOOF 40: OutputVar "YVel", Formula {Name "YVel", Name "+", Name "BallsData", Index {String "Gravity"}}
+BallsHandler.LOOF 44: OutputVar "BottomYPos", Formula {Name "YPos", Name "+", Name "Radius", Name "/", Int 2}
+BallsHandler.LOOF 45: Name "if", Table {Formula {Name "BottomYPos", Name ">", Int 1}}
+BallsHandler.LOOF 46: OutputVar "YVel", Formula {Formula {Name "BallsData", Index {String "BounceVelOffset"}, Name "+", Name "BallsData", Index {String "BounceVelScale"}, Name "*", Name "CurrentBall", Index {String "Size"}}, Name "*", Name "-", Int 1}
+BallsHandler.LOOF 50: OutputVar "LeftXPos", Formula {Name "XPos", Name "-", Name "Radius", Name "/", Int 2}
+BallsHandler.LOOF 51: Name "if", Table {Formula {Name "LeftXPos", Name "<", Int 0}}
+BallsHandler.LOOF 52: OutputVar "XVel", Formula {Name "abs", Name "XVel"}
+BallsHandler.LOOF 56: OutputVar "RightXPos", Formula {Name "XPos", Name "+", Name "Radius", Name "/", Int 2}
+BallsHandler.LOOF 57: Name "if", Table {Formula {Name "LeftXPos", Name "<", Int 0}}
+BallsHandler.LOOF 58: OutputVar "XVel", Formula {Name "abs", Name "XVel", Name "*", Name "-", Int 1}
+BallsHandler.LOOF 62: OutputVar "XPos", Formula {Name "XPos", Name "+", Name "XVel"}
+BallsHandler.LOOF 63: OutputVar "YPos", Formula {Name "YPos", Name "+", Name "YVel"}
+BallsHandler.LOOF 67: OutputVar "AllBullets", Formula {Name "BulletsData", Index {String "AllBullets"}}
+BallsHandler.LOOF 68: OutputVar "CollisionDistance", Formula {Name "Radius", Name "+", Name "BulletsData", Index {String "Size"}}
+BallsHandler.LOOF 69: Name "forEach", Table {OutputVar "CurrentBullet", Formula {Name "AllBullets"}}
+BallsHandler.LOOF 70: Name "call", Table {Formula {Int 56}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
+BallsHandler.LOOF 70: Name "pop", Table {OutputVar "ARGS", OutputVar "BulletIsColliding"}
+BallsHandler.LOOF 71: Name "continueIf", Table {Formula {Name "not", Name "BulletIsColliding"}}
+BallsHandler.LOOF 72: Name "call", Table {Formula {Int 65}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}, Formula {Name "NewBalls"}}
+BallsHandler.LOOF 73: Name "returnIf", Table {Formula {Name "BallIsDestroyed"}, Formula {Name "true"}}
+BallsHandler.LOOF 74: Name "repeat", Table {}
+BallsHandler.LOOF 78: OutputVar "CurrentBall", Index {String "XPos"}, Formula {Name "XPos"}
+BallsHandler.LOOF 79: OutputVar "CurrentBall", Index {String "YPos"}, Formula {Name "YPos"}
+BallsHandler.LOOF 80: OutputVar "CurrentBall", Index {String "XVel"}, Formula {Name "XVel"}
+BallsHandler.LOOF 81: OutputVar "CurrentBall", Index {String "YVel"}, Formula {Name "YVel"}
+BallsHandler.LOOF 85: Name "return", Table {Formula {Name "false"}}
+BallsHandler.LOOF 86: Name "end", Table {}
+BallsHandler.LOOF 96: Name "skip", Table {}
+BallsHandler.LOOF 96: Name "pop", Table {OutputVar "ARGS", OutputVar "CurrentBall", OutputVar "CurrentBullet", OutputVar "BallsData", OutputVar "BulletsData"}
+BallsHandler.LOOF 97: Name "call", Table {Formula {String "GeneralFunctions.LOOF"}, Formula {Int 1}, Formula {Name "CurrentBall"}, Formula {Name "CurrentBullet"}}
+BallsHandler.LOOF 97: Name "pop", Table {OutputVar "ARGS", OutputVar "Dsitance"}
+BallsHandler.LOOF 98: Name "call", Table {Formula {Int 130}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}}
+BallsHandler.LOOF 98: Name "pop", Table {OutputVar "ARGS", OutputVar "BallRadius"}
+BallsHandler.LOOF 99: OutputVar "CollisionDistance", Formula {Name "BallRadius", Name "+", Name "BulletsData", Index {String "BulletRadius"}}
+BallsHandler.LOOF 100: Name "return", Table {Formula {Name "Distance", Name "<=", Name "CollisionDistance"}}
+BallsHandler.LOOF 101: Name "end", Table {}
+BallsHandler.LOOF 105: Name "skip", Table {}
+BallsHandler.LOOF 105: Name "pop", Table {OutputVar "ARGS", OutputVar "CurrentBall", OutputVar "CurrentBullet", OutputVar "BallsData", OutputVar "BulletsData", OutputVar "NewBalls"}
+BallsHandler.LOOF 108: OutputVar "BulletDamage", Formula {Name "BulletsData", Index {String "BulletDamage"}}
+BallsHandler.LOOF 109: OutputVar "CurrentBall", Index {String "Health"}, Formula {Name "CurrentBall", Index {String "Health"}, Name "-", Name "BulletDamage"}
+BallsHandler.LOOF 112: Name "returnIf", Table {Formula {Name "CurrentBall", Index {String "Health"}, Name ">", Int 0}, Formula {Name "false"}}
+BallsHandler.LOOF 115: Name "if", Table {Formula {Name "CurrentBall", Index {String "Size"}, Name ">", Int 0}}
+BallsHandler.LOOF 116: Name "call", Table {Formula {Int 74}, Formula {Name "CurrentBall"}, Formula {Name "BallsData"}, Formula {Name "NewBalls"}}
+BallsHandler.LOOF 118: Name "return", Table {Formula {Name "true"}}
+BallsHandler.LOOF 119: Name "end", Table {}
+BallsHandler.LOOF 123: Name "skip", Table {}
+BallsHandler.LOOF 123: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball", OutputVar "BallsData", OutputVar "NewBalls"}
+BallsHandler.LOOF 125: OutputVar "NewSize", Formula {Name "Ball", Index {String "Size"}, Name "-", Int 1}
+BallsHandler.LOOF 126: OutputVar "NewHealth", Formula {Name "Ball", Index {String "Health"}, Name "/", Int 2}
+BallsHandler.LOOF 127: OutputVar "NewXPos", Formula {Name "Ball", Index {String "XPos"}}
+BallsHandler.LOOF 128: OutputVar "NewYPos", Formula {Name "Ball", Index {String "YPos"}}
+BallsHandler.LOOF 129: OutputVar "NewXVel", Formula {Name "Ball", Index {String "XVel"}}
+BallsHandler.LOOF 130: OutputVar "NewYVel", Formula {Name "BallsData", Index {String "BounceYVel"}, Name "/", Int 2}
+BallsHandler.LOOF 132: Name "call", Table {Formula {Int 116}, Formula {String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel"}, Formula {Name "NewYVel"}}
+BallsHandler.LOOF 132: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball1"}
+BallsHandler.LOOF 133: Name "call", Table {Formula {Int 116, String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel", Name "*", Name "-", Int 1}, Formula {Name "NewYVel"}}
+BallsHandler.LOOF 133: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball2"}
+BallsHandler.LOOF 135: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "NewBalls"}, Formula {Name "Ball1"}}
+BallsHandler.LOOF 136: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "NewBalls"}, Formula {Name "Ball2"}}
+BallsHandler.LOOF 138: Name "return", Table {}
+BallsHandler.LOOF 139: Name "end", Table {}
+BallsHandler.LOOF 150: Name "skip", Table {}
+BallsHandler.LOOF 150: Name "pop", Table {OutputVar "ARGS", OutputVar "BallsData"}
+BallsHandler.LOOF 151: Name "call", Table {Formula {Int 98}, Formula {Name "BallsData", Index {String "AllBalls"}}}
+BallsHandler.LOOF 151: Name "pop", Table {OutputVar "ARGS", OutputVar "NumberOfSize0Balls"}
+BallsHandler.LOOF 152: Name "if", Table {Formula {Name "NumberOfSize0Balls", Name "<", Name "BallsData", Index {String "MaxSize0Balls"}}}
+BallsHandler.LOOF 153: Name "call", Table {Formula {Int 106}, Formula {Name "BallsData"}}
+BallsHandler.LOOF 154: Name "return", Table {}
+BallsHandler.LOOF 155: Name "end", Table {}
+BallsHandler.LOOF 159: Name "skip", Table {}
+BallsHandler.LOOF 159: Name "pop", Table {OutputVar "ARGS", OutputVar "AllBalls"}
+BallsHandler.LOOF 160: OutputVar "Total", Formula {Int 0}
+BallsHandler.LOOF 161: Name "forEach", Table {OutputVar "CurrentBall", Formula {Name "AllBalls"}}
+BallsHandler.LOOF 162: OutputVar "Total", Formula {Name "Total", Name "+", Int 2, Name "^", Name "CurrentBall", Index {String "Size"}}
+BallsHandler.LOOF 163: Name "repeat", Table {}
+BallsHandler.LOOF 164: Name "return", Table {Formula {Name "Total"}}
+BallsHandler.LOOF 165: Name "end", Table {}
+BallsHandler.LOOF 171: Name "skip", Table {}
+BallsHandler.LOOF 171: Name "pop", Table {OutputVar "ARGS", OutputVar "BallsData"}
+BallsHandler.LOOF 172: OutputVar "StartingXPos", Formula {Formula {Name "chance", Int 50}, Name "and", Name "-", Float 0.2, Name "or", Float 1.2}
+BallsHandler.LOOF 173: OutputVar "StartingYPos", Formula {Float 0.75, Name "+", Name "random", Float 0.25}
+BallsHandler.LOOF 174: OutputVar "Size", Formula {Name "randomInt", Formula {Name "BallsData", Index {String "MaxBallSize"}}}
+BallsHandler.LOOF 175: Name "call", Table {Formula {Int 116}, Formula {String "normal"}, Formula {Name "Size"}, Formula {Name "BallsData", Index {String "StartingHealth"}}, Formula {Name "StartingXPos"}, Formula {Name "StartingYPos"}, Formula {Int 0}, Formula {Int 0}}
+BallsHandler.LOOF 175: Name "pop", Table {OutputVar "ARGS", OutputVar "NewBall"}
+BallsHandler.LOOF 176: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "BallsData", Index {String "AllBalls"}}, Formula {Name "NewBall"}}
+BallsHandler.LOOF 177: Name "return", Table {}
+BallsHandler.LOOF 178: Name "end", Table {}
+BallsHandler.LOOF 182: Name "skip", Table {}
+BallsHandler.LOOF 182: Name "pop", Table {OutputVar "ARGS", OutputVar "Type", OutputVar "Size", OutputVar "Health", OutputVar "XPos", OutputVar "YPos", OutputVar "XVel", OutputVar "YVel"}
+BallsHandler.LOOF 183: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 63}, Formula {Name "ARGS"}, Formula {Table {Formula {String "string"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}}}}
+BallsHandler.LOOF 184: OutputVar "NewBall", Formula {Table {}}
+BallsHandler.LOOF 185: OutputVar "NewBall", Index {String "Type"}, Formula {Name "Type"}
+BallsHandler.LOOF 186: OutputVar "NewBall", Index {String "Size"}, Formula {Name "Size"}
+BallsHandler.LOOF 187: OutputVar "NewBall", Index {String "Health"}, Formula {Name "Health"}
+BallsHandler.LOOF 188: OutputVar "NewBall", Index {String "StartingHealth"}, Formula {Name "Health"}
+BallsHandler.LOOF 189: OutputVar "NewBall", Index {String "XPos"}, Formula {Name "XPos"}
+BallsHandler.LOOF 190: OutputVar "NewBall", Index {String "YPos"}, Formula {Name "YPos"}
+BallsHandler.LOOF 191: OutputVar "NewBall", Index {String "XVel"}, Formula {Name "XVel"}
+BallsHandler.LOOF 192: OutputVar "NewBall", Index {String "YVel"}, Formula {Name "YVel"}
+BallsHandler.LOOF 193: Name "return", Table {Formula {Name "NewBall"}}
+BallsHandler.LOOF 194: Name "end", Table {}
+BallsHandler.LOOF 198: Name "skip", Table {}
+BallsHandler.LOOF 198: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball", OutputVar "BallsData"}
+BallsHandler.LOOF 199: OutputVar "BallSize", Formula {Name "Ball", Index {String "Size"}}
+BallsHandler.LOOF 200: OutputVar "BallRadius", Formula {Formula {Name "BallSize", Name "+", Int 1}, Name "*", Name "BallsData", Index {String "Size"}}
+BallsHandler.LOOF 201: Name "return", Table {Formula {Name "BallRadius"}}
+BallsHandler.LOOF 202: Name "end", Table {}

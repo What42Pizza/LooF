@@ -165,14 +165,12 @@ class LooFInterpreter {
       default:
         throw (new LooFInterpreterException (Environment, FileName, LineNumber, "tables cannot be indexed with " + DataValueTypeNames_PlusA[IndexDataValue.Type] + "."));
       
-      case (DataValueType_Number):
-        double NumberValue = IndexDataValue.NumberValue;
-        if (NumberValue % 1 != 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "tables cannot be indexed with a non-integer number."));
-        int NumberValueInt = (int) NumberValue;
+      case (DataValueType_Int):
+        long IntValue = IndexDataValue.IntValue;
         ArrayList <LooFDataValue> TableValue = TableDataValue.TableValue;
-        if (NumberValueInt < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
-        if (NumberValueInt >= TableValue.size()) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
-        return TableValue.get(NumberValueInt);
+        if (IntValue < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
+        if (IntValue >= TableValue.size()) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
+        return TableValue.get((int)IntValue);
       
       case (DataValueType_String):
         String StringValue = IndexDataValue.StringValue;

@@ -58,7 +58,7 @@
 - **loop**
   - Effectively nop; only useful because of repeat
 - **loop VAR\_NAME, VALUE (start), VALUE (end)**
-  - Same as statement 'loop VAR\_NAME, VALUE, VALUE, VALUE' but the thrid VALUE is assumed to be the number 1
+  - Same as statement 'loop VAR\_NAME, VALUE, VALUE, VALUE' but the third VALUE is assumed to be the number 1
 - **loop VAR\_NAME, VALUE (start), VALUE (end), VALUE (increment)**
   - If VAR\_NAME is null:  Sets VAR\_NAME to the first VALUE
   - If VAR\_NAME plus the second VALUE is less than the second VALUE:  Increments VAR\_NAME by the third VALUE
@@ -66,8 +66,8 @@
 - **forEach VAR\_NAME, VALUE (table)**
   - Same as statement 'forEach VAR\_NAME, VALUE, VAR\_NAME' but with the second VAR\_NAME being is assumed to be "\_" .. the first VAR\_NAME. Errors if VALUE is not a table
 - **forEach VAR\_NAME, VALUE (table), VAR\_NAME**
-  - If the second VAR\_NAME is null:  Sets the second VAR\_NAME to 0 and the first VAR\_NAME to VALUE indexed with the second VAR\_NAME. Erros if VALUE is not a table
-  - If the second VAR\_NAME plus 2 is less than the length of VALUE:  Increments the second VAR\_NAME and sets the first VAR\_NAME to VALUE indexed with the second VAR\_NAME. Erros if VALUE is not a table
+  - If the second VAR\_NAME is null:  Sets the second VAR\_NAME to 0 and the first VAR\_NAME to VALUE indexed with the second VAR\_NAME. Errors if VALUE is not a table
+  - If the second VAR\_NAME plus 2 is less than the length of VALUE:  Increments the second VAR\_NAME and sets the first VAR\_NAME to VALUE indexed with the second VAR\_NAME. Errors if VALUE is not a table
   - If the second VAR\_NAME plus 2 is not less than the length of VALUE:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if VALUE is not a table or if no suitable 'repeat' statement is found
 - **while VALUE**
   - If VALUE is truthy:  Effectively nop; only useful because of the other while conditions
@@ -103,4 +103,4 @@
 ## Interacting with external code
 
 - **callOutside VALUE (string: module), VALUE (arg 1), ...**
-  - Sends the the remaining VALUEs to the external module VALUE. Erros if the first VALUE is not a string.
+  - Sends the the remaining VALUEs to the external module VALUE. Errors if the first VALUE is not a string.
