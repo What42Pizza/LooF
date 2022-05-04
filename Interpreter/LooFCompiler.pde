@@ -1314,8 +1314,13 @@ class LooFCompiler {
       return new LooFTokenBranch (TokenBranchType_String, StringValue);
     }
     
-    // Type_Number
-    if (TokenIsNumber (CurrentToken)) {
+    // Type_Int
+    if (TokenIsInt (CurrentToken)) {
+      return new LooFTokenBranch (Long.parseLong(CurrentToken));
+    }
+    
+    // Type_Float
+    if (TokenIsFloat (CurrentToken)) {
       return new LooFTokenBranch (Double.parseDouble(CurrentToken));
     }
     

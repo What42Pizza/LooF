@@ -163,7 +163,17 @@ boolean CharStartsNewToken (char CharIn) {
 
 
 
-boolean TokenIsNumber (String Token) {
+boolean TokenIsInt (String Token) {
+  char[] TokenChars = Token.toCharArray();
+  for (char CurrChar : TokenChars) {
+    if (!CharIsDigit (CurrChar)) return false;
+  }
+  return true;
+}
+
+
+
+boolean TokenIsFloat (String Token) {
   char[] TokenChars = Token.toCharArray();
   boolean HasDigits = false;
   for (char CurrChar : TokenChars) {
@@ -171,7 +181,6 @@ boolean TokenIsNumber (String Token) {
     if (!CharIsNumberChar (CurrChar)) return false;
   }
   return HasDigits;
-  
 }
 
 

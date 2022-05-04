@@ -106,8 +106,11 @@ class LooFInterpreter {
       default:
         throw (new RuntimeException ("INTERNAL ERROR: could not recognize token branch type " + CurrentToken.Type + "."));
       
-      case (TokenBranchType_Number):
-        return new LooFDataValue (CurrentToken.NumberValue);
+      case (TokenBranchType_Int):
+        return new LooFDataValue (CurrentToken.IntValue);
+      
+      case (TokenBranchType_Float):
+        return new LooFDataValue (CurrentToken.FloatValue);
       
       case (TokenBranchType_String):
         return new LooFDataValue (CurrentToken.StringValue);

@@ -229,7 +229,8 @@ class LooFDataValue {
   
   int Type;
   
-  double NumberValue;
+  long IntValue;
+  double FloatValue;
   String StringValue;
   boolean BoolValue;
   ArrayList <LooFDataValue> TableValue;
@@ -244,9 +245,15 @@ class LooFDataValue {
     LockLevels.add(0);
   }
   
-  public LooFDataValue (double NumberValue) {
-    Type = DataValueType_Number;
-    this.NumberValue = NumberValue;
+  public LooFDataValue (long IntValue) {
+    Type = DataValueType_Int;
+    this.IntValue = IntValue;
+    LockLevels.add(0);
+  }
+  
+  public LooFDataValue (double FloatValue) {
+    Type = DataValueType_Float;
+    this.FloatValue = FloatValue;
     LockLevels.add(0);
   }
   
@@ -276,14 +283,16 @@ class LooFDataValue {
 
 
 final int DataValueType_Null = 0;
-final int DataValueType_Number = 1;
-final int DataValueType_String = 2;
-final int DataValueType_Bool = 3;
-final int DataValueType_Table = 4;
+final int DataValueType_Int = 1;
+final int DataValueType_Float = 2;
+final int DataValueType_String = 3;
+final int DataValueType_Bool = 4;
+final int DataValueType_Table = 5;
 
 final String[] DataValueTypeNames = {
   "null",
-  "number",
+  "int",
+  "float",
   "string",
   "bool",
   "table",
@@ -291,7 +300,8 @@ final String[] DataValueTypeNames = {
 
 final String[] DataValueTypeNames_PlusA = {
   "null",
-  "a number",
+  "an int",
+  "a float",
   "a string",
   "a bool",
   "a table",
@@ -309,14 +319,20 @@ final String[] DataValueTypeNames_PlusA = {
 class LooFTokenBranch {
   
   int Type;
-  double NumberValue;
+  long IntValue;
+  double FloatValue;
   String StringValue;
   boolean BoolValue;
   LooFTokenBranch[] Children;
   
-  public LooFTokenBranch (double NumberValue) {
-    this.Type = TokenBranchType_Number;
-    this.NumberValue = NumberValue;
+  public LooFTokenBranch (long IntValue) {
+    this.Type = TokenBranchType_Int;
+    this.IntValue = IntValue;
+  }
+  
+  public LooFTokenBranch (double FloatValue) {
+    this.Type = TokenBranchType_Float;
+    this.FloatValue = FloatValue;
   }
   
   public LooFTokenBranch (int Type, String StringValue) {
@@ -338,17 +354,19 @@ class LooFTokenBranch {
 
 
 
-final int TokenBranchType_Number = 0;
-final int TokenBranchType_String = 1;
-final int TokenBranchType_Bool = 2;
-final int TokenBranchType_Table = 3;
-final int TokenBranchType_Name = 4;
-final int TokenBranchType_Formula = 5;
-final int TokenBranchType_Index = 6;
-final int TokenBranchType_OutputVar = 7;
+final int TokenBranchType_Int = 0;
+final int TokenBranchType_Float = 1;
+final int TokenBranchType_String = 2;
+final int TokenBranchType_Bool = 3;
+final int TokenBranchType_Table = 4;
+final int TokenBranchType_Name = 5;
+final int TokenBranchType_Formula = 6;
+final int TokenBranchType_Index = 7;
+final int TokenBranchType_OutputVar = 8;
 
 final String[] TokenBranchTypeNames = {
-  "Number",
+  "Int",
+  "Float",
   "String",
   "Bool",
   "Table",
@@ -359,7 +377,8 @@ final String[] TokenBranchTypeNames = {
 };
 
 final String[] TokenBranchTypeNames_PlusA = {
-  "a Number",
+  "an Int",
+  "a Float",
   "a String",
   "a Bool",
   "a Table",
