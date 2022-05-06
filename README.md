@@ -38,7 +38,7 @@ call Factorial, 10
 ### Linking example:
 
 ```
-// in Functions.LOOF
+// in GeneralFunctions.LOOF
 
 #include Basics.LOOF
 
@@ -47,8 +47,8 @@ function ConvertTableToString  -> TableIn, Seperator
 	default Seperator = ", "
 	
 	StringOut = toString TableIn[i]
-	loop i, 1, lengthOf TableIn - 1
-		StringOut = StringOut .. Sepeator .. (toString TableIn[i])
+	loop i, 1, endOf TableIn
+		StringOut = StringOut .. Sepeator .. toString TableIn[i]
 	repeat
 	
 	return StringOut
@@ -59,10 +59,17 @@ end
 // in Main.LOOF
 
 #include Basics.LOOF
-$link Functions.LOOF as F
+$link GeneralFunctions.LOOF as F
 
-ExampleTable = {10, 20, "Example"}
-call F.ConvertTableToString, ExampleTable
+call F.ConvertTableToString, {10, 20, "Example"}
 :print
 :exit
 ```
+
+<br>
+<br>
+<br>
+
+## License
+
+[MIT License](LICENSE)
