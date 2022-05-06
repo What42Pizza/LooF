@@ -24,7 +24,16 @@ class LooFCompiler {
       ">=",
       "<=",
       "..",
+      "===",
+      "!==",
     };
+    
+    
+    
+    // get default addons
+    HashMap <String, LooFModule> Modules = GetDefaultModules (CompileSettings);
+    HashMap <String, LooFEvaluatorOperation> Operations = GetDefaultOperations (CompileSettings);
+    HashMap <String, LooFEvaluatorFunction> Functions = GetDefaultFunctions (CompileSettings);
     
     
     
@@ -76,7 +85,7 @@ class LooFCompiler {
     
     // lex CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      LexCodeData (CodeData);
+      LexCodeData (CodeData, Operations, Functions);
     }
     
     if (CompileSettings.LexerOutputPath != null) {
@@ -99,6 +108,9 @@ class LooFCompiler {
     
     // create environement
     LooFEnvironment NewEnvironment = new LooFEnvironment (AllFiles);
+    NewEnvironment.InterpreterModules = Modules;
+    NewEnvironment.EvaluatorOperations = Operations;
+    NewEnvironment.EvaluatorFunctions = Functions;
     
     
     
@@ -114,6 +126,82 @@ class LooFCompiler {
     
     return NewEnvironment;
     
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  HashMap <String, LooFModule> GetDefaultModules (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFModule> Modules = CompileSettings.CustomModules;
+    if (!CompileSettings.AddDefaultModules) return Modules;
+    
+    return Modules;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFEvaluatorOperation> GetDefaultOperations (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFEvaluatorOperation> Operations = new HashMap <String, LooFEvaluatorOperation> ();
+    if (!CompileSettings.AddDefaultOperations) return Operations;
+    
+    Operations.put("+", Operation_Add);
+    Operations.put("-", Operation_Subtract);
+    Operations.put("*", Operation_Multiply);
+    Operations.put("/", Operation_Divide);
+    Operations.put("^", Operation_Power);
+    Operations.put("%", Operation_Modulo);
+    Operations.put("..", Operation_Concat);
+    Operations.put("==", Operation_Equals);
+    Operations.put("===", Operation_StrictEquals);
+    Operations.put(">", Operation_GreaterThan);
+    Operations.put("<", Operation_LessThan);
+    Operations.put("!=", Operation_NotEquals);
+    Operations.put("!==", Operation_StrictNotEquals);
+    Operations.put(">=", Operation_GreaterThanOrEqual);
+    Operations.put("<=", Operation_LessThanOrEqual);
+    Operations.put("and", Operation_And);
+    Operations.put("or", Operation_Or);
+    Operations.put("xor", Operation_Xor);
+    
+    return Operations;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFEvaluatorFunction> GetDefaultFunctions (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFEvaluatorFunction> Functions = new HashMap <String, LooFEvaluatorFunction> ();
+    if (!CompileSettings.AddDefaultFunctions) return Functions;
+    
+    Functions.put("round", Function_round);
+    Functions.put("floor", Function_floor);
+    Functions.put("ceil", Function_ceil);
+    Functions.put("sqrt", Function_sqrt);
+    Functions.put("not", Function_not);
+    Functions.put("min", Function_min);
+    Functions.put("max", Function_max);
+    Functions.put("random", Function_random);
+    Functions.put("randomInt", Function_randomInt);
+    Functions.put("chance", Function_chance);
+    Functions.put("typeOf", Function_typeOf);
+    Functions.put("lengthOf", Function_lengthOf);
+    Functions.put("totalItemsIn", Function_totalItemsIn);
+    Functions.put("endOf", Function_endOf);
+    Functions.put("keysOf", Function_keysOf);
+    Functions.put("valuesOf", Function_valuesOf);
+    Functions.put("randomItem", Function_randomItem);
+    Functions.put("randomValue", Function_randomValue);
+    
+    return Functions;
   }
   
   
@@ -1120,13 +1208,15 @@ class LooFCompiler {
     int CurrentLineTokensSize = CurrentLineTokens.size();
     int CombinedTokensLength = CombinedTokens.length;
     
+    ReturnValue Return = null;
+    
     for (int i = StartIndex; i < CurrentLineTokensSize; i ++) {
       PossibleCombinedToken += CurrentLineTokens.get(i);
       
       // skip results that are too short
       while (CombinedTokens[ResultIndex].length() < PossibleCombinedToken.length()) {
         ResultIndex ++;
-        if (ResultIndex == CombinedTokensLength) return null;
+        if (ResultIndex == CombinedTokensLength) return Return;
       }
     
       // add another token if the next results are too long
@@ -1135,18 +1225,17 @@ class LooFCompiler {
       // test results
       while (PossibleCombinedToken.length() == CombinedTokens[ResultIndex].length()) {
         if (PossibleCombinedToken.equals(CombinedTokens[ResultIndex])) {
-          ReturnValue Return = new ReturnValue();
+          Return = new ReturnValue();
           Return.StringValue = PossibleCombinedToken;
           Return.IntegerValue = i;
-          return Return;
         }
         ResultIndex ++;
-        if (ResultIndex == CombinedTokensLength) return null;
+        if (ResultIndex == CombinedTokensLength) return Return;
       }
       
     }
     
-    return null;
+    return Return;
     
   }
   
@@ -1159,11 +1248,11 @@ class LooFCompiler {
   
   
   
-  void LexCodeData (LooFCodeData CodeData) {
+  void LexCodeData (LooFCodeData CodeData, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     LooFTokenBranch[][] Statements = new LooFTokenBranch [CodeTokens.size()] [];
     for (int i = 0; i < Statements.length; i ++) {
-      LooFTokenBranch[] Statement = GetLexedTokensForLine (CodeTokens.get(i), CodeData, i);
+      LooFTokenBranch[] Statement = GetLexedTokensForLine (CodeTokens.get(i), Operations, Functions, CodeData, i);
       EnsureStatementIsValid (Statement, CodeData, i);
       SimplifyStatement (Statement, CodeData, i);
       Statements[i] = Statement;
@@ -1175,7 +1264,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine (ArrayList <String> CurrentLineTokens, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch[] GetLexedTokensForLine (ArrayList <String> CurrentLineTokens, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     
     // get basic data
     ReturnValue BlocksData = GetAllBlockLevelsAndEnds (CurrentLineTokens, CodeData, LineNumber);
@@ -1185,11 +1274,11 @@ class LooFCompiler {
     // assignment statements
     int AssignmentTokenIndex = FindTokenIndex ("=", CurrentLineTokens, 0);
     if (AssignmentTokenIndex != -1) {
-      return GetLexedTokensForLine_Assignment (CurrentLineTokens, BlockLevels, BlockEnds, AssignmentTokenIndex, CodeData, LineNumber);
+      return GetLexedTokensForLine_Assignment (CurrentLineTokens, BlockLevels, BlockEnds, AssignmentTokenIndex, Operations, Functions, CodeData, LineNumber);
     }
     
     // other statements
-    return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, CodeData, LineNumber);
+    return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     
   }
   
@@ -1197,7 +1286,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     
     // error if there are multiple "="-s
     if (FindTokenIndex ("=", CurrentLineTokens, AssignmentTokenIndex + 1) != -1) throw (new LooFCompileException (CodeData, LineNumber, "found two \"=\" tokens but only one can used per statement."));
@@ -1205,7 +1294,7 @@ class LooFCompiler {
     // handle "default " statements
     if (CurrentLineTokens.get(0).equals("default")) {
       CurrentLineTokens.set(AssignmentTokenIndex, ",");
-      return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, CodeData, LineNumber);
+      return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     }
     
     // error if var name is invalid
@@ -1222,7 +1311,7 @@ class LooFCompiler {
     while (PossibleIndexIndex < AssignmentTokenIndex) {
       if (!CurrentLineTokens.get(PossibleIndexIndex).equals("[")) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
       int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
-      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, CodeData, LineNumber);
+      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
       IndexFormula.Type = TokenBranchType_Index;
       TargetVarIndexes.add(IndexFormula);
       PossibleIndexIndex = IndexEndIndex + 2;
@@ -1231,7 +1320,7 @@ class LooFCompiler {
     
     
     // formula for new value
-    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     
     
     // assemble final statement
@@ -1251,7 +1340,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown / statement is missing \"=\"."));
     
     
@@ -1260,7 +1349,7 @@ class LooFCompiler {
     
     
     // get args
-    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, CodeData, LineNumber);
+    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     
     
     // assemble final statement
@@ -1275,13 +1364,13 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     
     if (CurrentLineTokens.size() == 1) {
       return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
     }
     
-    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     
   }
   
@@ -1289,11 +1378,11 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     ArrayList <LooFTokenBranch> FormulaChildren = new ArrayList <LooFTokenBranch> ();
     for (int i = FormulaBlockStart; i < FormulaBlockEnd + 1; i ++) {
       String CurrentToken = CurrentLineTokens.get(i);
-      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, CodeData, LineNumber);
+      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
       FormulaChildren.add(NewChild);
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
@@ -1304,71 +1393,34 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     
-    switch (CurrentToken.charAt(0)) {
+    switch (CurrentToken) {
       
       // Type_Formula
-      case ('('):
-        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+      case ("("):
+        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
       
       // Type_Index
-      case ('['):
-        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+      case ("["):
+        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
         IndexFormula.Type = TokenBranchType_Index;
         return IndexFormula;
       
       // Type_Table
-      case ('{'):
-        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, CodeData, LineNumber);
+      case ("{"):
+        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
       
     }
     
-    // Type_Operation and Type_Function
-    switch (CurrentToken) {
-      
-      case ("+"):
-      case ("-"):
-      case ("*"):
-      case ("/"):
-      case ("^"):
-      case ("%"):
-      case (".."):
-      case ("=="):
-      case (">"):
-      case ("<"):
-      case ("!="):
-      case (">="):
-      case ("<="):
-      case ("and"):
-      case ("or"):
-      case ("not"):
-      case ("xor"):
-        return new LooFTokenBranch (TokenBranchType_Operation, CurrentToken);
-      
-      case ("round"):
-      case ("floor"):
-      case ("ceil"):
-      case ("sqrt"):
-      case ("min"):
-      case ("max"):
-      case ("random"):
-      case ("randomInt"):
-      case ("chance"):
-      case ("typeof"):
-      case ("lengthOf"):
-      case ("endOf"):
-      case ("keysOf"):
-      case ("valuesOf"):
-      case ("randomItem"):
-      case ("randomValue"):
-      case ("toInt"):
-      case ("toFloat"):
-      case ("toChars"):
-      case ("toBool"):
-      case ("timeSince"):
-        return new LooFTokenBranch (TokenBranchType_Function, CurrentToken);
-      
+    // Type_Operaion
+    if (Operations.containsKey(CurrentToken)) {
+      return new LooFTokenBranch (TokenBranchType_Operation, CurrentToken);
+    }
+    
+    // Type_Function
+    if (Functions.containsKey(CurrentToken)) {
+      return new LooFTokenBranch (TokenBranchType_Function, CurrentToken);
     }
     
     // Type_String
@@ -1404,7 +1456,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
     ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
@@ -1413,12 +1465,12 @@ class LooFCompiler {
     int PrevNextCommaIndex = ItemStartIndex - 1;
     int NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, TableBlockStart, TableBlockEnd, TableBlockLevel, BlockLevels);
     while (NextCommaIndex != -1) {
-      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds, CodeData, LineNumber));
+      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber));
       ItemStartIndex = NextCommaIndex + 1;
       PrevNextCommaIndex = NextCommaIndex;
       NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd, TableBlockLevel, BlockLevels);
     }
-    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, CodeData, LineNumber));
+    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber));
     
     return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)));
   }

@@ -14,14 +14,15 @@ These use values from both sides of the operator.
 - **%**
 - **..**
 - **==**
+- **===**
 - **>**
 - **<**
 - **!=**
+- **!==**
 - **>=**
 - **<=**
 - **and**
 - **or**
-- **not**
 - **xor**
 
 <br>
@@ -40,9 +41,7 @@ These use the value directly following the function. If the function takes in mu
 - **floor VALUE**
 - **ceiling VALUE**
 - **sqrt VALUE**
-
-<br>
-
+- **not VALUE**
 - **min VALUE (table)**
 - **max VALUE (table)**
 
@@ -58,7 +57,10 @@ These use the value directly following the function. If the function takes in mu
 <br>
 
 - **typeOf VALUE**
-- **lengthOf VALUE (table or string)**
+- **lengthOf VALUE (string or table)**
+  - returns the number of items in the array part of VALUE or the number of characters in VALUE
+- **totalItemsIn VALUE (table)**
+  - returns the number of items in the array part of VALUE plus the number of items in the hashmap part of VALUE
 - **endOf VALUE (table)**
   - returns lengthOf VALUE - 1
 - **keysOf VALUE (table)**
@@ -66,9 +68,19 @@ These use the value directly following the function. If the function takes in mu
 - **valuesOf VALUE (table)**
   - returns a table containing all of the values of VALUE
 - **randomItem VALUE (table)**
-  - returns a random item from the array part of the table
+  - returns a random item from the array part of VALUE
 - **randomValue VALUE (table)**
-  - returns a random value from the hashmap part of the table
+  - returns a random value from the hashmap part of VALUE
+
+<br>
+
+- **getChar VALUE (table {StringIn (string), Position (int)})**
+  - returns the character at Position of StringIn
+- **getChars VALUE (string)**
+  - returns an array of the characters in VALUE as ints
+- **subString VALUE (table {StringIn (string), StartIndex (int), EndIndex (int)})**
+  - returns a new string which is part of StringIn
+  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
 
 <br>
 
@@ -151,3 +163,63 @@ These use the value directly following the function. If the function takes in mu
 - String: returns (lengthOf VALUE > 0)
 - bool: returns VALUE
 - table: returns (lengthOf VALUE > 0)
+
+<br>
+<br>
+<br>
+
+## Equality details:
+
+<br>
+
+- **null == null:** true
+- **null == int:** false
+- **null == float:** false
+- **null == string:** false
+- **null == bool:** false
+- **null == table:** false
+
+<br>
+
+- **int == null:** false
+- **int == int:** (Left == Right)
+- **int == float:** (Left == Right)
+- **int == string:** false
+- **int == bool:** false
+- **int == table:** false
+
+<br>
+
+- **float == null:** false
+- **float == int:** (left == right)
+- **float == float:** (left == right)
+- **float == string:** false
+- **float == bool:** false
+- **float == table:** false
+
+<br>
+
+- **string == null:** false
+- **string == int:** false
+- **string == float:** false
+- **string == string:** (left == right)
+- **string == bool:** false
+- **string == table:** false
+
+<br>
+
+- **bool == bull:** false
+- **bool == int:** false
+- **bool == float:** false
+- **bool == string:** false
+- **bool == bool:** (left == right)
+- **bool == table:** false
+
+<br>
+
+- **table == null:** false
+- **table == int:** false
+- **table == float:** false
+- **table == string:** false
+- **table == bool:** false
+- **table == table:** (left == right)

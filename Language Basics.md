@@ -30,7 +30,7 @@ ExampleVar["1"] = 789 // add 789 to the hashmap part of the array
 
 <br>
 
-Data Value types:
+### Data Value types:
 
 null
 
@@ -199,7 +199,7 @@ With Basics.LOOF:
 
 <br>
 
-Without Basics:
+Without Basics.LOOF:
 
 ```
 callOutside "console", "println", "ExampleString"

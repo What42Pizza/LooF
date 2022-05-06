@@ -19,18 +19,18 @@ Main.LOOF 37: OutputVar "GameData", Index {String "Paused"}, Formula {Name "fals
 Main.LOOF 38: OutputVar "GameData", Index {String "PlayerIsAlive"}, Formula {Name "false"}
 Main.LOOF 39: OutputVar "GameData", Index {String "Score"}, Formula {Int 0}
 Main.LOOF 41: OutputVar "PrevFrameSecond", Formula {Name "timeSince", Int 0}
-Main.LOOF 42: OutputVar "TargetFrameDelta", Formula {Int 1, Name "/", Name "TargetFramerate"}
+Main.LOOF 42: OutputVar "TargetFrameDelta", Formula {Int 1, Operation "/", Name "TargetFramerate"}
 Main.LOOF 53: Name "loop", Table {}
 Main.LOOF 55: Name "call", Table {Formula {Int 28}, Formula {Name "GameData"}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
-Main.LOOF 57: Name "callOutside", Table {Formula {String "interpreter"}, Formula {String "pause until"}, Formula {Name "PrevFrameSecond", Name "+", Name "Settings", Index {String "TargetFrameDelta"}}}
+Main.LOOF 57: Name "callOutside", Table {Formula {String "interpreter"}, Formula {String "pause until"}, Formula {Name "PrevFrameSecond", Operation "+", Name "Settings", Index {String "TargetFrameDelta"}}}
 Main.LOOF 58: OutputVar "PrevFrameSecond", Formula {Name "timeSince", Int 0}
 Main.LOOF 60: Name "end", Table {}
 Main.LOOF 66: Name "skip", Table {}
 Main.LOOF 66: Name "pop", Table {OutputVar "ARGS", OutputVar "GameData", OutputVar "BallsData", OutputVar "BulletsData"}
-Main.LOOF 68: Name "if", Table {Formula {Name "not", Formula {Name "GameData", Index {String "Playing"}, Name "and", Name "not", Name "GameData", Index {String "Paused"}}}}
+Main.LOOF 68: Name "if", Table {Formula {Function "not", Formula {Name "GameData", Index {String "Playing"}, Operation "and", Function "not", Name "GameData", Index {String "Paused"}}}}
 Main.LOOF 68: Name "skip", Table {}
 Main.LOOF 69: Name "call", Table {Formula {String "BallsHandler.LOOF"}, Formula {Int 1}, Formula {Name "BallsData"}, Formula {Name "BulletsData"}}
-Main.LOOF 70: Name "call", Table {Formula {String "BallsHandler.LOOF"}, Formula {Int 90}, Formula {Name "BallsData"}}
+Main.LOOF 70: Name "call", Table {Formula {String "BallsHandler.LOOF"}, Formula {Int 89}, Formula {Name "BallsData"}}
 Main.LOOF 71: Name "end", Table {}
 Main.LOOF 73: Name "return", Table {}
 Main.LOOF 74: Name "end", Table {}

@@ -52,6 +52,36 @@ char[] ToPrimitive (Character[] ArrayIn) {
 
 
 
+long CorrectModulo (long A, long B) {
+  long FirstModulo = A % B;
+  long PositiveResult = FirstModulo + B;
+  return PositiveResult % B;
+}
+
+
+double CorrectModulo (double A, double B) {
+  double FirstModulo = A % B;
+  double PositiveResult = FirstModulo + B;
+  return PositiveResult % B;
+}
+
+
+
+
+
+// from stack overflow: https://stackoverflow.com/questions/21092086/get-random-element-from-collection by Peter Lawrey https://stackoverflow.com/users/57695/peter-lawrey
+<T> T GetRandomItemFromCollection (Collection <T> CollectionIn) {
+  int ChosenIndex = (int) (Math.random() * CollectionIn.size());
+  for (T CurrentItem : CollectionIn) {
+    if (--ChosenIndex < 0) return CurrentItem;
+  }
+  throw new AssertionError();
+}
+
+
+
+
+
 
 
 
@@ -427,7 +457,7 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
         return;
       
       case (DataValueType_Table):
-        TargetDataValue.TableValue = SourceDataValue.TableValue;
+        TargetDataValue.ArrayValue = SourceDataValue.ArrayValue;
         return;
       
       default:
@@ -458,4 +488,24 @@ void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
 void UnlockDataValue (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   LockLevels.set(LockLevels.size() - 1, 0);
+}
+
+
+
+
+
+double GetDataValueNumber (LooFDataValue DataValueIn) {
+  return (DataValueIn.Type == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
+}
+
+
+
+ArrayList <LooFDataValue> GetAllDataValueTableItems (LooFDataValue DataValueIn) {
+  ArrayList <LooFDataValue> AllItems = new ArrayList <LooFDataValue> (DataValueIn.ArrayValue);
+  HashMap <String, LooFDataValue> HashMapValue = DataValueIn.HashMapValue;
+  Collection <String> HashMapKeys = HashMapValue.keySet();
+  for (String CurrentKey : HashMapKeys) {
+    AllItems.add(HashMapValue.get(CurrentKey));
+  }
+  return AllItems;
 }

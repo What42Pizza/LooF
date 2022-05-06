@@ -6,8 +6,6 @@ class LooFInterpreter {
   
   ArrayList <LooFEnvironment> AllEnvironments = new ArrayList <LooFEnvironment> ();
   
-  HashMap <String, LooFModule> AllModules = new HashMap <String, LooFModule> ();
-  
   
   
   
@@ -167,7 +165,7 @@ class LooFInterpreter {
       
       case (DataValueType_Int):
         long IntValue = IndexDataValue.IntValue;
-        ArrayList <LooFDataValue> TableValue = TableDataValue.TableValue;
+        ArrayList <LooFDataValue> TableValue = TableDataValue.ArrayValue;
         if (IntValue < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
         if (IntValue >= TableValue.size()) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
         return TableValue.get((int)IntValue);

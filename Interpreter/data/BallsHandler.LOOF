@@ -1,5 +1,4 @@
 function UpdateAllBalls  -> BallsData, BulletsData
-	Test = 5.0.0
 	AllBalls = BallsData["AllBalls"]
 	unlock BulletsData
 	

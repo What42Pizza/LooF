@@ -1,12 +1,28 @@
 class LooFModule {
   
-  
-  
-  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack) {
+  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment, String FileName, int LineNumber) {
     
   }
   
+}
+
+
+
+class LooFEvaluatorOperation {
   
+  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
+  }
+  
+}
+
+
+
+class LooFEvaluatorFunction {
+  
+  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
+  }
   
 }
 
@@ -20,6 +36,13 @@ class LooFModule {
 
 
 class LooFEnvironment {
+  
+  
+  
+  HashMap <String, LooFModule> InterpreterModules = new HashMap <String, LooFModule> ();
+  
+  HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
+  HashMap <String, LooFEvaluatorFunction > EvaluatorFunctions  = new HashMap <String, LooFEvaluatorFunction > ();
   
   
   
@@ -121,6 +144,14 @@ class ReturnValue {
 
 class LooFCompileSettings {
   
+  boolean AddDefaultModules = true;
+  boolean AddDefaultOperations = true;
+  boolean AddDefaultFunctions = true;
+  
+  HashMap <String, LooFModule> CustomModules = new HashMap <String, LooFModule> ();
+  HashMap <String, LooFEvaluatorOperation> CustomOperations = new HashMap <String, LooFEvaluatorOperation> ();
+  HashMap <String, LooFEvaluatorFunction> CustomFunctions = new HashMap <String, LooFEvaluatorFunction> ();
+  
   String PreProcessorOutputPath = null;
   String LinkerOutputPath = null;
   String ParserOutputPath = null;
@@ -166,31 +197,45 @@ class LooFCompileException extends RuntimeException {
 
 
 String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenNumber, String Message) {
-  
+  int OriginalLineNumber = CodeData.LineNumbers.get(LineNumber);
+  String OriginalFileName = CodeData.LineFileOrigins.get(LineNumber);
+  return "File " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + "   (" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenNumber) + ") :   " + Message;
+}
+
+
+
+String ErrorMessage_GetFileNameToShow (String FileName, String OriginalFileName) {
+  if (FileName.equals(OriginalFileName)) return "\"" + FileName + "\"";
+  return "\"" + FileName + "\" (originally from file \"" + OriginalFileName + "\")";
+}
+
+
+
+String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, int LineNumber, Integer TokenNumber) {
+  String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
+  LineOfCodeToShow += (TokenNumber == null) ? "" : "; token \"" + CodeData.CodeTokens.get(LineNumber).get(TokenNumber) + "\"";
+  return LineOfCodeToShow;
+}
+
+String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int LineNumber) {
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
-  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
-  String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
+  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
   
-  if (OriginalLineOfCode.length() > 50) OriginalLineOfCode = OriginalLineOfCode.substring(0, 50) + "...";
+  boolean LineHasChanged = LineOfCode.equals(OriginalLineOfCode);
+  
+  if (OriginalLineOfCode.length() > 50) OriginalLineOfCode = OriginalLineOfCode.substring(0, 50) + " ...";
   if (LineOfCode.length() > 50) LineOfCode = LineOfCode.substring(0, 50) + " ...";
   
-  String FileNameToShow = (FileName.equals(LineFileOrigin))   ?   ("\"" + FileName + "\"")   :   ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
-  String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode))   ?   ("\"" + LineOfCode + "\"")   :   ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
-  LineOfCodeToShow += (TokenNumber != null)   ?   ("; token \"" + CodeData.CodeTokens.get(LineNumber).get(TokenNumber) + "\"")   :   "";
-  
-  return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
+  if (LineHasChanged) return "\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"";
+  return "\"" + LineOfCode + "\"";
   
 }
 
 
 
 String GetCompilerErrorMessage (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
-  
-  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
-  
-  return "File " + FileNameToShow + " line " + LineNumber + "   (\"" + LineOfCode + "\") :   " + Message;
-  
+  return "File " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + LineNumber + "   (\"" + LineOfCode + "\") :   " + Message;
 }
 
 
@@ -241,7 +286,7 @@ class LooFDataValue {
   double FloatValue;
   String StringValue;
   boolean BoolValue;
-  ArrayList <LooFDataValue> TableValue;
+  ArrayList <LooFDataValue> ArrayValue;
   HashMap <String, LooFDataValue> HashMapValue;
   
   ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
@@ -277,10 +322,17 @@ class LooFDataValue {
     LockLevels.add(0);
   }
   
-  public LooFDataValue (ArrayList <LooFDataValue> TableValue, HashMap <String, LooFDataValue> HashMapValue) {
+  public LooFDataValue (ArrayList <LooFDataValue> ArrayValue, HashMap <String, LooFDataValue> HashMapValue) {
     Type = DataValueType_Table;
-    this.TableValue = TableValue;
+    this.ArrayValue = ArrayValue;
     this.HashMapValue = HashMapValue;
+    LockLevels.add(0);
+  }
+  
+  public LooFDataValue (LooFDataValue[] ArrayValue) {
+    ArrayList <LooFDataValue> ArrayValueAsList = ArrayToArrayList (ArrayValue);
+    this.ArrayValue = ArrayValueAsList;
+    this.HashMapValue = new HashMap <String, LooFDataValue> ();
     LockLevels.add(0);
   }
   
