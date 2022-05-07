@@ -71,7 +71,7 @@ class LooFInterpreter {
     // evaluate indexes
     for (int i = 1; i < FormulaTokens.size(); i ++) {
       LooFTokenBranch CurrentToken = FormulaTokens.get(i);
-      if (CurrentToken.Type == TokenBranchType_Index) {
+      if (CurrentToken.TokenType == TokenBranchType_Index) {
         LooFDataValue EvaluatedIndex = EvaluateFormula (CurrentToken, Environment, FileName, LineNumber);
         LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(i - 1), EvaluatedIndex, FormulaTokens.get(i - 1), Environment, FileName, LineNumber);
         FormulaTokens.remove(i);
@@ -99,10 +99,10 @@ class LooFInterpreter {
   
   
   LooFDataValue GetDataValueFromToken (LooFTokenBranch CurrentToken, LooFEnvironment Environment, String FileName, int LineNumber) {
-    switch (CurrentToken.Type) {
+    switch (CurrentToken.TokenType) {
       
       default:
-        throw (new RuntimeException ("INTERNAL ERROR: could not recognize token branch type " + CurrentToken.Type + "."));
+        throw new AssertionError();
       
       case (TokenBranchType_Int):
         return new LooFDataValue (CurrentToken.IntValue);
@@ -129,7 +129,7 @@ class LooFInterpreter {
         return null;
       
       case (TokenBranchType_OutputVar):
-        throw (new RuntimeException ("INTERNAL ERROR: tried to convert an OutputVar token branch to a data value."));
+        throw new AssertionError();
       
     }
   }
@@ -138,42 +138,62 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue GetDataValueIndex (LooFDataValue TableDataValue, LooFDataValue IndexDataValue, LooFTokenBranch TableDataValueSource, LooFEnvironment Environment, String FileName, int LineNumber) {
+  LooFDataValue GetDataValueIndex (LooFDataValue TableDataValue, LooFDataValue IndexDataValue, LooFTokenBranch TableTokenSource, LooFEnvironment Environment, String FileName, int LineNumber) {
     
-    // error if source is not indexable
-    switch (TableDataValueSource.Type) {
+    int CaseToUse = 0;
+    
+    // error if source token is not indexable
+    if (!(TableTokenSource.TokenType == TokenBranchType_Table || TableTokenSource.TokenType == TokenBranchType_Name)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + TokenBranchTypeNames_PlusA[TableTokenSource.TokenType] + "."));
+    
+    // error if index is not a string or int
+    switch (IndexDataValue.ValueType) {
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + TokenBranchTypeNames_PlusA[TableDataValueSource.Type] + "."));
-      case (TokenBranchType_Table):
-      case (TokenBranchType_Name):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "tables cannot be indexed with " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + "."));
+      case (DataValueType_Int):
+        break;
+      case (DataValueType_String):
+        CaseToUse += 1;
         break;
     }
     
     // error if data value is not indexable
-    switch (TableDataValue.Type) {
+    switch (TableDataValue.ValueType) {
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + DataValueTypeNames_PlusA[TableDataValue.Type] + "."));
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + DataValueTypeNames_PlusA[TableDataValue.ValueType] + "."));
       case (DataValueType_Table):
+        break;
+      case (DataValueType_ByteArray):
+        CaseToUse += 2;
         break;
     }
     
     // get index
-    switch (IndexDataValue.Type) {
+    switch (CaseToUse) {
       
-      default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "tables cannot be indexed with " + DataValueTypeNames_PlusA[IndexDataValue.Type] + "."));
+      case (0): // table[int]
+        long IndexIntValue_table = IndexDataValue.IntValue;
+        ArrayList <LooFDataValue> ArrayValue = TableDataValue.ArrayValue;
+        if (IndexIntValue_table < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
+        if (IndexIntValue_table >= ArrayValue.size()) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
+        return ArrayValue.get((int)IndexIntValue_table);
       
-      case (DataValueType_Int):
-        long IntValue = IndexDataValue.IntValue;
-        ArrayList <LooFDataValue> TableValue = TableDataValue.ArrayValue;
-        if (IntValue < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
-        if (IntValue >= TableValue.size()) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
-        return TableValue.get((int)IntValue);
-      
-      case (DataValueType_String):
+      case (1): // table[string]
         String StringValue = IndexDataValue.StringValue;
         HashMap <String, LooFDataValue> HashMapValue = TableDataValue.HashMapValue;
         return HashMapValue.getOrDefault (StringValue, new LooFDataValue());
+      
+      case (2): // byteArray[int]
+        long IndexIntValue_byteArray = IndexDataValue.IntValue;
+        byte[] ByteArrayValue = TableDataValue.ByteArrayValue;
+        if (IndexIntValue_byteArray < 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (negative)."));
+        if (IndexIntValue_byteArray >= ByteArrayValue.length) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "index is out of bounds (too large)."));
+        return new LooFDataValue ((long) ByteArrayValue[(int)IndexIntValue_byteArray]);
+      
+      case (3): // byteArray[string]
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index byteArray with a string"));
+      
+      default:
+        throw new AssertionError();
       
     }
     

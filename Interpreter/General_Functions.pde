@@ -370,10 +370,10 @@ String ConvertLooFStatementToString (LooFTokenBranch[] Statement) {
 
 
 String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
-  switch (TokenBranch.Type) {
+  switch (TokenBranch.TokenType) {
     
     default:
-      throw (new RuntimeException ("Unknown LooFTokenBranch type: " + TokenBranch.Type));
+      throw (new RuntimeException ("Unknown LooFTokenBranch type: " + TokenBranch.TokenType));
     
     case (TokenBranchType_Int):
       return "Int " + TokenBranch.IntValue;
@@ -434,8 +434,8 @@ String ConvertLooFTokenBranchChildrenToString (LooFTokenBranch TokenBranch) {
 
 
 void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue TargetDataValue) {
-    TargetDataValue.Type = SourceDataValue.Type;
-    switch (SourceDataValue.Type) {
+    TargetDataValue.ValueType = SourceDataValue.ValueType;
+    switch (SourceDataValue.ValueType) {
       
       case (DataValueType_Null):
         return;
@@ -457,11 +457,15 @@ void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue Ta
         return;
       
       case (DataValueType_Table):
-        TargetDataValue.ArrayValue = SourceDataValue.ArrayValue;
+        TargetDataValue.ArrayValue = (ArrayList <LooFDataValue>) SourceDataValue.ArrayValue.clone();
+        TargetDataValue.HashMapValue = (HashMap <String, LooFDataValue>) SourceDataValue.HashMapValue.clone();
         return;
       
+      case (DataValueType_ByteArray):
+        TargetDataValue.ByteArrayValue = SourceDataValue.ByteArrayValue.clone();
+      
       default:
-        throw (new RuntimeException ("LooF Data Value " + SourceDataValue + " has an invalid Type (" + SourceDataValue.Type + ")."));
+        throw (new RuntimeException ("LooF Data Value " + SourceDataValue + " has an invalid Type (" + SourceDataValue.ValueType + ")."));
       
     }
 }
@@ -495,7 +499,7 @@ void UnlockDataValue (LooFDataValue DataValue) {
 
 
 double GetDataValueNumber (LooFDataValue DataValueIn) {
-  return (DataValueIn.Type == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
+  return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 
 

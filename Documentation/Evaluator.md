@@ -1,7 +1,5 @@
 ## Evaluator operators:
 
-<br>
-
 These use values from both sides of the operator.
 
 <br>
@@ -31,9 +29,7 @@ These use values from both sides of the operator.
 
 ## Evaluator functions:
 
-<br>
-
-These use the value directly following the function. If the function takes in multiple arguments, they are all passed inside a table (example: x = max {1, 2}).
+These use the value directly following the function. If the function takes in multiple arguments, they are all passed inside a table (examples: `x = max {1, 2}`, `y = sqrt 4` or `y = sqrt (4)`)
 
 <br>
 
@@ -57,7 +53,8 @@ These use the value directly following the function. If the function takes in mu
 <br>
 
 - **typeOf VALUE**
-- **lengthOf VALUE (string or table)**
+  - returns a string representing the data type of VALUE
+- **lengthOf VALUE (table or string)**
   - returns the number of items in the array part of VALUE or the number of characters in VALUE
 - **totalItemsIn VALUE (table)**
   - returns the number of items in the array part of VALUE plus the number of items in the hashmap part of VALUE
@@ -89,6 +86,11 @@ These use the value directly following the function. If the function takes in mu
 - **toString VALUE**
 - **toBool VALUE**
 - **toChars VALUE**
+
+<br>
+
+- **newByteArray VALUE (int)**
+  - returns a new byte array with the length VALUE
 
 <br>
 
@@ -130,6 +132,7 @@ These use the value directly following the function. If the function takes in mu
 - string: returns the number in VALUE. Throws errors if VALUE cannot be cast
 - bool: returns 1 for true and 0 for false
 - table: throws error
+- byteArray: throws error
 
 <br>
 
@@ -141,6 +144,7 @@ These use the value directly following the function. If the function takes in mu
 - string: returns the number in VALUE. Throws errors if VALUE cannot be cast
 - bool: returns 1.0 for true and 0.0 for false
 - table: throws error
+- byteArray: throws error
 
 <br>
 
@@ -152,6 +156,7 @@ These use the value directly following the function. If the function takes in mu
 - string: returns VALUE
 - bool: returns "true" for true and "false" for false
 - table: returns the contents of VALUE cast to strings (plus separators and brackets)
+- byteArray: throws error
 
 <br>
 
@@ -163,6 +168,7 @@ These use the value directly following the function. If the function takes in mu
 - String: returns (lengthOf VALUE > 0)
 - bool: returns VALUE
 - table: returns (lengthOf VALUE > 0)
+- byteArray: throws error
 
 <br>
 <br>

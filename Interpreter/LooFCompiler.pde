@@ -1042,7 +1042,7 @@ class LooFCompiler {
     
     // get linked file
     LooFCodeData LinkedCodeData = AllCodeDatas.get(FullFileName);
-    if (LinkedCodeData == null) throw (new RuntimeException ("INTERNAL ERROR: LooFCompiler.GetLinkedFunctionCall_OutsideFile found that the file linked as \"" + ShortenedFileName + "\" points to the non-existant file \"" + FullFileName + "\"."));
+    if (LinkedCodeData == null) throw new AssertionError();
     
     // get location of function
     Integer FunctionLocation = LinkedCodeData.FunctionLocations.get(FunctionName);
@@ -1312,7 +1312,7 @@ class LooFCompiler {
       if (!CurrentLineTokens.get(PossibleIndexIndex).equals("[")) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
       int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
       LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-      IndexFormula.Type = TokenBranchType_Index;
+      IndexFormula.TokenType = TokenBranchType_Index;
       TargetVarIndexes.add(IndexFormula);
       PossibleIndexIndex = IndexEndIndex + 2;
     }
@@ -1404,7 +1404,7 @@ class LooFCompiler {
       // Type_Index
       case ("["):
         LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-        IndexFormula.Type = TokenBranchType_Index;
+        IndexFormula.TokenType = TokenBranchType_Index;
         return IndexFormula;
       
       // Type_Table
@@ -1792,11 +1792,11 @@ class LooFCompiler {
   
   
   void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    if (Statement[0].Type != TokenBranchType_Name) return;
+    if (Statement[0].TokenType != TokenBranchType_Name) return;
     switch (Statement[0].StringValue) {
       
       default:
-        throw (new RuntimeException ("INTERNAL ERROR: could not recognize statement type \"" + Statement[0].StringValue));
+        throw new AssertionError();
       
       case ("default"):
         SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
@@ -1894,8 +1894,8 @@ class LooFCompiler {
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch OutputVarToken = OutputArgChildren[0];
-    if (OutputVarToken.Type != TokenBranchType_Name) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.Type] + "."));
-    OutputVarToken.Type = TokenBranchType_OutputVar;
+    if (OutputVarToken.TokenType != TokenBranchType_Name) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
+    OutputVarToken.TokenType = TokenBranchType_OutputVar;
     Statement[1].Children[OutputVarIndex] = OutputVarToken;
   }
   
@@ -1907,7 +1907,7 @@ class LooFCompiler {
     if (Statement.length == 1) return;
     
     // assignments
-    if (Statement[0].Type == TokenBranchType_OutputVar) {
+    if (Statement[0].TokenType == TokenBranchType_OutputVar) {
       Statement[Statement.length - 1] = GetSimplifyNestedFormulas (Statement[Statement.length - 1]);
       return;
     }
@@ -1925,7 +1925,7 @@ class LooFCompiler {
   LooFTokenBranch GetSimplifyNestedFormulas (LooFTokenBranch TokenBranch) {
     LooFTokenBranch[] Children = TokenBranch.Children;
     if (Children.length != 1) return TokenBranch;
-    if (Children[0].Type != TokenBranchType_Formula) return TokenBranch;
+    if (Children[0].TokenType != TokenBranchType_Formula) return TokenBranch;
     return Children[0];
   }
   

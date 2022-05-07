@@ -280,7 +280,7 @@ class LooFDataValue {
   
   
   
-  int Type;
+  int ValueType;
   
   long IntValue;
   double FloatValue;
@@ -288,42 +288,43 @@ class LooFDataValue {
   boolean BoolValue;
   ArrayList <LooFDataValue> ArrayValue;
   HashMap <String, LooFDataValue> HashMapValue;
+  byte[] ByteArrayValue;
   
   ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
   
   
   
   public LooFDataValue() {
-    Type = DataValueType_Null;
+    ValueType = DataValueType_Null;
     LockLevels.add(0);
   }
   
   public LooFDataValue (long IntValue) {
-    Type = DataValueType_Int;
+    ValueType = DataValueType_Int;
     this.IntValue = IntValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (double FloatValue) {
-    Type = DataValueType_Float;
+    ValueType = DataValueType_Float;
     this.FloatValue = FloatValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (String StringValue) {
-    Type = DataValueType_String;
+    ValueType = DataValueType_String;
     this.StringValue = StringValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (boolean BoolValue) {
-    Type = DataValueType_Bool;
+    ValueType = DataValueType_Bool;
     this.BoolValue = BoolValue;
     LockLevels.add(0);
   }
   
   public LooFDataValue (ArrayList <LooFDataValue> ArrayValue, HashMap <String, LooFDataValue> HashMapValue) {
-    Type = DataValueType_Table;
+    ValueType = DataValueType_Table;
     this.ArrayValue = ArrayValue;
     this.HashMapValue = HashMapValue;
     LockLevels.add(0);
@@ -332,6 +333,12 @@ class LooFDataValue {
   public LooFDataValue (LooFDataValue[] ArrayValue) {
     ArrayList <LooFDataValue> ArrayValueAsList = ArrayToArrayList (ArrayValue);
     this.ArrayValue = ArrayValueAsList;
+    this.HashMapValue = new HashMap <String, LooFDataValue> ();
+    LockLevels.add(0);
+  }
+  
+  public LooFDataValue (byte[] ByteArrayValue) {
+    this.ByteArrayValue = ByteArrayValue;
     this.HashMapValue = new HashMap <String, LooFDataValue> ();
     LockLevels.add(0);
   }
@@ -348,6 +355,7 @@ final int DataValueType_Float = 2;
 final int DataValueType_String = 3;
 final int DataValueType_Bool = 4;
 final int DataValueType_Table = 5;
+final int DataValueType_ByteArray = 6;
 
 final String[] DataValueTypeNames = {
   "null",
@@ -356,6 +364,7 @@ final String[] DataValueTypeNames = {
   "string",
   "bool",
   "table",
+  "byteArray",
 };
 
 final String[] DataValueTypeNames_PlusA = {
@@ -365,6 +374,7 @@ final String[] DataValueTypeNames_PlusA = {
   "a string",
   "a bool",
   "a table",
+  "a byteArray",
 };
 
 
@@ -378,7 +388,7 @@ final String[] DataValueTypeNames_PlusA = {
 
 class LooFTokenBranch {
   
-  int Type;
+  int TokenType;
   long IntValue;
   double FloatValue;
   String StringValue;
@@ -386,27 +396,27 @@ class LooFTokenBranch {
   LooFTokenBranch[] Children;
   
   public LooFTokenBranch (long IntValue) {
-    this.Type = TokenBranchType_Int;
+    this.TokenType = TokenBranchType_Int;
     this.IntValue = IntValue;
   }
   
   public LooFTokenBranch (double FloatValue) {
-    this.Type = TokenBranchType_Float;
+    this.TokenType = TokenBranchType_Float;
     this.FloatValue = FloatValue;
   }
   
   public LooFTokenBranch (int Type, String StringValue) {
-    this.Type = Type;
+    this.TokenType = Type;
     this.StringValue = StringValue;
   }
   
   public LooFTokenBranch (boolean BoolValue) {
-    this.Type = TokenBranchType_Bool;
+    this.TokenType = TokenBranchType_Bool;
     this.BoolValue = BoolValue;
   }
   
   public LooFTokenBranch (int Type, LooFTokenBranch[] Children) {
-    this.Type = Type;
+    this.TokenType = Type;
     this.Children = Children;
   }
   
