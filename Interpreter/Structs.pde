@@ -154,6 +154,10 @@ class FloatIntPair {
     this.IntValue = IntValue;
   }
   
+  public String toString() {
+    return IntValue + ",   " + FloatValue;
+  }
+  
 }
 
 
@@ -252,7 +256,7 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
   
-  boolean LineHasChanged = LineOfCode.equals(OriginalLineOfCode);
+  boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
   
   if (OriginalLineOfCode.length() > 50) OriginalLineOfCode = OriginalLineOfCode.substring(0, 50) + " ...";
   if (LineOfCode.length() > 50) LineOfCode = LineOfCode.substring(0, 50) + " ...";
@@ -429,7 +433,7 @@ class LooFTokenBranch {
   
   int[] IndexQueryIndexes;
   int[] FunctionIndexes;
-  int[] OperationIndexes;
+  FloatIntPair[] OperationIndexes;
   
   public LooFTokenBranch (long IntValue) {
     this.TokenType = TokenBranchType_Int;

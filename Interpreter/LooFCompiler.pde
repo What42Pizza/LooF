@@ -1118,6 +1118,10 @@ class LooFCompiler {
       }
       
       if (CharStartsNewToken (CurrChar) || CharStartsNewToken (PrevChar)) {
+        if (CurrToken.equals("-") && CharIsDigit (CurrChar)) {
+          CurrToken += CurrChar;
+          continue;
+        }
         if (CurrToken.length() != 0) {
           CurrentLineTokens.add(CurrToken);
           CurrToken = "";
@@ -1503,14 +1507,63 @@ class LooFCompiler {
     }
     Arrays.sort(OperationIndexesAndOrders, new FloatIntPairComparator());
     
-    // finish
-    int[] SortedOperationIndexes = new int [OperationIndexesAndOrders.length];
-    for (int i = 0; i < SortedOperationIndexes.length; i ++) {
-      SortedOperationIndexes[i] = OperationIndexesAndOrders[i].IntValue;
-    }
+    // fill orders
     FormulaToken.IndexQueryIndexes = ToPrimitive (ArrayListToArray (IndexQueryIndexes, 0));
     FormulaToken.FunctionIndexes = ToPrimitive (ArrayListToArray (FunctionIndexes, 0));
-    FormulaToken.OperationIndexes = SortedOperationIndexes;
+    FormulaToken.OperationIndexes = OperationIndexesAndOrders;
+    
+    ShiftAllFormulaTokenEvaluationOrders (FormulaToken);
+    
+  }
+  
+  
+  
+  
+  
+  void ShiftAllFormulaTokenEvaluationOrders (LooFTokenBranch FormulaToken) {
+    
+    int[] IndexQueryIndexes = FormulaToken.IndexQueryIndexes;
+    int[] FunctionIndexes = FormulaToken.FunctionIndexes;
+    FloatIntPair[] OperationIndexes = FormulaToken.OperationIndexes;
+    
+    for (int i = 0; i < IndexQueryIndexes.length; i ++) {
+      int CurrentIndexQueryIndex = IndexQueryIndexes[i];
+      ShiftEvaluationOrdersPastIndex (IndexQueryIndexes, CurrentIndexQueryIndex, -1);
+      ShiftEvaluationOrdersPastIndex (FunctionIndexes, CurrentIndexQueryIndex, -1);
+      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentIndexQueryIndex, 1000000, -1);
+    }
+    
+    for (int i = 0; i < FunctionIndexes.length; i ++) {
+      int CurrentFormulaIndex = FunctionIndexes[i];
+      ShiftEvaluationOrdersPastIndex (FunctionIndexes, CurrentFormulaIndex, -1);
+      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentFormulaIndex, 1000000, -1);
+    }
+    
+    for (int i = 0; i < OperationIndexes.length; i ++) {
+      FloatIntPair CurrentOperationIndex = OperationIndexes[i];
+      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentOperationIndex.IntValue, CurrentOperationIndex.FloatValue, -2);
+    }
+    
+  }
+  
+  
+  
+  void ShiftEvaluationOrdersPastIndex (int[] EvaluationOrders, int StartIndex, int ShiftAmount) {
+    for (int i = 0; i < EvaluationOrders.length; i ++) {
+      if (EvaluationOrders[i] > StartIndex) EvaluationOrders[i] += ShiftAmount;
+    }
+  }
+  
+  
+  
+  void ShiftOperationOrdersPastIndex (FloatIntPair[] OperationIndexes, int StartIndex, float MaximumOrder, int ShiftAmount) {
+    for (int i = 0; i < OperationIndexes.length; i ++) {
+      FloatIntPair CurrentOperationIndex = OperationIndexes[i];
+      if (CurrentOperationIndex.IntValue > StartIndex && CurrentOperationIndex.FloatValue <= MaximumOrder) {
+        //println (StartIndex + ", " + MaximumOrder + ",   " + CurrentOperationIndex.IntValue + ", " + CurrentOperationIndex.FloatValue);
+        CurrentOperationIndex.IntValue += ShiftAmount;
+      }
+    }
   }
   
   

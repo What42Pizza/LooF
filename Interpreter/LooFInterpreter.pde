@@ -40,23 +40,42 @@ class LooFInterpreter {
     if (FormulaTokens.size() == 0) return new LooFDataValue();
     ArrayList <LooFDataValue> FormulaValues = GetFormulaValuesFromTokens (FormulaTokens, Environment, FileName, LineNumber);
     
+    int[] IndexQueryIndexes = Formula.IndexQueryIndexes;
+    int[] FunctionIndexes = Formula.FunctionIndexes;
+    FloatIntPair[] OperationIndexes = Formula.OperationIndexes;
+    
     // evaluate indexes
-    for (int i = 1; i < FormulaTokens.size(); i ++) {
-      LooFTokenBranch CurrentToken = FormulaTokens.get(i);
-      if (CurrentToken.TokenType != TokenBranchType_Index) continue;
-      LooFDataValue EvaluatedIndex = EvaluateFormula (CurrentToken, Environment, FileName, LineNumber);
-      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(i - 1), EvaluatedIndex, FormulaTokens.get(i - 1), Environment, FileName, LineNumber);
-      FormulaTokens.remove(i);
-      FormulaValues.remove(i);
-      FormulaValues.set(i - 1, NewValue);
-      i --;
+    for (int CurrentTokenIndex : IndexQueryIndexes) {
+      LooFDataValue EvaluatedIndex = EvaluateFormula (FormulaTokens.remove(CurrentTokenIndex), Environment, FileName, LineNumber);
+      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), EvaluatedIndex, FormulaTokens.get(CurrentTokenIndex - 1), Environment, FileName, LineNumber);
+      FormulaValues.remove(CurrentTokenIndex);
+      FormulaValues.set(CurrentTokenIndex - 1, NewValue);
     }
     
     // evaluate functions
-    for (int i = FormulaTokens.size() - 2; i >= 0; i ++) {
-      LooFTokenBranch CurrentToken = FormulaTokens.get(i);
-      if (CurrentToken.TokenType != TokenBranchType_Function) continue;
-      LooFDataValue FunctionInput = FormulaValues.get(i + 1);
+    for (int CurrentTokenIndex : FunctionIndexes) {
+      LooFTokenBranch FunctionToken = FormulaTokens.get(CurrentTokenIndex);
+      LooFEvaluatorFunction FunctionToCall = FunctionToken.Function;
+      LooFDataValue FunctionInput = FormulaValues.get(CurrentTokenIndex + 1);
+      LooFDataValue FunctionOutput = FunctionToCall.HandleFunctionCall (FunctionInput, Environment, FileName, LineNumber);
+      FormulaTokens.remove(CurrentTokenIndex + 1);
+      FormulaValues.remove(CurrentTokenIndex + 1);
+      FormulaValues.set(CurrentTokenIndex, FunctionOutput);
+    }
+    
+    // evaluator operations
+    for (FloatIntPair CurrentTokenIndexPair : OperationIndexes) {
+      int CurrentTokenIndex = CurrentTokenIndexPair.IntValue;
+      LooFTokenBranch OperationToken = FormulaTokens.get(CurrentTokenIndex);
+      LooFEvaluatorOperation OperationToCall = OperationToken.Operation;
+      LooFDataValue LeftValue = FormulaValues.get(CurrentTokenIndex - 1);
+      LooFDataValue RightValue = FormulaValues.get(CurrentTokenIndex + 1);
+      LooFDataValue OperationOutput = OperationToCall.HandleOperation (LeftValue, RightValue, Environment, FileName, LineNumber);
+      FormulaValues.set(CurrentTokenIndex - 1, OperationOutput);
+      FormulaValues.remove(CurrentTokenIndex);
+      FormulaValues.remove(CurrentTokenIndex);
+      FormulaTokens.remove(CurrentTokenIndex);
+      FormulaTokens.remove(CurrentTokenIndex);
     }
     
     return null;

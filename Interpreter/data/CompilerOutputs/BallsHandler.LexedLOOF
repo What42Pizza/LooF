@@ -28,13 +28,13 @@ BallsHandler.LOOF 35: Name "pop", Table {OutputVar "ARGS", OutputVar "Radius"}
 BallsHandler.LOOF 39: OutputVar "YVel", Formula {Name "YVel", Operation "+", Name "BallsData", Index {String "Gravity"}}
 BallsHandler.LOOF 43: OutputVar "BottomYPos", Formula {Name "YPos", Operation "+", Name "Radius", Operation "/", Int 2}
 BallsHandler.LOOF 44: Name "if", Table {Formula {Name "BottomYPos", Operation ">", Int 1}}
-BallsHandler.LOOF 45: OutputVar "YVel", Formula {Formula {Name "BallsData", Index {String "BounceVelOffset"}, Operation "+", Name "BallsData", Index {String "BounceVelScale"}, Operation "*", Name "CurrentBall", Index {String "Size"}}, Operation "*", Operation "-", Int 1}
+BallsHandler.LOOF 45: OutputVar "YVel", Formula {Formula {Name "BallsData", Index {String "BounceVelOffset"}, Operation "+", Name "BallsData", Index {String "BounceVelScale"}, Operation "*", Name "CurrentBall", Index {String "Size"}}, Operation "*", Int -1}
 BallsHandler.LOOF 49: OutputVar "LeftXPos", Formula {Name "XPos", Operation "-", Name "Radius", Operation "/", Int 2}
 BallsHandler.LOOF 50: Name "if", Table {Formula {Name "LeftXPos", Operation "<", Int 0}}
 BallsHandler.LOOF 51: OutputVar "XVel", Formula {Name "abs", Name "XVel"}
 BallsHandler.LOOF 55: OutputVar "RightXPos", Formula {Name "XPos", Operation "+", Name "Radius", Operation "/", Int 2}
 BallsHandler.LOOF 56: Name "if", Table {Formula {Name "LeftXPos", Operation "<", Int 0}}
-BallsHandler.LOOF 57: OutputVar "XVel", Formula {Name "abs", Name "XVel", Operation "*", Operation "-", Int 1}
+BallsHandler.LOOF 57: OutputVar "XVel", Formula {Name "abs", Name "XVel", Operation "*", Int -1}
 BallsHandler.LOOF 61: OutputVar "XPos", Formula {Name "XPos", Operation "+", Name "XVel"}
 BallsHandler.LOOF 62: OutputVar "YPos", Formula {Name "YPos", Operation "+", Name "YVel"}
 BallsHandler.LOOF 66: OutputVar "AllBullets", Formula {Name "BulletsData", Index {String "AllBullets"}}
@@ -80,7 +80,7 @@ BallsHandler.LOOF 128: OutputVar "NewXVel", Formula {Name "Ball", Index {String 
 BallsHandler.LOOF 129: OutputVar "NewYVel", Formula {Name "BallsData", Index {String "BounceYVel"}, Operation "/", Int 2}
 BallsHandler.LOOF 131: Name "call", Table {Formula {Int 115}, Formula {String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel"}, Formula {Name "NewYVel"}}
 BallsHandler.LOOF 131: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball1"}
-BallsHandler.LOOF 132: Name "call", Table {Formula {Int 115, String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel", Operation "*", Operation "-", Int 1}, Formula {Name "NewYVel"}}
+BallsHandler.LOOF 132: Name "call", Table {Formula {Int 115, String "Normal"}, Formula {Name "NewSize"}, Formula {Name "NewHealth"}, Formula {Name "NewXPos"}, Formula {Name "NewYPos"}, Formula {Name "NewXVel", Operation "*", Int -1}, Formula {Name "NewYVel"}}
 BallsHandler.LOOF 132: Name "pop", Table {OutputVar "ARGS", OutputVar "Ball2"}
 BallsHandler.LOOF 134: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "NewBalls"}, Formula {Name "Ball1"}}
 BallsHandler.LOOF 135: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {Name "NewBalls"}, Formula {Name "Ball2"}}
@@ -104,7 +104,7 @@ BallsHandler.LOOF 163: Name "return", Table {Formula {Name "Total"}}
 BallsHandler.LOOF 164: Name "end", Table {}
 BallsHandler.LOOF 170: Name "skip", Table {}
 BallsHandler.LOOF 170: Name "pop", Table {OutputVar "ARGS", OutputVar "BallsData"}
-BallsHandler.LOOF 171: OutputVar "StartingXPos", Formula {Formula {Function "chance", Int 50}, Operation "and", Operation "-", Float 0.2, Operation "or", Float 1.2}
+BallsHandler.LOOF 171: OutputVar "StartingXPos", Formula {Formula {Function "chance", Int 50}, Operation "and", Float -0.2, Operation "or", Float 1.2}
 BallsHandler.LOOF 172: OutputVar "StartingYPos", Formula {Float 0.75, Operation "+", Function "random", Float 0.25}
 BallsHandler.LOOF 173: OutputVar "Size", Formula {Function "randomInt", Formula {Name "BallsData", Index {String "MaxBallSize"}}}
 BallsHandler.LOOF 174: Name "call", Table {Formula {Int 115}, Formula {String "normal"}, Formula {Name "Size"}, Formula {Name "BallsData", Index {String "StartingHealth"}}, Formula {Name "StartingXPos"}, Formula {Name "StartingYPos"}, Formula {Int 0}, Formula {Int 0}}
