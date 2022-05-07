@@ -195,7 +195,10 @@ boolean CharStartsNewToken (char CharIn) {
 
 boolean TokenIsInt (String Token) {
   char[] TokenChars = Token.toCharArray();
-  for (char CurrChar : TokenChars) {
+  if (TokenChars.length == 1 && TokenChars[0] == '-') return false;
+  for (int i = 0; i < TokenChars.length; i ++) {
+    char CurrChar = TokenChars[i];
+    if (CurrChar == '-' && i == 0) continue;
     if (!CharIsDigit (CurrChar)) return false;
   }
   return true;
@@ -205,14 +208,18 @@ boolean TokenIsInt (String Token) {
 
 boolean TokenIsFloat (String Token) {
   char[] TokenChars = Token.toCharArray();
+  if (TokenChars.length == 1 && (TokenChars[0] == '-' || TokenChars[0] == '.')) return false;
+  if (TokenChars.length == 2 && TokenChars[0] == '-' && TokenChars[1] == '.') return false;
   boolean HasPeriod = false;
-  for (char CurrChar : TokenChars) {
-    if (!CharIsDigit (CurrChar)) {
-      if (CurrChar == '.') {
+  for (int i = 0; i < TokenChars.length; i ++) {
+    char CurrChar = TokenChars[i];
+    if (CurrChar == '-' && i == 0) continue;
+    if (CurrChar == '.') {
         if (HasPeriod) return false;
         HasPeriod = true;
         continue;
       }
+    if (!CharIsDigit (CurrChar)) {
       return false;
     }
   }

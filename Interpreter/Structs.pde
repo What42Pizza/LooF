@@ -14,6 +14,10 @@ class LooFEvaluatorOperation {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
   }
   
+  public float GetOrder() {
+    return 0;
+  }
+  
 }
 
 
@@ -135,6 +139,32 @@ class ReturnValue {
   String[] StringArrayValue;
   ArrayList <Integer> IntegerArrayListValue;
   ArrayList <Integer> SecondIntegerArrayListValue;
+  
+}
+
+
+
+class FloatIntPair {
+  
+  float FloatValue;
+  int IntValue;
+  
+  public FloatIntPair (float FloatValue, int IntValue) {
+    this.FloatValue = FloatValue;
+    this.IntValue = IntValue;
+  }
+  
+}
+
+
+
+class FloatIntPairComparator implements Comparator <FloatIntPair> {
+  
+  public int compare (FloatIntPair Pair1, FloatIntPair Pair2) {
+    float FloatDifference = Pair2.FloatValue - Pair1.FloatValue;
+    if (FloatDifference == 0) return 0;
+    return (int) (FloatDifference / Math.abs(FloatDifference));
+  }
   
 }
 
@@ -394,6 +424,12 @@ class LooFTokenBranch {
   String StringValue;
   boolean BoolValue;
   LooFTokenBranch[] Children;
+  LooFEvaluatorOperation Operation;
+  LooFEvaluatorFunction Function;
+  
+  int[] IndexQueryIndexes;
+  int[] FunctionIndexes;
+  int[] OperationIndexes;
   
   public LooFTokenBranch (long IntValue) {
     this.TokenType = TokenBranchType_Int;
@@ -418,6 +454,18 @@ class LooFTokenBranch {
   public LooFTokenBranch (int Type, LooFTokenBranch[] Children) {
     this.TokenType = Type;
     this.Children = Children;
+  }
+  
+  public LooFTokenBranch (LooFEvaluatorOperation Operation, String Name) {
+    this.TokenType = TokenBranchType_Operation;
+    this.Operation = Operation;
+    this.StringValue = Name;
+  }
+  
+  public LooFTokenBranch (LooFEvaluatorFunction Function, String Name) {
+    this.TokenType = TokenBranchType_Function;
+    this.Function = Function;
+    this.StringValue = Name;
   }
   
 }

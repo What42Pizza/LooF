@@ -24,7 +24,7 @@ void setup() {
   //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
   
-  LooFInterpreter.AddNewEnvironment(new File (dataPath("")), CompileSettings);
+  LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("")), CompileSettings);
   
   exit();
   

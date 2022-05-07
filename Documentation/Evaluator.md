@@ -113,8 +113,9 @@ These use the value directly following the function. If the function takes in mu
 - **4: %**
 - **5: \* and /**
 - **6: + and -**
-- **7: ==, ===, >, < !=, !==, >=, and <=**
-- **8: and, or, not, and xor**
+- **7: ..**
+- **8: ==, ===, >, < !=, !==, >=, and <=**
+- **9: and, or, not, and xor**
 
 <br>
 <br>

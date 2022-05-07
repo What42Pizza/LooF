@@ -4,34 +4,6 @@ class LooFInterpreter {
   
   
   
-  ArrayList <LooFEnvironment> AllEnvironments = new ArrayList <LooFEnvironment> ();
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  void AddNewEnvironment (File CodeFolder) {
-    AddNewEnvironment (CodeFolder, new LooFCompileSettings());
-  }
-  
-  void AddNewEnvironment (File CodeFolder, LooFCompileSettings CompileSettings) {
-    if (CodeFolder == null) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument (File argument is null)."));
-    if (!CodeFolder.exists()) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument (File does not exist)."));
-    if (!CodeFolder.isDirectory()) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument. (File is not a folder)."));
-    if (CompileSettings == null) throw (new LooFCompileException ("AddNewEnvironment cannot take a null LoofCompileSettings object. Either pass a new LooFCompileSettings object or call AddNewEvironment with no LooFCompileSettings argument."));
-    
-    LooFEnvironment NewEnvironment = LooFCompiler.CompileEnvironmentFromFolder (CodeFolder, CompileSettings);
-    AllEnvironments.add(NewEnvironment);
-    
-  }
-  
-  
-  
   
   
   
@@ -71,14 +43,20 @@ class LooFInterpreter {
     // evaluate indexes
     for (int i = 1; i < FormulaTokens.size(); i ++) {
       LooFTokenBranch CurrentToken = FormulaTokens.get(i);
-      if (CurrentToken.TokenType == TokenBranchType_Index) {
-        LooFDataValue EvaluatedIndex = EvaluateFormula (CurrentToken, Environment, FileName, LineNumber);
-        LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(i - 1), EvaluatedIndex, FormulaTokens.get(i - 1), Environment, FileName, LineNumber);
-        FormulaTokens.remove(i);
-        FormulaValues.remove(i);
-        FormulaValues.set(i - 1, NewValue);
-        i --;
-      }
+      if (CurrentToken.TokenType != TokenBranchType_Index) continue;
+      LooFDataValue EvaluatedIndex = EvaluateFormula (CurrentToken, Environment, FileName, LineNumber);
+      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(i - 1), EvaluatedIndex, FormulaTokens.get(i - 1), Environment, FileName, LineNumber);
+      FormulaTokens.remove(i);
+      FormulaValues.remove(i);
+      FormulaValues.set(i - 1, NewValue);
+      i --;
+    }
+    
+    // evaluate functions
+    for (int i = FormulaTokens.size() - 2; i >= 0; i ++) {
+      LooFTokenBranch CurrentToken = FormulaTokens.get(i);
+      if (CurrentToken.TokenType != TokenBranchType_Function) continue;
+      LooFDataValue FunctionInput = FormulaValues.get(i + 1);
     }
     
     return null;

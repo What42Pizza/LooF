@@ -13,6 +13,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 4.0;}
 };
 
 
@@ -34,6 +35,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 4.0;}
 };
 
 
@@ -55,6 +57,7 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 5.0;}
 };
 
 
@@ -79,6 +82,7 @@ LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 5.0;}
 };
 
 
@@ -100,6 +104,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 7.0;}
 };
 
 
@@ -121,6 +126,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 6.0;}
 };
 
 
@@ -148,6 +154,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 3.0;}
 };
 
 
@@ -188,6 +195,7 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
       
     }
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -214,6 +222,7 @@ LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -230,6 +239,7 @@ LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -270,6 +280,7 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
       
     }
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -280,6 +291,7 @@ LooFEvaluatorOperation Operation_StrictNotEquals = new LooFEvaluatorOperation() 
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
     return new LooFDataValue (!LeftValue.equals(RightValue));
   };
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -296,6 +308,7 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -312,6 +325,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
     throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
+  @Override public float GetOrder() {return 2.0;}
 };
 
 
@@ -323,6 +337,7 @@ LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
     LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, FileName, LineNumber);
     return (LeftValueAsBool.BoolValue) ? RightValue : new LooFDataValue (false);
   }
+  @Override public float GetOrder() {return 1.0;}
 };
 
 
@@ -334,6 +349,7 @@ LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
     LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, FileName, LineNumber);
     return (LeftValueAsBool.BoolValue) ? LeftValue : RightValue;
   }
+  @Override public float GetOrder() {return 1.0;}
 };
 
 
@@ -346,6 +362,7 @@ LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
     LooFDataValue RightValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment, FileName, LineNumber);
     return new LooFDataValue (LeftValueAsBool.BoolValue ^ RightValueAsBool.BoolValue);
   }
+  @Override public float GetOrder() {return 1.0;}
 };
 
 

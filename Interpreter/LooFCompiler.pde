@@ -12,6 +12,10 @@ class LooFCompiler {
   
   
   LooFEnvironment CompileEnvironmentFromFolder (File CodeFolder, LooFCompileSettings CompileSettings) {
+    if (CodeFolder == null) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument (File argument is null)."));
+    if (!CodeFolder.exists()) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument (File does not exist)."));
+    if (!CodeFolder.isDirectory()) throw (new LooFCompileException ("AddNewEnvironment must take a folder as its argument. (File is not a folder)."));
+    if (CompileSettings == null) throw (new LooFCompileException ("AddNewEnvironment cannot take a null LoofCompileSettings object. Either pass a new LooFCompileSettings object or call AddNewEvironment with no LooFCompileSettings argument."));
     StartTimer ("Total");
     StartTimer ("OnlyCompilation");
     
@@ -1387,8 +1391,13 @@ class LooFCompiler {
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
     }
+    if (FormulaChildren.get(0).TokenType == TokenBranchType_Index) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockStart, "formula cannot start with index query."));
+    if (GetLastItemOf(FormulaChildren).TokenType == TokenBranchType_Function) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockEnd, "formula cannot end with an evaluator function."));
+    if (GetLastItemOf(FormulaChildren).TokenType == TokenBranchType_Operation) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockEnd, "formula cannot end with an evaluator operation."));
     LooFTokenBranch[] FormulaChildrenArray = ArrayListToArray (FormulaChildren, new LooFTokenBranch (0));
-    return new LooFTokenBranch (TokenBranchType_Formula, FormulaChildrenArray);
+    LooFTokenBranch LexedFormula = new LooFTokenBranch (TokenBranchType_Formula, FormulaChildrenArray);
+    FillFormulaTokenEvaluationOrders (LexedFormula);
+    return LexedFormula;
   }
   
   
@@ -1414,13 +1423,15 @@ class LooFCompiler {
     }
     
     // Type_Operaion
-    if (Operations.containsKey(CurrentToken)) {
-      return new LooFTokenBranch (TokenBranchType_Operation, CurrentToken);
+    LooFEvaluatorOperation FoundOperation = Operations.get(CurrentToken);
+    if (FoundOperation != null) {
+      return new LooFTokenBranch (FoundOperation, CurrentToken);
     }
     
     // Type_Function
-    if (Functions.containsKey(CurrentToken)) {
-      return new LooFTokenBranch (TokenBranchType_Function, CurrentToken);
+    LooFEvaluatorFunction FoundFunction = Functions.get(CurrentToken);
+    if (FoundFunction != null) {
+      return new LooFTokenBranch (FoundFunction, CurrentToken);
     }
     
     // Type_String
@@ -1450,6 +1461,56 @@ class LooFCompiler {
     // Type_Name
     return new LooFTokenBranch (TokenBranchType_Name, CurrentToken);
     
+  }
+  
+  
+  
+  
+  
+  void FillFormulaTokenEvaluationOrders (LooFTokenBranch FormulaToken) {
+    ArrayList <Integer> IndexQueryIndexes = new ArrayList <Integer> ();
+    ArrayList <Integer> FunctionIndexes = new ArrayList <Integer> ();
+    ArrayList <Integer> OperationIndexes = new ArrayList <Integer> ();
+    ArrayList <Float> OperationOrders = new ArrayList <Float> ();
+    LooFTokenBranch[] FormulaChildren = FormulaToken.Children;
+    
+    // get index query indexes
+    for (int i = 0; i < FormulaChildren.length; i ++) {
+      if (FormulaChildren[i].TokenType == TokenBranchType_Index) {
+        IndexQueryIndexes.add(i);
+      }
+    }
+    
+    // get function indexes
+    for (int i = FormulaChildren.length - 1; i >= 0; i --) {
+      if (FormulaChildren[i].TokenType == TokenBranchType_Function) {
+        FunctionIndexes.add(i);
+      }
+    }
+    
+    // get operation indexes
+    for (int i = 0; i < FormulaChildren.length; i ++) {
+      if (FormulaChildren[i].TokenType == TokenBranchType_Operation) {
+        OperationIndexes.add(i);
+        OperationOrders.add(FormulaChildren[i].Operation.GetOrder());
+      }
+    }
+    
+    // sort operation indexes based on operation orders
+    FloatIntPair[] OperationIndexesAndOrders = new FloatIntPair [OperationIndexes.size()];
+    for (int i = 0; i < OperationIndexesAndOrders.length; i ++) {
+      OperationIndexesAndOrders[i] = new FloatIntPair (OperationOrders.get(i), OperationIndexes.get(i));
+    }
+    Arrays.sort(OperationIndexesAndOrders, new FloatIntPairComparator());
+    
+    // finish
+    int[] SortedOperationIndexes = new int [OperationIndexesAndOrders.length];
+    for (int i = 0; i < SortedOperationIndexes.length; i ++) {
+      SortedOperationIndexes[i] = OperationIndexesAndOrders[i].IntValue;
+    }
+    FormulaToken.IndexQueryIndexes = ToPrimitive (ArrayListToArray (IndexQueryIndexes, 0));
+    FormulaToken.FunctionIndexes = ToPrimitive (ArrayListToArray (FunctionIndexes, 0));
+    FormulaToken.OperationIndexes = SortedOperationIndexes;
   }
   
   
