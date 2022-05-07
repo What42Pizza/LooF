@@ -38,22 +38,28 @@
 
 <br>
 
-##### "get file data", VALUE (file path)
+##### "get file properties", VALUE (file path)
 
 - Pushes data relating to the file VALUE to the general stack. Errors if VALUE is not a string.
-- Return data includes: Name, Path, IsFolder
+- Return data includes: string Name, string Path, bool IsFolder
 
 <br>
 
 ##### "read file as strings", VALUE (file path)
 
-- Pushes the contents of the file VALUE to the general stack as a table full of strings. Errors if VALUE is not a string, if the file VALUE cannot be found or if the VALUE is a folder.
+- Pushes the contents of the file VALUE to the general stack as a table full of strings. Errors if VALUE is not a string, if the file VALUE cannot be found, or if the VALUE is a folder.
+
+<br>
+
+##### "read file as byteArray", VALUE (file path)
+
+- Pushes the contents of the file VALUE to the general stack as a byteArray. Errors if VALUE is not a string, if the file VALUE cannot be found, or if the VALUE is a folder.
 
 <br>
 
 ##### "write to file", VALUE (file path), VALUE (contents)
 
-- Writes the data of the second VALUE to the file of the first VALUE (which is created if necessary). Errors if the first VALUE is not a string.
+- Writes the data of the second VALUE to the file of the first VALUE (which is created if necessary). Errors if the first VALUE is not a string or if the second VALUE is not an array of strings or a byteArray.
 
 <br>
 <br>
@@ -63,12 +69,12 @@
 
 <br>
 
-##### "set data", VALUE (new data)
+##### "set properties", VALUE (new data)
 
-- Sets internal data about graphics to VALUE. Errors if VALUE is not a table.
+- Sets the internal data about the graphics to VALUE. Errors if VALUE is not a table.
 
 <br>
 
 ##### "set frame", VALUE (new frame)
 
-- Sets the current frame being displayed to VALUE. Errors if VALUE is not a table, if lengthOf Value is not data.Width * data.Height, or if VALUE contains non-int values.
+- Sets the current frame being displayed to VALUE. Errors if VALUE is not a byteArray or if lengthOf Value is not data.Width * data.Height * 3.

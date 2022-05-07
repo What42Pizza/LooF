@@ -20,16 +20,16 @@
 
 
 function Factorial  -> In
-	if (In == 1)
-		return {1}
-	call Factorial, (In - 1)  -> NextProduct
+	if In == 1
+		return 1
+	call Factorial, In - 1  -> NextProduct
 	return In * NextProduct
 end
 
 
 
-call Factorial, 10
-:print
+call Factorial, 10  -> FactorialResult
+:print FactorialResult
 :exit
 ```
 
@@ -43,7 +43,7 @@ call Factorial, 10
 #include Basics.LOOF
 
 function ConvertTableToString  -> TableIn, Seperator
-	returnIf (typeOf TableIn ~= "table")
+	returnIf typeOf TableIn ~= "table"
 	default Seperator = ", "
 	
 	StringOut = toString TableIn[i]
@@ -61,8 +61,8 @@ end
 #include Basics.LOOF
 $link GeneralFunctions.LOOF as F
 
-call F.ConvertTableToString, {10, 20, "Example"}
-:print
+call F.ConvertTableToString, {10, 20, "Example"}  -> TableAsString
+:print TableAsString
 :exit
 ```
 

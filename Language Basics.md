@@ -42,7 +42,9 @@ string
 
 boolean (or bool)
 
-table (with both an array part and a hashmap part)
+table (with both an array part and a hashmap part (with String keys)
+
+byteArray
 
 <br>
 <br>
@@ -55,12 +57,12 @@ table (with both an array part and a hashmap part)
 With basics.LOOF:
 
 ```
-if ExampleTest
+if ExampleCondition
 	// single statement code block
 
 OR
 
-if\_ ExampleTest then
+if\_ ExampleCondition then
 	// multiple statement code block
 end
 ```
@@ -70,10 +72,10 @@ end
 Without Basics.LOOF:
 
 ```
-if ExampleTest
+if ExampleCondition
 	// single statement code block
 OR
-if not (ExampleTest)
+if not ExampleCondition
 skip
 	// multiple statement code block
 end
@@ -90,7 +92,7 @@ end
 With Basics.LOOF:
 
 ```
-function ExampleFunc  -> Arg1, Arg2, etc
+function ExampleFunction  -> Arg1, Arg2, etc
 	// do stuff
 	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
 end
@@ -102,7 +104,7 @@ Without Basics.LOOF:
 
 ```
 skip
-$function ExampleFunc
+$function ExampleFunction
 	pop ARGS, Arg1, Arg2, etc
 	// do stuff
 	return
@@ -124,9 +126,9 @@ Functions work like labels, so you have to put a "skip" statement proceeding a f
 With Basics.LOOF:
 
 ```
-call ExampleFunc, Arg1, Arg2, etc
+call ExampleFunction, Arg1, Arg2, etc
 OR
-call ExampleFunc, Arg1, Arg2, etc  -> ReturnValue1, ReturnValue2, etc
+call ExampleFunction, Arg1, Arg2, etc  -> ReturnValue1, ReturnValue2, etc
 ```
 
 <br>
@@ -134,9 +136,9 @@ call ExampleFunc, Arg1, Arg2, etc  -> ReturnValue1, ReturnValue2, etc
 Without Basics.LOOF:
 
 ```
-call $ExampleFunc, Arg1, Arg2, etc
+call $ExampleFunction, Arg1, Arg2, etc
 OR
-call $ExampleFunc, Arg1, Arg2, etc
+call $ExampleFunction, Arg1, Arg2, etc
 pop ARGS, ReturnValue1, ReturnValue2, etc
 ```
 
@@ -149,14 +151,14 @@ pop ARGS, ReturnValue1, ReturnValue2, etc
 <br>
 
 ```
-#link ParentFolder.ParentFolder(...).FileName
+#link ExampleFolder.ExampleFolder(...).ExampleFileName
 OR
-#link ParentFolder.ParentFolder(...).FileName as ShortenedName
+#link ExampleFolder.ExampleFolder(...).ExampleFileName as ExampleShortenedName
 ```
 
 <br>
 
-When linking a file, only have to write out the end of the file name. If you want to link ExampleFolder.ExampleFile.LOOF, you can just write "#link e.LOOF". This example is obviously a bad idea, though, since you can only have one file that ends with "e.LOOF". It would be much better to write "#link ExampleFile.LOOF" here. If you try to link with a name that fits more than one file, the code will not compile.
+When linking a file, only have to write out the end of the file name. If you want to link ExampleFolder.ExampleFileName.LOOF, you can just write "#link e.LOOF". This example is obviously a bad idea, though, since you can only have one file that ends with "e.LOOF". It would be much better to write "#link ExampleFileName.LOOF" here. If you try to link with a name that fits more than one file, the code will not compile.
 
 <br>
 <br>
@@ -169,17 +171,17 @@ When linking a file, only have to write out the end of the file name. If you wan
 With Basics.LOOF:
 
 ```
-call FileName.ExampleFunc, Arg1, Arg2, etc // FileName doesn't include ".LOOF"
+call ExampleFileName.ExampleFunction, Arg1, Arg2, etc // file name doesn't include ".LOOF"
 OR
-call ShortenedName.ExampleFunc, Arg1, Arg2, etc // FileName doesn't include ".LOOF"
+call ExampleShortenedName.ExampleFunction, Arg1, Arg2, etc // file name doesn't include ".LOOF"
 ```
 
 Without Basics.LOOF:
 
 ```
-call $FileName.ExampleFunc, Arg1, Arg2, etc // FileName doesn't include ".LOOF"
+call $ExampleFileName.ExampleFunction, Arg1, Arg2, etc // file name doesn't include ".LOOF"
 OR
-call $ShortenedName.ExampleFunc, Arg1, Arg2, etc // FileName doesn't include ".LOOF"
+call $ExampleShortenedName.ExampleFunction, Arg1, Arg2, etc // file name doesn't include ".LOOF"
 ```
 
 <br>

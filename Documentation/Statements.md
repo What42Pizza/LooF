@@ -18,27 +18,28 @@
 - **pop VAR\_NAME**
   - Pops the first value of the general stack into VAR\_NAME. Errors if the general stack is empty
 - **pop VAR\_NAME (table), VAR\_NAME (item 0 of table), ...**
-  - Pops the first value of the general stack into the first VAR\_NAME, then sets the second VAR\_NAME to index 0 of the first VAR\_NAME, sets the third VAR\_NAME to index 1 of the first VAR\_NAME, etc. Errors if the first VAR\_NAME is not a table or if the general stack is empty
+  - Pops the first value of the general stack into the first VAR\_NAME, then sets the second VAR\_NAME to index 0 of the first VAR\_NAME, sets the third VAR\_NAME to index 1 of the first VAR\_NAME, etc. If the number of items in the first VAR_NAME runs out, all remaining VAR_NAME-s will be set to null. Errors if the first VAR\_NAME is not a table or if the general stack is empty
 
 <br>
 
 ## Functions
 
 - **call VALUE (int: function line number)**
-  - Pushes the instruction pointer to a stack and jumps execution to line described by VALUE
+  - Pushes the instruction pointer to the IP stack and jumps execution to the line described by VALUE
 - **call VALUE (string: function file name), VALUE (int: function line number)**
+  - Pushes the instruction pointer to the IP stack and jumps execution to the line described by the first VALUE in the file described by the second VALUE
 - **call VALUE (int: function line number), VALUE (arg 1), ...**
-  - Pushes the instruction pointer to a stack and jumps execution to line described by VALUE and pushes all remaining VALUEs to the general stack in a single table
+  - Pushes the instruction pointer to the IP stack, jumps execution to line described by VALUE, and pushes all remaining VALUE-s to the general stack in a single table
 - **call VALUE (string: function file name), VALUE (int: function line number), VALUE (arg 1), ...**
-  - Pushes the instruction pointer to a stack and jumps execution to line described by the first VALUE in file described by the second VALUE and pushes all remaining VALUEs to the general stack in a single table
+  - Pushes the instruction pointer to the IP stack, jumps execution to the line described by the first VALUE in file described by the second VALUE, and pushes all remaining VALUE-s to the general stack in a single table
 - **return**
-  - Jumps execution to the popped value of the IP stack. Errors if the IP stack is empty
-- **return VALUE**
-  - Pushes VALUE to the general stack and jumps execution to the popped value of the IP stack. Errors if the IP stack is empty
+  - Jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
+- **return VALUE (return value 1), ...**
+  - Pushes all remaining VALUE-s to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 - **returnIf VALUE (condition)**
-  - Only if VALUE is truthy, jumps execution to the popped value of the IP stack. Errors if the IP stack is empty
+  - Only if VALUE is truthy, jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 - **returnIf VALUE (condition), VALUE (return value)**
-  - Only if the first VALUE is truthy, pushes the second VALUE to the general stack and jumps execution to the popped value of the IP stack. Errors if the IP stack is empty
+  - Only if the first VALUE is truthy, pushes all remaining VALUE-s to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 
 <br>
 
@@ -58,7 +59,7 @@
 - **loop**
   - Effectively nop; only useful because of repeat
 - **loop VAR\_NAME, VALUE (start), VALUE (end)**
-  - Same as statement 'loop VAR\_NAME, VALUE, VALUE, VALUE' but the third VALUE is assumed to be the number 1
+  - Same as statement 'loop VAR\_NAME, VALUE, VALUE, VALUE' but the third VALUE is assumed to be 1
 - **loop VAR\_NAME, VALUE (start), VALUE (end), VALUE (increment)**
   - If VAR\_NAME is null:  Sets VAR\_NAME to the first VALUE
   - If VAR\_NAME plus the second VALUE is less than the second VALUE:  Increments VAR\_NAME by the third VALUE

@@ -54,8 +54,8 @@ These use the value directly following the function. If the function takes in mu
 
 - **typeOf VALUE**
   - returns a string representing the data type of VALUE
-- **lengthOf VALUE (table or string)**
-  - returns the number of items in the array part of VALUE or the number of characters in VALUE
+- **lengthOf VALUE (table, byteArray, or string)**
+  - returns the number of items in the array part of VALUE (for tables), the number of bytes in VALUE (for byteArrays), or the number of characters in VALUE (for strings)
 - **totalItemsIn VALUE (table)**
   - returns the number of items in the array part of VALUE plus the number of items in the hashmap part of VALUE
 - **endOf VALUE (table)**
@@ -90,7 +90,7 @@ These use the value directly following the function. If the function takes in mu
 <br>
 
 - **newByteArray VALUE (int)**
-  - returns a new byte array with the length VALUE
+  - returns a new byte array with length VALUE
 
 <br>
 
@@ -113,7 +113,7 @@ These use the value directly following the function. If the function takes in mu
 - **4: %**
 - **5: \* and /**
 - **6: + and -**
-- **7: ==, >, < !=, >=, and <=**
+- **7: ==, ===, >, < !=, !==, >=, and <=**
 - **8: and, or, not, and xor**
 
 <br>
@@ -156,7 +156,7 @@ These use the value directly following the function. If the function takes in mu
 - string: returns VALUE
 - bool: returns "true" for true and "false" for false
 - table: returns the contents of VALUE cast to strings (plus separators and brackets)
-- byteArray: throws error
+- byteArray: returns the contents of VALUE as ascii characters
 
 <br>
 
@@ -168,7 +168,14 @@ These use the value directly following the function. If the function takes in mu
 - String: returns (lengthOf VALUE > 0)
 - bool: returns VALUE
 - table: returns (lengthOf VALUE > 0)
-- byteArray: throws error
+- byteArray: returns (lengthOf VALUE > 0)
+
+<br>
+
+### toChars VALUE:
+
+- string: returns a new byteArray with the characters of VALUE
+- else: throws error
 
 <br>
 <br>
@@ -179,53 +186,36 @@ These use the value directly following the function. If the function takes in mu
 <br>
 
 - **null == null:** true
-- **null == int:** false
-- **null == float:** false
-- **null == string:** false
-- **null == bool:** false
-- **null == table:** false
+- **else:** false
 
 <br>
 
-- **int == null:** false
-- **int == int:** (Left == Right)
-- **int == float:** (Left == Right)
-- **int == string:** false
-- **int == bool:** false
-- **int == table:** false
+- **int == int:** left number == right number ?
+- **int == float:** left number == right number ?
+- **else:** false
 
 <br>
 
-- **float == null:** false
-- **float == int:** (left == right)
-- **float == float:** (left == right)
-- **float == string:** false
-- **float == bool:** false
-- **float == table:** false
+- **float == int:** left number == right number ?
+- **float == float:** left number == right number ?
+- **else:** false
 
 <br>
 
-- **string == null:** false
-- **string == int:** false
-- **string == float:** false
-- **string == string:** (left == right)
-- **string == bool:** false
-- **string == table:** false
+- **string == string:** contents of left == contents of right ?
+- **else:** false
 
 <br>
 
-- **bool == bull:** false
-- **bool == int:** false
-- **bool == float:** false
-- **bool == string:** false
-- **bool == bool:** (left == right)
-- **bool == table:** false
+- **bool == bool:** left == right ?
+- **else:** false
 
 <br>
 
-- **table == null:** false
-- **table == int:** false
-- **table == float:** false
-- **table == string:** false
-- **table == bool:** false
-- **table == table:** (left == right)
+- **table == table:** contents of left == contents of right ?
+- **else:** false
+
+<br>
+
+- **byteArray == byteArray:** contents of left == contents of right ?
+- **else:** false
