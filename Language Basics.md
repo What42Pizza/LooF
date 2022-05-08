@@ -2,6 +2,8 @@
 
 **Lines starting with "#" are pre-processor statements, and lines or tokens starting with "$" are linker statements.**
 
+**NOTE: This language has no real sense of code blocks. The main effect of this is that a variable that is initialized in what looks like a code block will be accessible outside that "block".**
+
 <br>
 <br>
 <br>
@@ -30,7 +32,7 @@ ExampleVar["1"] = 789 // add 789 to the hashmap part of the array
 
 <br>
 
-### Data Value types:
+#### Data Value types:
 
 null
 
@@ -42,7 +44,7 @@ string
 
 boolean (or bool)
 
-table (with both an array part and a hashmap part (with String keys)
+table (with both an array part and a hashmap part (with String keys))
 
 byteArray
 
