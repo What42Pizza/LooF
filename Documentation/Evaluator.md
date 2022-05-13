@@ -37,6 +37,8 @@ These use the value directly following the function. If the function takes in mu
 - **floor VALUE**
 - **ceiling VALUE**
 - **sqrt VALUE**
+- **sign VALUE**
+  - returns 1 if VALUE is >= 0 or -1 if VALUE is < 0
 - **not VALUE**
 - **min VALUE (table)**
 - **max VALUE (table)**
@@ -72,7 +74,7 @@ These use the value directly following the function. If the function takes in mu
 <br>
 
 - **getChar VALUE (table {StringIn (string), Position (int)})**
-  - returns the character at Position of StringIn
+  - returns the character at Position of StringIn. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
 - **getChars VALUE (string)**
   - returns an array of the characters in VALUE as ints
 - **subString VALUE (table {StringIn (string), StartIndex (int), EndIndex (int)})**

@@ -444,14 +444,14 @@ class LooFCompiler {
     
     // find first (not in string) '"'
     int i = SearchStart;
-    for (int _ = 0; i < CurrentLineLength; i ++) {
+    for (int VOID = 0; i < CurrentLineLength; i ++) {
       if (CurrentLine.charAt(i) == '"' && CurrentLine.charAt(i - 1) != '\\') break;
     }
     int FirstMiddleQuote = i;
     
     // find second (not in string) '"'
     i ++;
-    for (int _ = 0; i < CurrentLineLength; i ++) {
+    for (int VOID = 0; i < CurrentLineLength; i ++) {
       if (CurrentLine.charAt(i) == '"' && CurrentLine.charAt(i - 1) != '\\') break;
     }
     int SecondMiddleQuote = i;

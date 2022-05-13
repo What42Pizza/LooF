@@ -438,6 +438,24 @@ LooFEvaluatorFunction Function_sqrt = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_sign = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    
+    if (Input.ValueType == DataValueType_Float) {
+      double InputValue = Input.FloatValue;
+      return new LooFDataValue (InputValue >= 0 ? 1 : -1);
+    }
+    
+    long InputValue = Input.IntValue;
+    return new LooFDataValue (InputValue >= 0 ? 1 : -1);
+    
+  }
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_not = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
     
@@ -680,6 +698,30 @@ LooFEvaluatorFunction Function_randomValue = new LooFEvaluatorFunction() {
     Collection <LooFDataValue> HashMapValues = Input.HashMapValue.values();
     
     return GetRandomItemFromCollection (HashMapValues);
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    ArrayList <LooFDataValue> Args = Input.ArrayValue;
+    if (Args.size() != 2) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getChar can only take two arguments."));
+    LooFDataValue StringDataValue = Args.get(0);
+    LooFDataValue IndexDataValue = Args.get(1);
+    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getChar takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
+    if (IndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getChar takes an int as its second argument, not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + "."));
+    
+    String StringIn = StringDataValue.StringValue;
+    long Index = IndexDataValue.IntValue;
+    
+    char CharOut = StringIn.charAt((int) CorrectModulo (Index, StringIn.length()));
+    
+    return new LooFDataValue ((long) CharOut);
     
   }
 };
