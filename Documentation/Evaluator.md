@@ -42,6 +42,7 @@ These use the value directly following the function. If the function takes in mu
 - **not VALUE**
 - **min VALUE (table)**
 - **max VALUE (table)**
+- **clamp VALUE (table {Input (float or int), Min (float or int), Max (float or int)})**
 
 <br>
 
@@ -49,6 +50,8 @@ These use the value directly following the function. If the function takes in mu
   - returns a random number in the range [0, VALUE)
 - **randomInt VALUE (int)**
   - returns a random integer in the range [0, VALUE]
+- **randomInt VALUE (table {min (int), max (int)})**
+  - returns a random integer in the range [min, max]
 - **chance VALUE (int or float)**
   - returns true VALUE % of the time (chance 50 would return true half of the time)
 
@@ -70,16 +73,36 @@ These use the value directly following the function. If the function takes in mu
   - returns a random item from the array part of VALUE
 - **randomValue VALUE (table)**
   - returns a random value from the hashmap part of VALUE
+- **firstIndexOfItem VALUE (table {Table, Item})**
+ - returns the index of the first found occurrence of Item in Table
+- **firstIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
+ - returns the index of the first found occurrence of Item in Table starting at StartIndex
+- **lastIndexOfItem VALUE (table {Table, Item})**
+ - returns the index of the last found occurrence of Item in Table
+- **lastIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
+ - returns the index of the last found occurrence of Item in Table starting at StartIndex
 
 <br>
 
-- **getChar VALUE (table {StringIn (string), Position (int)})**
-  - returns the character at Position of StringIn. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
+- **getChar VALUE (table {String, Position (int)})**
+  - returns the character at Position of String. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf String - 1)
 - **getChars VALUE (string)**
   - returns an array of the characters in VALUE as ints
-- **subString VALUE (table {StringIn (string), StartIndex (int), EndIndex (int)})**
-  - returns a new string which is part of StringIn
-  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
+- **getCharBytes VALUE (string)**
+  - returns a byteArray with the characters in VALUE as bytes
+- **getSubString VALUE (table {String, StartIndex (int), EndIndex (int)})**
+  - returns a new string which is part of String
+  - both StartIndex and EndIndex are modulo-ed by the length of String (with -1 mapping correctly to lengthOf String - 1)
+- **firstIndexOfString VAlUE (table {MainString, StringToFind})**
+  - returns the index of the first found occurrence of StringToFind in MainString
+- **firstIndexOfString VAlUE (table {MainString, StringToFind, StartIndex (int)})**
+  - returns the index of the first found occurrence of StringToFind in MainString starting at StartIndex
+- **lastIndexOfString VAlUE (table {MainString, StringToFind})**
+  - returns the index of the last found occurrence of StringToFind in MainString
+- **lastIndexOfString VAlUE (table {MainString, StringToFind, StartIndex (int)})**
+  - returns the index of the last found occurrence of StringToFind in MainString starting at StartIndex
+- **allIndexesOfString VALUE (table {MainString, StringToFind)}**
+  - returns an array of all the indexes for the found occurrances of StringToFind in MainString
 
 <br>
 
@@ -172,13 +195,6 @@ These use the value directly following the function. If the function takes in mu
 - bool: returns VALUE
 - table: returns (lengthOf VALUE > 0)
 - byteArray: returns (lengthOf VALUE > 0)
-
-<br>
-
-### toChars VALUE:
-
-- string: returns a new byteArray with the characters of VALUE
-- else: throws error
 
 <br>
 <br>

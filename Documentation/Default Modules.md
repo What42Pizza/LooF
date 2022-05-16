@@ -46,26 +46,44 @@
 
 ##### "get file properties", VALUE (file path)
 
-- Pushes data relating to the file VALUE to the general stack. Errors if VALUE is not a string.
-- Return data includes: string Name, string Path, bool IsFolder
+- Pushes data relating to the file VALUE to the general stack.
+- Return data includes: string Name, table {string, ...} Path, bool IsFolder.
+- Errors if VALUE is not a string or an array of strings or if the file does not exist.
+
+<br>
+
+##### "check file exists", VALUE (file path)
+
+- Pushes an array containing a bool for whether the file VALUE exists to the general stack.
+- Errors if VALUE is not a string or an array of strings.
 
 <br>
 
 ##### "read file as strings", VALUE (file path)
 
-- Pushes the contents of the file VALUE to the general stack as a table full of strings. Errors if VALUE is not a string, if the file VALUE cannot be found, or if the VALUE is a folder.
+- Pushes the contents of the file VALUE to the general stack as a table full of strings.
+- Errors if VALUE is not a string or an array of strings, if the file does not exist, or if the file is a folder.
 
 <br>
 
 ##### "read file as byteArray", VALUE (file path)
 
-- Pushes the contents of the file VALUE to the general stack as a byteArray. Errors if VALUE is not a string, if the file VALUE cannot be found, or if the VALUE is a folder.
+- Pushes the contents of the file VALUE to the general stack as a byteArray.
+- Errors if VALUE is not a string or an array of strings, if the file VALUE cannot be found, or if the VALUE is a folder.
 
 <br>
 
 ##### "write to file", VALUE (file path), VALUE (contents)
 
-- Writes the data of the second VALUE to the file of the first VALUE (which is created if necessary). Errors if the first VALUE is not a string or if the second VALUE is not an array of strings or a byteArray.
+- Writes the data of the second VALUE to the file of the first VALUE (which is created if necessary).
+- Errors if the first VALUE is not a string or an array of strings or if the second VALUE is not an array of strings or a byteArray.
+
+<br>
+
+##### "get folder contents", VALUE (folder path)
+
+- Pushes a table containing the names of the files and folders inside the folder VALUE to the general stack.
+- Errors if VALUE is not a string or an array of strings.
 
 <br>
 <br>

@@ -435,6 +435,84 @@ String ConvertLooFTokenBranchChildrenToString (LooFTokenBranch TokenBranch) {
 
 
 
+String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
+  switch (DataValueIn.ValueType) {
+    
+    default:
+      throw new AssertionError();
+    
+    case (DataValueType_Null):
+      return "null";
+    
+    case (DataValueType_Int):
+      return DataValueIn.IntValue + "";
+    
+    case (DataValueType_Float):
+      return DataValueIn.IntValue + "";
+    
+    case (DataValueType_Bool):
+      return DataValueIn.BoolValue ? "true" : "false";
+    
+    case (DataValueType_Table):
+      return ConvertLooFDataValueTableToString (DataValueIn);
+    
+    case (DataValueType_ByteArray):
+      return new String (DataValueIn.ByteArrayValue);
+    
+  }
+}
+
+
+
+String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
+  
+  String ArrayPartString = "";
+  ArrayList <LooFDataValue> ArrayPart = DataValueIn.ArrayValue;
+  if (ArrayPart.size() > 0) {
+    ArrayPartString += ConvertLooFDataValueToString (ArrayPart.get(0));
+    for (int i = 1; i < ArrayPart.size(); i ++) {
+      ArrayPartString += ", " + ConvertLooFDataValueToString (ArrayPart.get(i));
+    }
+  }
+  
+  String HashMapPartString = "";
+  HashMap <String, LooFDataValue> HashMapPart = DataValueIn.HashMapValue;
+  Set <String> HashMapKeys = HashMapPart.keySet();
+  boolean FirstItem = true;
+  for (String CurrentKey : HashMapKeys) {
+    LooFDataValue CurrentDataValue = HashMapPart.get(CurrentKey);
+    String CurrentDataValueAsString = ConvertLooFDataValueToString (CurrentDataValue);
+    String MappingToAdd = CurrentKey + " = " + CurrentDataValueAsString;
+    HashMapPartString += FirstItem  ?  MappingToAdd  :  ", " + MappingToAdd;
+    FirstItem = false;
+  }
+  
+  int CaseToUse = (ArrayPartString.length() > 0 ? 1 : 0) + (HashMapPartString.length() > 0 ? 2 : 0);
+  switch (CaseToUse) {
+    
+    case (0): // no ArrayPart or HashMapPart
+      return "{}";
+    
+    case (1): // ArrayPart but no HashMapPart
+      return "{" + ArrayPartString + "}";
+    
+    case (2): // HashMapPart but no ArrayPart
+      return "{" + HashMapPartString+ "}";
+    
+    case (3): // ArrayPart and HashMapPart
+      return "{" + ArrayPart + "; " + HashMapPart + "}";
+    
+    default:
+      throw new AssertionError();
+    
+  }
+  
+}
+
+
+
+
+
 
 
 

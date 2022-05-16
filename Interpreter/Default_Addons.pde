@@ -165,9 +165,6 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
     switch (LeftValue.ValueType) {
       
-      default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "INTERNAL ERROR: unkown LooFDataValue ValueType " + LeftValue.ValueType + "."));
-      
       case (DataValueType_Null):
         return new LooFDataValue (RightValue.ValueType == DataValueType_Null);
       
@@ -192,6 +189,9 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
       
       case (DataValueType_Table):
          return new LooFDataValue (RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue));
+      
+      default:
+        throw new AssertionError();
       
     }
   }
@@ -250,9 +250,6 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
     switch (LeftValue.ValueType) {
       
-      default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "INTERNAL ERROR: unkown LooFDataValue ValueType " + LeftValue.ValueType + "."));
-      
       case (DataValueType_Null):
         return new LooFDataValue (RightValue.ValueType != DataValueType_Null);
       
@@ -277,6 +274,9 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
       
       case (DataValueType_Table):
          return new LooFDataValue (!(RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue)));
+      
+      default:
+        throw new AssertionError();
       
     }
   }
@@ -730,12 +730,200 @@ LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_getChars = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    
+    String StringIn = Input.StringValue;
+    char[] InputChars = new char [StringIn.length()];
+    
+    StringIn.getChars (0, InputChars.length - 1, InputChars, 0);
+    
+    ArrayList <LooFDataValue> InputCharValues = new ArrayList <LooFDataValue> ();
+    for (char CurrChar : InputChars) {
+      InputCharValues.add (new LooFDataValue ((long) CurrChar));
+    }
+    
+    return new LooFDataValue (InputCharValues, new HashMap <String, LooFDataValue> ());
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_getCharBytes = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    
+    String StringIn = Input.StringValue;
+    char[] InputChars = new char [StringIn.length()];
+    
+    StringIn.getChars (0, InputChars.length - 1, InputChars, 0);
+    
+    ArrayList <LooFDataValue> InputCharValues = new ArrayList <LooFDataValue> ();
+    for (char CurrChar : InputChars) {
+      InputCharValues.add (new LooFDataValue ((long) CurrChar));
+    }
+    
+    return new LooFDataValue (InputCharValues, new HashMap <String, LooFDataValue> ());
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_getSubString = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    ArrayList <LooFDataValue> Args = Input.ArrayValue;
+    if (Args.size() != 3) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getSubString can only take three arguments."));
+    LooFDataValue StringDataValue = Args.get(0);
+    LooFDataValue StartIndexDataValue = Args.get(1);
+    LooFDataValue EndIndexDataValue = Args.get(2);
+    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getSubString takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
+    if (StartIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getSubString takes an int as its second argument, not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + "."));
+    if (EndIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the function getSubString takes an int as its third argument, not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + "."));
+    
+    String StringIn = StringDataValue.StringValue;
+    long StartIndex = StartIndexDataValue.IntValue;
+    long EndIndex = EndIndexDataValue.IntValue;
+    int StringInLength = StringIn.length();
+    
+    StartIndex = CorrectModulo (StartIndex, StringInLength);
+    EndIndex = CorrectModulo (EndIndex, StringInLength);
+    
+    return new LooFDataValue (StringIn.substring((int) StartIndex, (int) EndIndex));
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
     switch (Input.ValueType) {
       
+      case (DataValueType_Null):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast null to int."));
+      
+      case (DataValueType_Int):
+        return new LooFDataValue (Input.IntValue);
+      
+      case (DataValueType_Float):
+        return new LooFDataValue ((long) Math.floor (Input.FloatValue));
+      
+      case (DataValueType_String):
+        try {
+          return new LooFDataValue (Long.parseLong(Input.StringValue));
+        } catch (NumberFormatException e) {
+          throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast string \"" + Input.StringValue + "\" to a number."));
+        }
+      
+      case (DataValueType_Bool):
+        return new LooFDataValue (Input.BoolValue ? (long) 1 : (long) 0);
+      
+      case (DataValueType_Table):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast table to int."));
+      
+      case (DataValueType_ByteArray):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to int."));
+      
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "INTERNAL ERROR: unkown LooFDataValue ValueType " + Input.ValueType + "."));
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    switch (Input.ValueType) {
+      
+      case (DataValueType_Null):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast null to float."));
+      
+      case (DataValueType_Int):
+        return new LooFDataValue ((double) Input.IntValue);
+      
+      case (DataValueType_Float):
+        return new LooFDataValue (Input.FloatValue);
+      
+      case (DataValueType_String):
+        try {
+          return new LooFDataValue (Double.parseDouble(Input.StringValue));
+        } catch (NumberFormatException e) {
+          throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast string \"" + Input.StringValue + "\" to a float."));
+        }
+      
+      case (DataValueType_Bool):
+        return new LooFDataValue (Input.BoolValue ? (double) 1.0 :  (double) 0.0);
+      
+      case (DataValueType_Table):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast table to float."));
+      
+      case (DataValueType_ByteArray):
+        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to float."));
+      
+      default:
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_toString = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    switch (Input.ValueType) {
+      
+      case (DataValueType_Null):
+        return new LooFDataValue ("null");
+      
+      case (DataValueType_Int):
+        return new LooFDataValue (Input.IntValue + "");
+      
+      case (DataValueType_Float):
+        return new LooFDataValue (Input.FloatValue + "");
+      
+      case (DataValueType_String):
+        return new LooFDataValue (Input.StringValue);
+      
+      case (DataValueType_Bool):
+        return new LooFDataValue (Input.BoolValue ? "true" : "false");
+      
+      case (DataValueType_Table):
+        return new LooFDataValue (ConvertLooFDataValueToString (Input));
+      
+      case (DataValueType_ByteArray):
+        return new LooFDataValue (new String (Input.ByteArrayValue));
+      
+      default:
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+    switch (Input.ValueType) {
       
       case (DataValueType_Null):
         return new LooFDataValue (false);
@@ -757,6 +945,9 @@ LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
       
       case (DataValueType_ByteArray):
         throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to bool."));
+      
+      default:
+        throw new AssertionError();
       
     }
   }
