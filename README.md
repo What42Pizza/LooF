@@ -43,7 +43,7 @@ call Factorial, 10  -> FactorialResult
 #include Basics.LOOF
 
 function ConvertTableToString  -> TableIn, Seperator
-	returnIf typeOf TableIn ~= "table"
+	returnIf typeOf TableIn != "table"
 	default Seperator = ", "
 	
 	StringOut = toString TableIn[i]
