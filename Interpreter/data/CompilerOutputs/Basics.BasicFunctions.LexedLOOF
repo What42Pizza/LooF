@@ -17,7 +17,7 @@ Basics.BasicFunctions.LOOF 31: Name "pop", Table {OutputVar "ARGS", OutputVar "T
 Basics.BasicFunctions.LOOF 32: Name "loop", Table {OutputVar "i", Formula {Name "Index"}, Formula {Function "endOf", Name "Table", Operation "-", Int 1}}
 Basics.BasicFunctions.LOOF 33: OutputVar "Table", Index {Name "i"}, Formula {Name "Table", Index {Name "i", Operation "+", Int 1}}
 Basics.BasicFunctions.LOOF 34: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 35: OutputVar "Table", Index {Function "endOf", Name "Table"}, Formula {Name "null"}
+Basics.BasicFunctions.LOOF 35: OutputVar "Table", Index {Function "endOf", Name "Table"}, Formula {Null}
 Basics.BasicFunctions.LOOF 36: Name "return", Table {}
 Basics.BasicFunctions.LOOF 37: Name "end", Table {}
 Basics.BasicFunctions.LOOF 41: Name "skip", Table {}

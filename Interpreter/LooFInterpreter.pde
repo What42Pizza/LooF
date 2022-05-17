@@ -46,8 +46,9 @@ class LooFInterpreter {
     
     // evaluate indexes
     for (int CurrentTokenIndex : IndexQueryIndexes) {
-      LooFDataValue EvaluatedIndex = EvaluateFormula (FormulaTokens.remove(CurrentTokenIndex), Environment, FileName, LineNumber);
+      LooFDataValue EvaluatedIndex = EvaluateFormula (FormulaTokens.get(CurrentTokenIndex), Environment, FileName, LineNumber);
       LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), EvaluatedIndex, FormulaTokens.get(CurrentTokenIndex - 1), Environment, FileName, LineNumber);
+      FormulaTokens.remove(CurrentTokenIndex);
       FormulaValues.remove(CurrentTokenIndex);
       FormulaValues.set(CurrentTokenIndex - 1, NewValue);
     }
@@ -101,6 +102,9 @@ class LooFInterpreter {
       default:
         throw new AssertionError();
       
+      case (TokenBranchType_Null):
+        return new LooFDataValue();
+      
       case (TokenBranchType_Int):
         return new LooFDataValue (CurrentToken.IntValue);
       
@@ -114,16 +118,16 @@ class LooFInterpreter {
         return new LooFDataValue (CurrentToken.BoolValue);
       
       case (TokenBranchType_Table):
-        return null;
+        throw (new RuntimeException ("WIP"));
       
       case (TokenBranchType_Name):
         return GetVariableValue (Environment, CurrentToken.StringValue, false, FileName, LineNumber);
       
       case (TokenBranchType_Formula):
-        return null;
+        throw (new RuntimeException ("WIP"));
       
       case (TokenBranchType_Index):
-        return null;
+        throw (new RuntimeException ("WIP"));
       
       case (TokenBranchType_OutputVar):
         throw new AssertionError();

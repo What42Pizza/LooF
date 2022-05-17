@@ -1410,6 +1410,10 @@ class LooFCompiler {
     
     switch (CurrentToken) {
       
+      // Type_Null
+      case ("null"):
+        return new LooFTokenBranch();
+      
       // Type_Formula
       case ("("):
         return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);

@@ -380,7 +380,10 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
   switch (TokenBranch.TokenType) {
     
     default:
-      throw (new RuntimeException ("Unknown LooFTokenBranch type: " + TokenBranch.TokenType));
+      throw new AssertionError();
+    
+    case (TokenBranchType_Null):
+      return "Null";
     
     case (TokenBranchType_Int):
       return "Int " + TokenBranch.IntValue;

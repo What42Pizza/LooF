@@ -83,20 +83,24 @@ These use the value directly following the function. If the function takes in mu
   - returns a random item from the array part of VALUE
 - **randomValue VALUE (table)**
   - returns a random value from the hashmap part of VALUE
-- **firstIndexOfItem VALUE (table {Table, Item})**
-  - returns the index of the first found occurrence of Item in Table
-- **firstIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
-  - returns the index of the first found occurrence of Item in Table starting at StartIndex
-- **lastIndexOfItem VALUE (table {Table, Item})**
-  - returns the index of the last found occurrence of Item in Table
-- **lastIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
-  - returns the index of the last found occurrence of Item in Table starting at StartIndex
-- **tableContainsItem VALUE (table {Table, Item})**
-  - returns true if the array part of Table contains Item or if the hashmap part of Table contains Item
-- **arrayContainsItem VALUE (table {Table, Item})**
-  - returns true if the array part of Table contains Item
-- **hashmapContainsItem VALUE (table {Table, Item})**
-  - returns true if the hashmap part of Table contains Item
+- **firstIndexOfItem VALUE (table {TableIn, Item})**
+  - returns the index of the first found occurrence of Item in TableIn
+- **firstIndexOfItem VALUE (table {TableIn, Item, StartIndex (int)})**
+  - returns the index of the first found occurrence of Item in TableIn starting at StartIndex
+- **lastIndexOfItem VALUE (table {TableIn, Item})**
+  - returns the index of the last found occurrence of Item in TableIn
+- **lastIndexOfItem VALUE (table {TableIn, Item, StartIndex (int)})**
+  - returns the index of the last found occurrence of Item in TableIn starting at StartIndex
+- **allIndexesOfItem VALUE (table {TableIn, Item)}**
+  - returns an array of all the indexes for the found occurrences of Item in TableIn
+- **tableContainsItem VALUE (table {TableIn, Item})**
+  - returns true if the array part of TableIn contains Item or if the hashmap part of TableIn contains Item
+- **arrayContainsItem VALUE (table {TableIn, Item})**
+  - returns true if the array part of TableIn contains Item
+- **hashmapContainsItem VALUE (table {TableIn, Item})**
+  - returns true if the hashmap part of TableIn contains Item
+- **splitTable VALUE (table {TableIn, Position (int)})**
+  - returns a table containing two more tables which are TableIn split at Position. (splitTable {{0, 1, 2}, 1} would evaluate to {{0}, {1, 2}})
 
 <br>
 
@@ -120,7 +124,21 @@ These use the value directly following the function. If the function takes in mu
 - **lastIndexOfString VAlUE (table {MainString, StringToFind, StartIndex (int)})**
   - returns the index of the last found occurrence of StringToFind in MainString starting at StartIndex
 - **allIndexesOfString VALUE (table {MainString, StringToFind)}**
-  - returns an array of all the indexes for the found occurrances of StringToFind in MainString
+  - returns an array of all the indexes for the found occurrences of StringToFind in MainString
+- **splitString VALUE (table {StringIn, Position (int)})**
+  - returns a table containing two strings which are StringIn split at Position. (splitString {"abc", 1} would evaluate to {"a", "bc"})
+- **splitString VALUE (table {StringIn, StringToFind})**
+  - returns a table containing all the sections in StringIn between the found occurrences of StringToFind. (splitString ("a b c", " ") would evaluate to {"a", "b", "c"})
+- **stringStartsWith VALUE (table {StringIn, StringToFind})**
+  - returns true if StringIn starts with StringToFind
+- **stringEndsWith VALUE (table {StringIn, StringToFind})**
+  - returns true if StringIn ends with StringToFind
+- **replaceStrings VALUE (table {StringIn, StringToFind, ReplacementString})**
+  - returns a string which is StringIn but with all occurrences of StringToFind replaced with ReplacementString. (replaceStrings {"a b c", " ", ", "} would evaluate to "a, b, c")
+- **toLowerCase VALUE (string)**
+- **toUpperCase VALUE (string)**
+- **trimString VALUE (string)**
+  - returns VALUE without any leading or trailing whitespace
 
 <br>
 

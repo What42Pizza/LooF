@@ -437,6 +437,10 @@ class LooFTokenBranch {
   int[] FunctionIndexes;
   FloatIntPair[] OperationIndexes;
   
+  public LooFTokenBranch() {
+    this.TokenType = TokenBranchType_Null;
+  }
+  
   public LooFTokenBranch (long IntValue) {
     this.TokenType = TokenBranchType_Int;
     this.IntValue = IntValue;
@@ -478,19 +482,21 @@ class LooFTokenBranch {
 
 
 
-final int TokenBranchType_Int = 0;
-final int TokenBranchType_Float = 1;
-final int TokenBranchType_String = 2;
-final int TokenBranchType_Bool = 3;
-final int TokenBranchType_Table = 4;
-final int TokenBranchType_Formula = 5;
-final int TokenBranchType_Index = 6;
-final int TokenBranchType_Name = 7;
-final int TokenBranchType_OutputVar = 8;
-final int TokenBranchType_Operation = 9;
-final int TokenBranchType_Function = 10;
+final int TokenBranchType_Null = 0;
+final int TokenBranchType_Int = 1;
+final int TokenBranchType_Float = 2;
+final int TokenBranchType_String = 3;
+final int TokenBranchType_Bool = 4;
+final int TokenBranchType_Table = 5;
+final int TokenBranchType_Formula = 6;
+final int TokenBranchType_Index = 7;
+final int TokenBranchType_Name = 8;
+final int TokenBranchType_OutputVar = 9;
+final int TokenBranchType_Operation = 10;
+final int TokenBranchType_Function = 11;
 
 final String[] TokenBranchTypeNames = {
+  "Null",
   "Int",
   "Float",
   "String",
@@ -503,6 +509,7 @@ final String[] TokenBranchTypeNames = {
 };
 
 final String[] TokenBranchTypeNames_PlusA = {
+  "a Null",
   "an Int",
   "a Float",
   "a String",
