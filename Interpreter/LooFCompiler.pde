@@ -1812,7 +1812,7 @@ class LooFCompiler {
         return;
       
       case ("loop"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 3, CodeData, LineNumber);
+        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 4, CodeData, LineNumber);
         return;
       
       case ("forEach"):

@@ -383,6 +383,8 @@ class LooFDataValue {
 
 
 
+final int NumOfDataValueTypes = 7;
+
 final int DataValueType_Null = 0;
 final int DataValueType_Int = 1;
 final int DataValueType_Float = 2;

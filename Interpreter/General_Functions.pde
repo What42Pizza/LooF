@@ -587,6 +587,11 @@ double GetDataValueNumber (LooFDataValue DataValueIn) {
   return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 
+double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Environment, String FileName, int LineNumber, String FunctionName) {
+  if (!(DataValueIn.ValueType == DataValueType_Int || DataValueIn.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function " + FunctionName + " cannot be called with a table containing a non-number value."));
+  return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
+}
+
 
 
 ArrayList <LooFDataValue> GetAllDataValueTableItems (LooFDataValue DataValueIn) {
@@ -597,4 +602,14 @@ ArrayList <LooFDataValue> GetAllDataValueTableItems (LooFDataValue DataValueIn) 
     AllItems.add(HashMapValue.get(CurrentKey));
   }
   return AllItems;
+}
+
+
+
+boolean[] GetDataValueTypesFoundInList (ArrayList <LooFDataValue> ListIn) {
+  boolean[] DataTypesOut = new boolean [NumOfDataValueTypes];
+  for (LooFDataValue CurrentDataValue : ListIn) {
+    DataTypesOut[CurrentDataValue.ValueType] = true;
+  }
+  return DataTypesOut;
 }

@@ -114,7 +114,7 @@ BallsHandler.LOOF 176: Name "return", Table {}
 BallsHandler.LOOF 177: Name "end", Table {}
 BallsHandler.LOOF 181: Name "skip", Table {}
 BallsHandler.LOOF 181: Name "pop", Table {OutputVar "ARGS", OutputVar "Type", OutputVar "Size", OutputVar "Health", OutputVar "XPos", OutputVar "YPos", OutputVar "XVel", OutputVar "YVel"}
-BallsHandler.LOOF 182: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 63}, Formula {Name "ARGS"}, Formula {Table {Formula {String "string"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}}}}
+BallsHandler.LOOF 182: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 74}, Formula {Name "ARGS"}, Formula {Table {Formula {String "string"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}}}}
 BallsHandler.LOOF 183: OutputVar "NewBall", Formula {Table {}}
 BallsHandler.LOOF 184: OutputVar "NewBall", Index {String "Type"}, Formula {Name "Type"}
 BallsHandler.LOOF 185: OutputVar "NewBall", Index {String "Size"}, Formula {Name "Size"}

@@ -33,6 +33,8 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
+#### Math:
+
 - **round VALUE**
 - **floor VALUE**
 - **ceiling VALUE**
@@ -46,6 +48,8 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
+#### Random:
+
 - **random VALUE (int or float)**
   - returns a random number in the range [0, VALUE)
 - **randomInt VALUE (int)**
@@ -57,13 +61,19 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
-- **typeOf VALUE**
-  - returns a string representing the data type of VALUE
-- **lengthOf VALUE (table, byteArray, or string)**
-  - returns the number of items in the array part of VALUE (for tables), the number of bytes in VALUE (for byteArrays), or the number of characters in VALUE (for strings)
+#### Tables:
+
+- **lengthOf VALUE (table)**
+  - returns the number of items in the array part of VALUE 
+- **lengthOf VALUE (string)**
+  - returns the number of characters in VALUE
+- **lengthOf VALUE (byteArray)**
+  - returns the number of bytes in VALUE
 - **totalItemsIn VALUE (table)**
   - returns the number of items in the array part of VALUE plus the number of items in the hashmap part of VALUE
 - **endOf VALUE (table)**
+  - returns lengthOf VALUE - 1
+- **endOf VALUE (byteArray)**
   - returns lengthOf VALUE - 1
 - **keysOf VALUE (table)**
   - returns a table containing all of the keys of VALUE
@@ -74,25 +84,33 @@ These use the value directly following the function. If the function takes in mu
 - **randomValue VALUE (table)**
   - returns a random value from the hashmap part of VALUE
 - **firstIndexOfItem VALUE (table {Table, Item})**
- - returns the index of the first found occurrence of Item in Table
+  - returns the index of the first found occurrence of Item in Table
 - **firstIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
- - returns the index of the first found occurrence of Item in Table starting at StartIndex
+  - returns the index of the first found occurrence of Item in Table starting at StartIndex
 - **lastIndexOfItem VALUE (table {Table, Item})**
- - returns the index of the last found occurrence of Item in Table
+  - returns the index of the last found occurrence of Item in Table
 - **lastIndexOfItem VALUE (table {Table, Item, StartIndex (int)})**
- - returns the index of the last found occurrence of Item in Table starting at StartIndex
+  - returns the index of the last found occurrence of Item in Table starting at StartIndex
+- **tableContainsItem VALUE (table {Table, Item})**
+  - returns true if the array part of Table contains Item or if the hashmap part of Table contains Item
+- **arrayContainsItem VALUE (table {Table, Item})**
+  - returns true if the array part of Table contains Item
+- **hashmapContainsItem VALUE (table {Table, Item})**
+  - returns true if the hashmap part of Table contains Item
 
 <br>
 
-- **getChar VALUE (table {String, Position (int)})**
-  - returns the character at Position of String. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf String - 1)
-- **getChars VALUE (string)**
+#### Strings:
+
+- **getChar VALUE (table {StringIn, Position (int)})**
+  - returns the character at Position of StringIn. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
+- **getCharInts VALUE (string)**
   - returns an array of the characters in VALUE as ints
 - **getCharBytes VALUE (string)**
   - returns a byteArray with the characters in VALUE as bytes
-- **getSubString VALUE (table {String, StartIndex (int), EndIndex (int)})**
-  - returns a new string which is part of String
-  - both StartIndex and EndIndex are modulo-ed by the length of String (with -1 mapping correctly to lengthOf String - 1)
+- **getSubString VALUE (table {StringIn, StartIndex (int), EndIndex (int)})**
+  - returns a new string which is part of StringIn
+  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
 - **firstIndexOfString VAlUE (table {MainString, StringToFind})**
   - returns the index of the first found occurrence of StringToFind in MainString
 - **firstIndexOfString VAlUE (table {MainString, StringToFind, StartIndex (int)})**
@@ -106,6 +124,8 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
+#### Casting:
+
 - **toInt VALUE**
 - **toFloat VALUE**
 - **toString VALUE**
@@ -114,11 +134,12 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
+#### Misc:
+
+- **typeOf VALUE**
+  - returns a string representing the data type of VALUE
 - **newByteArray VALUE (int)**
   - returns a new byte array with length VALUE
-
-<br>
-
 - **timeSince VALUE (number)**
   - returns the number of seconds since VALUE
 

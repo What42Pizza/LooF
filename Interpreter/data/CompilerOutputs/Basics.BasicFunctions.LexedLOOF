@@ -29,42 +29,53 @@ Basics.BasicFunctions.LOOF 45: Name "return", Table {}
 Basics.BasicFunctions.LOOF 46: Name "end", Table {}
 Basics.BasicFunctions.LOOF 50: Name "skip", Table {}
 Basics.BasicFunctions.LOOF 50: Name "pop", Table {OutputVar "ARGS", OutputVar "TableIn"}
-Basics.BasicFunctions.LOOF 51: Name "errorIf", Table {Formula {Function "typeOf", Name "TableIn", Operation "!=", String "table"}, Formula {String "Basics.cloneTable, must take a table as its first argument"}, Formula {Table {Formula {String "InvalidArgType"}}}}
-Basics.BasicFunctions.LOOF 52: OutputVar "NewTable", Formula {Table {}}
-Basics.BasicFunctions.LOOF 53: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableIn"}}
-Basics.BasicFunctions.LOOF 54: OutputVar "NewTable", Index {Name "i"}, Formula {Name "TableIn", Index {Name "i"}}
-Basics.BasicFunctions.LOOF 55: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 56: OutputVar "TableInKeys", Formula {Function "keysOf", Name "TableIn"}
-Basics.BasicFunctions.LOOF 57: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableInKeys"}}
-Basics.BasicFunctions.LOOF 58: OutputVar "CurrentKey", Formula {Name "TableInKeys", Index {Name "i"}}
-Basics.BasicFunctions.LOOF 59: OutputVar "NewTable", Index {Name "CurrentKey"}, Formula {Name "TableIn", Index {Name "CurrentKey"}}
-Basics.BasicFunctions.LOOF 60: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 61: Name "return", Table {Formula {Name "NewTable"}}
-Basics.BasicFunctions.LOOF 62: Name "end", Table {}
-Basics.BasicFunctions.LOOF 66: Name "skip", Table {}
-Basics.BasicFunctions.LOOF 66: Name "pop", Table {OutputVar "ARGS", OutputVar "ValueIn"}
-Basics.BasicFunctions.LOOF 67: Name "returnIf", Table {Formula {Function "typeOf", Name "ValueIn", Operation "!=", String "table"}, Formula {Name "ValueIn"}}
-Basics.BasicFunctions.LOOF 68: OutputVar "TableIn", Formula {Name "ValueIn"}
-Basics.BasicFunctions.LOOF 69: OutputVar "NewTable", Formula {Table {}}
-Basics.BasicFunctions.LOOF 70: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableIn"}}
-Basics.BasicFunctions.LOOF 71: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 44}, Formula {Name "TableIn", Index {Name "i"}}}
-Basics.BasicFunctions.LOOF 71: Name "pop", Table {OutputVar "ARGS", OutputVar "ClonedValue"}
-Basics.BasicFunctions.LOOF 72: OutputVar "NewTable", Index {Name "i"}, Formula {Name "ClonedValue"}
+Basics.BasicFunctions.LOOF 51: Name "loop", Table {OutputVar "i", Formula {Function "endOf", Name "TableIn"}, Formula {Int 0}, Formula {Int -1}}
+Basics.BasicFunctions.LOOF 52: OutputVar "CurrentItem", Formula {Name "TableIn", Index {Name "i"}}
+Basics.BasicFunctions.LOOF 53: OutputVar "DuplicateIndex", Formula {Name "lastIndexOfItem", Table {Formula {Name "TableIn"}, Formula {Name "CurrentItem"}, Formula {Name "i", Operation "-", Int 1}}}
+Basics.BasicFunctions.LOOF 54: Name "if", Table {Formula {Function "not", Name "DuplicateIndex"}}
+Basics.BasicFunctions.LOOF 54: Name "continue", Table {}
+Basics.BasicFunctions.LOOF 55: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 15}, Formula {Name "TableIn"}, Formula {Name "DuplicateIndex"}}
+Basics.BasicFunctions.LOOF 57: Name "repeat", Table {}
+Basics.BasicFunctions.LOOF 58: Name "return", Table {}
+Basics.BasicFunctions.LOOF 59: Name "end", Table {}
+Basics.BasicFunctions.LOOF 63: Name "skip", Table {}
+Basics.BasicFunctions.LOOF 63: Name "pop", Table {OutputVar "ARGS", OutputVar "TableIn"}
+Basics.BasicFunctions.LOOF 64: Name "errorIf", Table {Formula {Function "typeOf", Name "TableIn", Operation "!=", String "table"}, Formula {String "Basics.cloneTable, must take a table as its first argument"}, Formula {Table {Formula {String "InvalidArgType"}}}}
+Basics.BasicFunctions.LOOF 65: OutputVar "NewTable", Formula {Table {}}
+Basics.BasicFunctions.LOOF 66: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableIn"}}
+Basics.BasicFunctions.LOOF 67: OutputVar "NewTable", Index {Name "i"}, Formula {Name "TableIn", Index {Name "i"}}
+Basics.BasicFunctions.LOOF 68: Name "repeat", Table {}
+Basics.BasicFunctions.LOOF 69: OutputVar "TableInKeys", Formula {Function "keysOf", Name "TableIn"}
+Basics.BasicFunctions.LOOF 70: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableInKeys"}}
+Basics.BasicFunctions.LOOF 71: OutputVar "CurrentKey", Formula {Name "TableInKeys", Index {Name "i"}}
+Basics.BasicFunctions.LOOF 72: OutputVar "NewTable", Index {Name "CurrentKey"}, Formula {Name "TableIn", Index {Name "CurrentKey"}}
 Basics.BasicFunctions.LOOF 73: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 74: OutputVar "TableInKeys", Formula {Function "keysOf", Name "TableIn"}
-Basics.BasicFunctions.LOOF 75: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableInKeys"}}
-Basics.BasicFunctions.LOOF 76: OutputVar "CurrentKey", Formula {Name "TableInKeys", Index {Name "i"}}
-Basics.BasicFunctions.LOOF 77: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 44}, Formula {Name "TableIn", Index {Name "CurrentKey"}}}
-Basics.BasicFunctions.LOOF 77: Name "pop", Table {OutputVar "ARGS", OutputVar "ClonedValue"}
-Basics.BasicFunctions.LOOF 78: OutputVar "NewTable", Index {Name "CurrentKey"}, Formula {Name "ClonedValue"}
-Basics.BasicFunctions.LOOF 79: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 80: Name "return", Table {Formula {Name "NewTable"}}
-Basics.BasicFunctions.LOOF 81: Name "end", Table {}
-Basics.BasicFunctions.LOOF 87: Name "skip", Table {}
-Basics.BasicFunctions.LOOF 87: Name "pop", Table {OutputVar "ARGS", OutputVar "Args", OutputVar "ArgTypes", OutputVar "FunctionName"}
-Basics.BasicFunctions.LOOF 88: Name "default", Table {OutputVar "FunctionName", Formula {String "unnamed"}}
-Basics.BasicFunctions.LOOF 89: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "lengthOf", Name "ArgsTypes", Operation "-", Int 1}}
-Basics.BasicFunctions.LOOF 90: Name "errorIf", Table {Formula {Function "typeOf", Name "Args", Index {Name "i"}, Operation "!=", Name "ArgTypes", Index {Name "i"}}, Formula {String "Arg ", Operation "..", Name "i", Operation "..", String " of function \"", Operation "..", Name "FunctionName", Operation "..", String "\" must be of type ", Operation "..", Name "ArgTypes", Index {Name "i"}, Operation "..", String ", not type ", Operation "..", Function "typeOf", Name "Args", Index {Name "i"}, Operation "..", String "."}, Formula {Table {Formula {String "InvalidArgType"}, Formula {Name "FunctionName"}}}}
-Basics.BasicFunctions.LOOF 91: Name "repeat", Table {}
-Basics.BasicFunctions.LOOF 92: Name "return", Table {}
-Basics.BasicFunctions.LOOF 93: Name "end", Table {}
+Basics.BasicFunctions.LOOF 74: Name "return", Table {Formula {Name "NewTable"}}
+Basics.BasicFunctions.LOOF 75: Name "end", Table {}
+Basics.BasicFunctions.LOOF 79: Name "skip", Table {}
+Basics.BasicFunctions.LOOF 79: Name "pop", Table {OutputVar "ARGS", OutputVar "ValueIn"}
+Basics.BasicFunctions.LOOF 80: Name "returnIf", Table {Formula {Function "typeOf", Name "ValueIn", Operation "!=", String "table"}, Formula {Name "ValueIn"}}
+Basics.BasicFunctions.LOOF 81: OutputVar "TableIn", Formula {Name "ValueIn"}
+Basics.BasicFunctions.LOOF 82: OutputVar "NewTable", Formula {Table {}}
+Basics.BasicFunctions.LOOF 83: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableIn"}}
+Basics.BasicFunctions.LOOF 84: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 55}, Formula {Name "TableIn", Index {Name "i"}}}
+Basics.BasicFunctions.LOOF 84: Name "pop", Table {OutputVar "ARGS", OutputVar "ClonedValue"}
+Basics.BasicFunctions.LOOF 85: OutputVar "NewTable", Index {Name "i"}, Formula {Name "ClonedValue"}
+Basics.BasicFunctions.LOOF 86: Name "repeat", Table {}
+Basics.BasicFunctions.LOOF 87: OutputVar "TableInKeys", Formula {Function "keysOf", Name "TableIn"}
+Basics.BasicFunctions.LOOF 88: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "endOf", Name "TableInKeys"}}
+Basics.BasicFunctions.LOOF 89: OutputVar "CurrentKey", Formula {Name "TableInKeys", Index {Name "i"}}
+Basics.BasicFunctions.LOOF 90: Name "call", Table {Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 55}, Formula {Name "TableIn", Index {Name "CurrentKey"}}}
+Basics.BasicFunctions.LOOF 90: Name "pop", Table {OutputVar "ARGS", OutputVar "ClonedValue"}
+Basics.BasicFunctions.LOOF 91: OutputVar "NewTable", Index {Name "CurrentKey"}, Formula {Name "ClonedValue"}
+Basics.BasicFunctions.LOOF 92: Name "repeat", Table {}
+Basics.BasicFunctions.LOOF 93: Name "return", Table {Formula {Name "NewTable"}}
+Basics.BasicFunctions.LOOF 94: Name "end", Table {}
+Basics.BasicFunctions.LOOF 100: Name "skip", Table {}
+Basics.BasicFunctions.LOOF 100: Name "pop", Table {OutputVar "ARGS", OutputVar "Args", OutputVar "ArgTypes", OutputVar "FunctionName"}
+Basics.BasicFunctions.LOOF 101: Name "default", Table {OutputVar "FunctionName", Formula {String "unnamed"}}
+Basics.BasicFunctions.LOOF 102: Name "loop", Table {OutputVar "i", Formula {Int 0}, Formula {Function "lengthOf", Name "ArgsTypes", Operation "-", Int 1}}
+Basics.BasicFunctions.LOOF 103: Name "errorIf", Table {Formula {Function "typeOf", Name "Args", Index {Name "i"}, Operation "!=", Name "ArgTypes", Index {Name "i"}}, Formula {String "Arg ", Operation "..", Name "i", Operation "..", String " of function \"", Operation "..", Name "FunctionName", Operation "..", String "\" must be of type ", Operation "..", Name "ArgTypes", Index {Name "i"}, Operation "..", String ", not type ", Operation "..", Function "typeOf", Name "Args", Index {Name "i"}, Operation "..", String "."}, Formula {Table {Formula {String "InvalidArgType"}, Formula {Name "FunctionName"}}}}
+Basics.BasicFunctions.LOOF 104: Name "repeat", Table {}
+Basics.BasicFunctions.LOOF 105: Name "return", Table {}
+Basics.BasicFunctions.LOOF 106: Name "end", Table {}

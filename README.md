@@ -2,6 +2,10 @@
 
 <br>
 
+# THIS IS STILL A WORK IN PROGRESS AND IS NOT MEANT TO BE USED YET
+
+<br>
+
 ### This is a language that is loosely functional. It's interpreted, loosely typed, and has (mostly) mutable data.
 
 <br>

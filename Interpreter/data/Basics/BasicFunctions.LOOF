@@ -49,11 +49,11 @@ end
 
 
 function removeDuplicateitems  -> TableIn
-	for i, endOf TableIn, 0, -1
+	loop i, endOf TableIn, 0, -1
 		CurrentItem = TableIn[i]
 		DuplicateIndex = lastIndexOfItem {TableIn, CurrentItem, i - 1}
 		if not DuplicateIndex; continue
-		:removeItem TableIn, DuplicateIndex
+		:removeIndex TableIn, DuplicateIndex
 		// `i --` is not needed since this will search for CurrentItem again on the next loop, which is what we want
 	repeat
 	return
