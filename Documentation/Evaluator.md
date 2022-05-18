@@ -38,6 +38,7 @@ These use the value directly following the function. If the function takes in mu
 - **round VALUE**
 - **floor VALUE**
 - **ceiling VALUE**
+- **abs VALUE**
 - **sqrt VALUE**
 - **sign VALUE**
   - returns 1 if VALUE is >= 0 or -1 if VALUE is < 0
@@ -75,6 +76,8 @@ These use the value directly following the function. If the function takes in mu
   - returns lengthOf VALUE - 1
 - **endOf VALUE (byteArray)**
   - returns lengthOf VALUE - 1
+- **lastItemOf VALUE (table)**
+  - returns the last item in the array part of VALUE
 - **keysOf VALUE (table)**
   - returns a table containing all of the keys of VALUE
 - **valuesOf VALUE (table)**

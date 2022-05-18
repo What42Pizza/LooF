@@ -36,13 +36,13 @@ ExampleVar["1"] = 789 // add 789 to the hashmap part of the array
 
 null
 
-integer (or int)
+int
 
 float
 
 string
 
-boolean (or bool)
+bool
 
 table (with both an array part and a hashmap part (with String keys))
 
@@ -76,7 +76,9 @@ Without Basics.LOOF:
 ```
 if ExampleCondition
 	// single statement code block
+
 OR
+
 if not ExampleCondition
 skip
 	// multiple statement code block

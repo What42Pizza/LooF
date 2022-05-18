@@ -779,7 +779,7 @@ LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_getChars = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_getCharInts = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
     if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     

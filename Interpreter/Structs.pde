@@ -22,6 +22,8 @@ class LooFEvaluatorOperation {
 
 
 
+LooFEvaluatorFunction NullFunction = new LooFEvaluatorFunction();
+
 class LooFEvaluatorFunction {
   
   public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
@@ -258,8 +260,8 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   
   boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
   
-  if (OriginalLineOfCode.length() > 50) OriginalLineOfCode = OriginalLineOfCode.substring(0, 50) + " ...";
-  if (LineOfCode.length() > 50) LineOfCode = LineOfCode.substring(0, 50) + " ...";
+  if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
+  if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
   
   if (LineHasChanged) return "\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"";
   return "\"" + LineOfCode + "\"";
@@ -424,6 +426,8 @@ final String[] DataValueTypeNames_PlusA = {
 
 class LooFTokenBranch {
   
+  boolean ConvertsToDataValue;
+  boolean IsAction;
   int TokenType;
   long IntValue;
   double FloatValue;
@@ -439,43 +443,59 @@ class LooFTokenBranch {
   
   public LooFTokenBranch() {
     this.TokenType = TokenBranchType_Null;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
   }
   
   public LooFTokenBranch (long IntValue) {
     this.TokenType = TokenBranchType_Int;
     this.IntValue = IntValue;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
   }
   
   public LooFTokenBranch (double FloatValue) {
     this.TokenType = TokenBranchType_Float;
     this.FloatValue = FloatValue;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
   }
   
-  public LooFTokenBranch (int Type, String StringValue) {
-    this.TokenType = Type;
+  public LooFTokenBranch (int TokenType, String StringValue, boolean ConvertsToDataValue, boolean IsAction) {
+    this.TokenType = TokenType;
     this.StringValue = StringValue;
+    this.ConvertsToDataValue = ConvertsToDataValue;
+    this.IsAction = IsAction;
   }
   
   public LooFTokenBranch (boolean BoolValue) {
     this.TokenType = TokenBranchType_Bool;
     this.BoolValue = BoolValue;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
   }
   
-  public LooFTokenBranch (int Type, LooFTokenBranch[] Children) {
-    this.TokenType = Type;
+  public LooFTokenBranch (int TokenType, LooFTokenBranch[] Children, boolean IsAction) {
+    this.TokenType = TokenType;
     this.Children = Children;
+    this.ConvertsToDataValue = true;
+    this.IsAction = IsAction;
   }
   
   public LooFTokenBranch (LooFEvaluatorOperation Operation, String Name) {
     this.TokenType = TokenBranchType_Operation;
     this.Operation = Operation;
     this.StringValue = Name;
+    this.ConvertsToDataValue = false;
+    this.IsAction = true;
   }
   
   public LooFTokenBranch (LooFEvaluatorFunction Function, String Name) {
     this.TokenType = TokenBranchType_Function;
     this.Function = Function;
     this.StringValue = Name;
+    this.ConvertsToDataValue = true;
+    this.IsAction = true;
   }
   
 }
@@ -490,7 +510,7 @@ final int TokenBranchType_Bool = 4;
 final int TokenBranchType_Table = 5;
 final int TokenBranchType_Formula = 6;
 final int TokenBranchType_Index = 7;
-final int TokenBranchType_Name = 8;
+final int TokenBranchType_VarName = 8;
 final int TokenBranchType_OutputVar = 9;
 final int TokenBranchType_Operation = 10;
 final int TokenBranchType_Function = 11;
@@ -502,10 +522,12 @@ final String[] TokenBranchTypeNames = {
   "String",
   "Bool",
   "Table",
-  "Name",
   "Formula",
   "Index",
+  "VarName",
   "OutputVar",
+  "Operation",
+  "Function",
 };
 
 final String[] TokenBranchTypeNames_PlusA = {
@@ -515,8 +537,10 @@ final String[] TokenBranchTypeNames_PlusA = {
   "a String",
   "a Bool",
   "a Table",
-  "a Name",
   "a Formula",
   "an Index",
+  "a VarName",
   "an OutputVar",
+  "an Operation",
+  "a Function",
 };

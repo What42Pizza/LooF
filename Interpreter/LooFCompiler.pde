@@ -122,7 +122,7 @@ class LooFCompiler {
     StopTimer ("OnlyCompilation");
     StopTimer ("Total");
     
-    println ("Added environment from folder " + CodeFolder + ".");
+    println ("Compiled environment from folder " + CodeFolder + ".");
     println ("Total time for only compiling: " + GetTimerMillis ("OnlyCompilation") + " ms.");
     println ("Total time: " + GetTimerMillis ("Total") + " ms.");
     
@@ -189,21 +189,56 @@ class LooFCompiler {
     Functions.put("round", Function_round);
     Functions.put("floor", Function_floor);
     Functions.put("ceil", Function_ceil);
+    Functions.put("abs", NullFunction);
     Functions.put("sqrt", Function_sqrt);
+    Functions.put("sign", Function_sign);
     Functions.put("not", Function_not);
     Functions.put("min", Function_min);
     Functions.put("max", Function_max);
+    
     Functions.put("random", Function_random);
     Functions.put("randomInt", Function_randomInt);
     Functions.put("chance", Function_chance);
-    Functions.put("typeOf", Function_typeOf);
+    
     Functions.put("lengthOf", Function_lengthOf);
     Functions.put("totalItemsIn", Function_totalItemsIn);
     Functions.put("endOf", Function_endOf);
+    Functions.put("lastItemOf", NullFunction);
     Functions.put("keysOf", Function_keysOf);
     Functions.put("valuesOf", Function_valuesOf);
     Functions.put("randomItem", Function_randomItem);
     Functions.put("randomValue", Function_randomValue);
+    Functions.put("firstIndexOfItem", NullFunction);
+    Functions.put("lastIndexOfItem", NullFunction);
+    Functions.put("allIndexesOfItem", NullFunction);
+    Functions.put("tableContainsItem", NullFunction);
+    Functions.put("arrayContainsItem", NullFunction);
+    Functions.put("hashmapContainsItem", NullFunction);
+    Functions.put("splitTable", NullFunction);
+    
+    Functions.put("getChar", Function_getChar);
+    Functions.put("getCharInts", Function_getCharInts);
+    Functions.put("getCharByes", Function_getCharBytes);
+    Functions.put("getSubString", Function_getSubString);
+    Functions.put("firstIndexOfString", NullFunction);
+    Functions.put("lastIndexOfString", NullFunction);
+    Functions.put("allIndexesOfString", NullFunction);
+    Functions.put("splitString", NullFunction);
+    Functions.put("stringStartsWith", NullFunction);
+    Functions.put("stringEndsWith", NullFunction);
+    Functions.put("replaceStrings", NullFunction);
+    Functions.put("toLowerCase", NullFunction);
+    Functions.put("toUpperCase", NullFunction);
+    Functions.put("trimString", NullFunction);
+    
+    Functions.put("toInt", Function_toInt);
+    Functions.put("toFloat", Function_toFloat);
+    Functions.put("toString", Function_toString);
+    Functions.put("toBool", Function_toBool);
+    
+    Functions.put("typeOf", Function_typeOf);
+    Functions.put("newByteArray", NullFunction);
+    Functions.put("timeSince", NullFunction);
     
     return Functions;
   }
@@ -1310,7 +1345,7 @@ class LooFCompiler {
     
     
     // var name
-    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_OutputVar, CurrentLineTokens.get(0));
+    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_OutputVar, CurrentLineTokens.get(0), false, false);
     
     
     // indexes
@@ -1321,6 +1356,7 @@ class LooFCompiler {
       int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
       LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
       IndexFormula.TokenType = TokenBranchType_Index;
+      //IndexFormula.IsAction = true;  // this is more correct but it's not needed
       TargetVarIndexes.add(IndexFormula);
       PossibleIndexIndex = IndexEndIndex + 2;
     }
@@ -1353,7 +1389,7 @@ class LooFCompiler {
     
     
     // statement name
-    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_Name, CurrentLineTokens.get(0));
+    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_VarName, CurrentLineTokens.get(0), true, false);
     
     
     // get args
@@ -1375,7 +1411,7 @@ class LooFCompiler {
   LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     
     if (CurrentLineTokens.size() == 1) {
-      return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
+      return new LooFTokenBranch (TokenBranchType_Formula, new LooFTokenBranch [0], false);
     }
     
     return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
@@ -1387,19 +1423,17 @@ class LooFCompiler {
   
   
   LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
-    ArrayList <LooFTokenBranch> FormulaChildren = new ArrayList <LooFTokenBranch> ();
+    ArrayList <LooFTokenBranch> FormulaChildrenList = new ArrayList <LooFTokenBranch> ();
     for (int i = FormulaBlockStart; i < FormulaBlockEnd + 1; i ++) {
       String CurrentToken = CurrentLineTokens.get(i);
       LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-      FormulaChildren.add(NewChild);
+      FormulaChildrenList.add(NewChild);
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
     }
-    if (FormulaChildren.get(0).TokenType == TokenBranchType_Index) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockStart, "formula cannot start with index query."));
-    if (GetLastItemOf(FormulaChildren).TokenType == TokenBranchType_Function) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockEnd, "formula cannot end with an evaluator function."));
-    if (GetLastItemOf(FormulaChildren).TokenType == TokenBranchType_Operation) throw (new LooFCompileException (CodeData, LineNumber, FormulaBlockEnd, "formula cannot end with an evaluator operation."));
-    LooFTokenBranch[] FormulaChildrenArray = ArrayListToArray (FormulaChildren, new LooFTokenBranch (0));
-    LooFTokenBranch LexedFormula = new LooFTokenBranch (TokenBranchType_Formula, FormulaChildrenArray);
+    LooFTokenBranch[] FormulaChildren = ArrayListToArray (FormulaChildrenList, new LooFTokenBranch (0));
+    EnsureFormulaTokensAreValid (FormulaChildren, CodeData, LineNumber, FormulaBlockStart);
+    LooFTokenBranch LexedFormula = new LooFTokenBranch (TokenBranchType_Formula, FormulaChildren, false);
     FillFormulaTokenEvaluationOrders (LexedFormula);
     return LexedFormula;
   }
@@ -1422,6 +1456,7 @@ class LooFCompiler {
       case ("["):
         LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
         IndexFormula.TokenType = TokenBranchType_Index;
+        IndexFormula.IsAction = true;
         return IndexFormula;
       
       // Type_Table
@@ -1445,7 +1480,7 @@ class LooFCompiler {
     // Type_String
     if (CurrentToken.charAt(0) == '"') {
       String StringValue = CurrentToken.substring(1, CurrentToken.length() - 1);
-      return new LooFTokenBranch (TokenBranchType_String, StringValue);
+      return new LooFTokenBranch (TokenBranchType_String, StringValue, true, false);
     }
     
     // Type_Int
@@ -1467,7 +1502,70 @@ class LooFCompiler {
     }
     
     // Type_Name
-    return new LooFTokenBranch (TokenBranchType_Name, CurrentToken);
+    return new LooFTokenBranch (TokenBranchType_VarName, CurrentToken, true, false);
+    
+  }
+  
+  
+  
+  
+  
+  void EnsureFormulaTokensAreValid (LooFTokenBranch[] FormulaChildren, LooFCodeData CodeData, int LineNumber, int TokenOffset) {
+    
+    switch (FormulaChildren[0].TokenType) {
+      
+      case (TokenBranchType_Index):
+        throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot start with an index query."));
+      
+      case (TokenBranchType_Operation):
+        throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot start with an evaluator operation."));
+      
+    }
+    
+    switch (GetLastItemOf(FormulaChildren).TokenType) {
+      
+      case (TokenBranchType_Operation):
+        throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot end with an evaluator operation."));
+      
+      case (TokenBranchType_Function):
+        throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot end with an evaluator function."));
+      
+    }
+    
+    // ensure index queries are valid
+    for (int i = 1; i < FormulaChildren.length; i ++) {
+      LooFTokenBranch CurrentToken = FormulaChildren[i];
+      if (CurrentToken.TokenType != TokenBranchType_Index) continue;
+      LooFTokenBranch PrevToken = FormulaChildren[i - 1];
+      if (!PrevToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot index a token of type " + TokenBranchTypeNames[PrevToken.TokenType] + "."));
+    }
+    
+    // ensure evaluator operations are valid
+    for (int i = 1; i < FormulaChildren.length - 1; i ++) {
+      LooFTokenBranch CurrentToken = FormulaChildren[i];
+      if (CurrentToken.TokenType != TokenBranchType_Operation) continue;
+      LooFTokenBranch PrevToken = FormulaChildren[i - 1];
+      if (!PrevToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot perform an evaluator operation where the left token is of type " + TokenBranchTypeNames[PrevToken.TokenType] + "."));
+      LooFTokenBranch NextToken = FormulaChildren[i + 1];
+      if (!NextToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot perform an evaluator operation where the right token is of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
+    }
+    
+    // ensure evaluator functions are valid
+    for (int i = 0; i < FormulaChildren.length - 1; i ++) {
+      LooFTokenBranch CurrentToken = FormulaChildren[i];
+      if (CurrentToken.TokenType != TokenBranchType_Function) continue;
+      LooFTokenBranch NextToken = FormulaChildren[i + 1];
+      if (!NextToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot perform an evaluator function on a token of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
+    }
+    
+    // ensure no double non-action tokens
+    for (int i = 0; i < FormulaChildren.length - 1; i ++) {
+      LooFTokenBranch CurrentToken = FormulaChildren[i];
+      if (CurrentToken.IsAction) continue;
+      LooFTokenBranch NextToken = FormulaChildren[i + 1];
+      if (NextToken.IsAction) continue;
+      throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot have two non-acting tokens next to each other (" + TokenBranchTypeNames[CurrentToken.TokenType] + " and " + TokenBranchTypeNames[NextToken.TokenType] + ")."));
+    }
     
   }
   
@@ -1483,7 +1581,7 @@ class LooFCompiler {
     LooFTokenBranch[] FormulaChildren = FormulaToken.Children;
     
     // get index query indexes
-    for (int i = 0; i < FormulaChildren.length; i ++) {
+    for (int i = 1; i < FormulaChildren.length; i ++) {
       if (FormulaChildren[i].TokenType == TokenBranchType_Index) {
         IndexQueryIndexes.add(i);
       }
@@ -1564,7 +1662,6 @@ class LooFCompiler {
     for (int i = 0; i < OperationIndexes.length; i ++) {
       FloatIntPair CurrentOperationIndex = OperationIndexes[i];
       if (CurrentOperationIndex.IntValue > StartIndex && CurrentOperationIndex.FloatValue <= MaximumOrder) {
-        //println (StartIndex + ", " + MaximumOrder + ",   " + CurrentOperationIndex.IntValue + ", " + CurrentOperationIndex.FloatValue);
         CurrentOperationIndex.IntValue += ShiftAmount;
       }
     }
@@ -1575,7 +1672,7 @@ class LooFCompiler {
   
   
   LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
-    if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0]);
+    if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0], false);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
     ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
     
@@ -1590,7 +1687,7 @@ class LooFCompiler {
     }
     Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber));
     
-    return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)));
+    return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)), false);
   }
   
   
@@ -1910,7 +2007,7 @@ class LooFCompiler {
   
   
   void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    if (Statement[0].TokenType != TokenBranchType_Name) return;
+    if (Statement[0].TokenType != TokenBranchType_VarName) return;
     switch (Statement[0].StringValue) {
       
       default:
@@ -2012,7 +2109,7 @@ class LooFCompiler {
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch OutputVarToken = OutputArgChildren[0];
-    if (OutputVarToken.TokenType != TokenBranchType_Name) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
+    if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
     OutputVarToken.TokenType = TokenBranchType_OutputVar;
     Statement[1].Children[OutputVarIndex] = OutputVarToken;
   }

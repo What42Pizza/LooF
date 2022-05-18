@@ -120,7 +120,7 @@ class LooFInterpreter {
       case (TokenBranchType_Table):
         throw (new RuntimeException ("WIP"));
       
-      case (TokenBranchType_Name):
+      case (TokenBranchType_VarName):
         return GetVariableValue (Environment, CurrentToken.StringValue, false, FileName, LineNumber);
       
       case (TokenBranchType_Formula):
@@ -144,7 +144,7 @@ class LooFInterpreter {
     int CaseToUse = 0;
     
     // error if source token is not indexable
-    if (!(TableTokenSource.TokenType == TokenBranchType_Table || TableTokenSource.TokenType == TokenBranchType_Name)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + TokenBranchTypeNames_PlusA[TableTokenSource.TokenType] + "."));
+    if (!(TableTokenSource.TokenType == TokenBranchType_Table || TableTokenSource.TokenType == TokenBranchType_VarName)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot index " + TokenBranchTypeNames_PlusA[TableTokenSource.TokenType] + "."));
     
     // error if index is not a string or int
     switch (IndexDataValue.ValueType) {

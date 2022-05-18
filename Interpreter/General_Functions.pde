@@ -30,6 +30,10 @@
   return Input.get(Input.size() - 1);
 }
 
+<T> T GetLastItemOf (T[] Input) {
+  return Input[Input.length - 1];
+}
+
 
 
 int[] ToPrimitive (Integer[] ArrayIn) {
@@ -406,8 +410,8 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_Index):
       return "Index {" + ConvertLooFTokenBranchChildrenToString (TokenBranch) + "}";
     
-    case (TokenBranchType_Name):
-      return "Name \"" + TokenBranch.StringValue + "\"";
+    case (TokenBranchType_VarName):
+      return "VarName \"" + TokenBranch.StringValue + "\"";
     
     case (TokenBranchType_OutputVar):
       return "OutputVar \"" + TokenBranch.StringValue + "\"";

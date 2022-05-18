@@ -130,7 +130,7 @@ function SplitBall  -> Ball, BallsData, NewBalls
 	NewYVel = BallsData["BounceYVel"] / 2
 	
 	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel, NewYVel  -> Ball1
-	call GetNewBallStruct "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel * -1, NewYVel  -> Ball2
+	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel * -1, NewYVel  -> Ball2
 	
 	:addItem NewBalls, Ball1
 	:addItem NewBalls, Ball2
