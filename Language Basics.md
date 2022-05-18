@@ -56,7 +56,7 @@ byteArray
 
 <br>
 
-With basics.LOOF:
+With Basics.LOOF:
 
 ```
 if ExampleCondition
@@ -155,14 +155,14 @@ pop ARGS, ReturnValue1, ReturnValue2, etc
 <br>
 
 ```
-#link ExampleFolder.ExampleFolder(...).ExampleFileName
+$link ExampleFolder.ExampleFolder... .ExampleFileName
 OR
-#link ExampleFolder.ExampleFolder(...).ExampleFileName as ExampleShortenedName
+$link ExampleFolder.ExampleFolder... .ExampleFileName as ExampleShortenedName
 ```
 
 <br>
 
-When linking a file, only have to write out the end of the file name. If you want to link ExampleFolder.ExampleFileName.LOOF, you can just write "#link e.LOOF". This example is obviously a bad idea, though, since you can only have one file that ends with "e.LOOF". It would be much better to write "#link ExampleFileName.LOOF" here. If you try to link with a name that fits more than one file, the code will not compile.
+When linking a file, only have to write out the end of the file name. If you want to link ExampleFolder.ExampleFileName.LOOF, you can just write "$link e.LOOF". This example is obviously a bad idea, though, since you can only have one file that ends with "e.LOOF". It would be much better to write "$link ExampleFileName.LOOF" here. If you try to link with a name that fits more than one file, the code will not compile.
 
 <br>
 <br>

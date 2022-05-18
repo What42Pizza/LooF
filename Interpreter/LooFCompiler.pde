@@ -100,18 +100,8 @@ class LooFCompiler {
     
     
     
-    // create LooFFile-s
-    HashMap <String, LooFFile> AllFiles = new HashMap <String, LooFFile> ();
-    for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      String FullFileName = CodeData.FullFileName;
-      LooFFile NewFile = new LooFFile (FullFileName, CodeData);
-      AllFiles.put(FullFileName, NewFile);
-    }
-    
-    
-    
     // create environement
-    LooFEnvironment NewEnvironment = new LooFEnvironment (AllFiles);
+    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas);
     NewEnvironment.InterpreterModules = Modules;
     NewEnvironment.EvaluatorOperations = Operations;
     NewEnvironment.EvaluatorFunctions = Functions;

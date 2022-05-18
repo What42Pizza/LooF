@@ -21,7 +21,7 @@ class LooFInterpreter {
         CurrentVariableList.put(VariableName, NewVariableValue);
         return NewVariableValue;
       }
-      throw (new LooFInterpreterException (Environment, FileName, LineNumber, "could not find any variables named \"" + VariableName + "\"."));
+      throw (new LooFInterpreterException (Environment, FileName, LineNumber, "could not find any variable named \"" + VariableName + "\"."));
     }
     return CurrentVariableList.get(VariableName);
   }
@@ -79,7 +79,21 @@ class LooFInterpreter {
       FormulaTokens.remove(CurrentTokenIndex);
     }
     
-    return null;
+    if (FormulaValues.size() > 1) throw new AssertionError();
+    
+    return FormulaValues.get(0);
+  }
+  
+  
+  
+  
+  
+  LooFDataValue EvaluateTable (LooFTokenBranch Formula, LooFEnvironment Environment, String FileName, int LineNumber) {
+    ArrayList <LooFDataValue> TableChildren = new ArrayList <LooFDataValue> ();
+    for (LooFTokenBranch CurrentToken : Formula.Children) {
+      TableChildren.add(EvaluateFormula (CurrentToken, Environment, FileName, LineNumber));
+    }
+    return new LooFDataValue (TableChildren, new HashMap <String, LooFDataValue> ());
   }
   
   
@@ -118,19 +132,25 @@ class LooFInterpreter {
         return new LooFDataValue (CurrentToken.BoolValue);
       
       case (TokenBranchType_Table):
-        throw (new RuntimeException ("WIP"));
+        return EvaluateTable (CurrentToken, Environment, FileName, LineNumber);
+      
+      case (TokenBranchType_Formula):
+        return EvaluateFormula (CurrentToken, Environment, FileName, LineNumber);
+      
+      case (TokenBranchType_Index):
+        return null;
       
       case (TokenBranchType_VarName):
         return GetVariableValue (Environment, CurrentToken.StringValue, false, FileName, LineNumber);
       
-      case (TokenBranchType_Formula):
-        throw (new RuntimeException ("WIP"));
-      
-      case (TokenBranchType_Index):
-        throw (new RuntimeException ("WIP"));
-      
       case (TokenBranchType_OutputVar):
         throw new AssertionError();
+      
+      case (TokenBranchType_Operation):
+        return null;
+      
+      case (TokenBranchType_Function):
+        return null;
       
     }
   }

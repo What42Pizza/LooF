@@ -6,52 +6,51 @@
 
 ### Console:
 
-- **"println", VALUE (to print)**
-  - Prints VALUE to the console
+- **"println", ToPrint1, ToPrint2, etc**
+  - Prints all arguments to the console, separated with spaces.
 
 <br>
 
 ### Interpreter:
 
-- **"pause", VALUE (time)**
-  - Pauses execution for VALUE seconds. Errors if VALUE is not a number.
-- **"pause until", VALUE (end time)**
-  - Pauses until timeSince 0 >= VALUE. Errors if VALUE is not a number.
+- **"pause", Time (int or float)**
+  - Pauses execution for Time seconds.
+- **"pause until", EndTime (int or float)**
+  - Pauses until timeSince 0 >= EndTime.
 - **"stop"**
-  - Stops execution
+  - Stops execution.
 
 <br>
 
 ### Files:
 
-- **"get file properties", VALUE (file path)**
-  - Pushes data relating to the file VALUE to the general stack.
-  - Return data: {Name (string), Path table {string, ...}, IsFolder (bool), CanRead (bool), CanWrite (bool)}.
-  - Errors if VALUE is not a string or an array of strings or if the file does not exist.
-- **"check file exists", VALUE (file path)**
-  - Pushes an array containing a bool for whether the file VALUE exists to the general stack.
-  - Errors if VALUE is not a string or an array of strings.
-- **"get folder contents", VALUE (folder path)**
-  - Pushes a table containing the names of the files and folders inside the folder VALUE to the general stack.
-  - Errors if VALUE is not a string or an array of strings.
-- **"read file as strings", VALUE (file path)**
-  - Pushes the contents of the file VALUE to the general stack as a table full of strings.
-  - Errors if VALUE is not a string or an array of strings, if the file does not exist, or if the file is a folder.
-- **"read file as byteArray", VALUE (file path)**
-  - Pushes the contents of the file VALUE to the general stack as a byteArray.
-  - Errors if VALUE is not a string or an array of strings, if the file VALUE cannot be found, or if the VALUE is a folder.
-- **"write to file", VALUE (file path), VALUE (contents)**
-  - Writes the data of the second VALUE to the file of the first VALUE (which is created if necessary).
-  - Errors if the first VALUE is not a string or an array of strings or if the second VALUE is not an array of strings or a byteArray.
-- **"delete file", VALUE (file path)**
-  - Deletes the file VALUE.
-  - Errors if VALUE is not a string or an array of strings or if the file VALUE cannot be found.
+- **"get file properties", FilePath (string or table {string, ...})**
+  - Pushes data relating to the file at FilePath to the general stack.
+  - Return data: {Name (string), Path (table {string, ...}), IsFolder (bool), CanRead (bool), CanWrite (bool)}.
+  - Errors if the file at FilePath does not exist.
+- **"check file exists", FilePath (string or table {string, ...})**
+  - Pushes an array containing a bool for whether the file at FilePath exists to the general stack.
+- **"get folder contents", FolderPath (string or table {string, ...})**
+  - Pushes a table containing the names (as arrays of strings) of the files and folders inside the folder at FolderPath to the general stack.
+  - Errors if the file at FolderPath is not a folder.
+- **"read file as strings", FilePath (string or table {string, ...})**
+  - Pushes the contents of the file at FilePath to the general stack as an array of strings.
+  - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
+- **"read file as byteArray", FilePath (string or table {string, ...})**
+  - Pushes the contents of the file at FilePath to the general stack as a byteArray.
+  - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
+- **"write to file", FilePath (string or table {string, ...}), Contents (table {string, ...} or byteArray)**
+  - Writes the data of Contents to the file at FilePath (which is created if necessary).
+- **"delete file", FilePath (string or table {string, ...})**
+  - Deletes the file at FilePath.
+  - Errors if the file at FilePath cannot be found.
 
 <br>
 
 ### Graphics:
 
-- **"set properties", VALUE (new data)**
-  - Sets the internal data about the graphics to VALUE. Errors if VALUE is not a table.
-- **"set frame", VALUE (new frame)**
-  - Sets the current frame being displayed to VALUE. Errors if VALUE is not a byteArray or if lengthOf Value is not data.Width * data.Height * 3.
+- **"set properties", NewProperties (table)**
+  - Sets the internal data about the graphics to NewProperties.
+- **"set frame", NewFrame (byteArray)**
+  - Sets the current frame being displayed to NewFrame.
+  - Errors if lengthOf NewFrame is not data.Width * data.Height * 3.

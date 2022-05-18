@@ -27,7 +27,12 @@
 
 
 <T> T GetLastItemOf (ArrayList <T> Input) {
-  return Input.get(Input.size() - 1);
+  try {
+    return Input.get(Input.size() - 1);
+  } catch (Exception e) {
+    e.printStackTrace();
+    throw new AssertionError();
+  }
 }
 
 <T> T GetLastItemOf (T[] Input) {

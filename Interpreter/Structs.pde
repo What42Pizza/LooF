@@ -46,13 +46,12 @@ class LooFEnvironment {
   
   
   HashMap <String, LooFModule> InterpreterModules = new HashMap <String, LooFModule> ();
-  
   HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
   HashMap <String, LooFEvaluatorFunction > EvaluatorFunctions  = new HashMap <String, LooFEvaluatorFunction > ();
   
   
   
-  HashMap <String, LooFFile> AllFiles;
+  HashMap <String, LooFCodeData> AllCodeDatas;
   
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
@@ -61,27 +60,12 @@ class LooFEnvironment {
   
   
   
-  public LooFEnvironment (HashMap <String, LooFFile> AllFiles) {
-    this.AllFiles = AllFiles;
+  public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas) {
+    this.AllCodeDatas = AllCodeDatas;
+    this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
   }
   
   
-  
-}
-
-
-
-
-
-class LooFFile {
-  
-  String FullName;
-  LooFCodeData CodeData;
-  
-  public LooFFile (String FullName, LooFCodeData CodeData) {
-    this.FullName = FullName;
-    this.CodeData = CodeData;
-  }
   
 }
 
@@ -289,7 +273,7 @@ class LooFInterpreterException extends RuntimeException {
 
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
-  LooFCodeData CodeData = Environment.AllFiles.get(FileName).CodeData;
+  LooFCodeData CodeData = Environment.AllCodeDatas.get(FileName);
   
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
@@ -300,7 +284,6 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String FileName,
   String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
   
   return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
-  
 }
 
 
