@@ -1,5 +1,5 @@
 LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
       long NewIntValue = LeftValue.IntValue + RightValue.IntValue;
@@ -10,7 +10,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) + GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 4.0;}
@@ -21,7 +21,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
       long NewIntValue = LeftValue.IntValue - RightValue.IntValue;
@@ -32,7 +32,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) - GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 4.0;}
@@ -43,7 +43,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
       long NewIntValue = LeftValue.IntValue * RightValue.IntValue;
@@ -54,7 +54,7 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) * GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 5.0;}
@@ -65,21 +65,21 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
-      if (RightValue.IntValue == 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot divide by 0."));
+      if (RightValue.IntValue == 0) throw (new LooFInterpreterException (Environment, "cannot divide by 0."));
       long NewIntValue = LeftValue.IntValue / RightValue.IntValue;
       return new LooFDataValue (NewIntValue);
     }
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       double RightFloatValue = GetDataValueNumber (RightValue);
-      if (RightFloatValue == 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot divide by 0."));
+      if (RightFloatValue == 0) throw (new LooFInterpreterException (Environment, "cannot divide by 0."));
       return new LooFDataValue (GetDataValueNumber (LeftValue) / RightFloatValue);
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 5.0;}
@@ -90,7 +90,7 @@ LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
       long NewIntValue = (long) Math.pow (LeftValue.IntValue, RightValue.IntValue);
@@ -101,7 +101,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
       return new LooFDataValue (Math.pow (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 7.0;}
@@ -112,7 +112,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
       long NewIntValue = CorrectModulo (LeftValue.IntValue, RightValue.IntValue);
@@ -123,7 +123,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
       return new LooFDataValue (CorrectModulo (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 6.0;}
@@ -134,7 +134,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if (LeftValue.ValueType == DataValueType_String && RightValue.ValueType == DataValueType_String) {
       String NewStringValue = LeftValue.StringValue + RightValue.StringValue;
@@ -151,7 +151,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewArrayValue, NewHashMapValue);
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 3.0;}
@@ -162,7 +162,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     switch (LeftValue.ValueType) {
       
       case (DataValueType_Null):
@@ -203,7 +203,7 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_StrictEquals = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     return new LooFDataValue (LeftValue.equals(RightValue));
   };
 };
@@ -213,13 +213,13 @@ LooFEvaluatorOperation Operation_StrictEquals = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) > GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 2.0;}
@@ -230,13 +230,13 @@ LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) < GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 2.0;}
@@ -247,7 +247,7 @@ LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     switch (LeftValue.ValueType) {
       
       case (DataValueType_Null):
@@ -288,7 +288,7 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_StrictNotEquals = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     return new LooFDataValue (!LeftValue.equals(RightValue));
   };
   @Override public float GetOrder() {return 2.0;}
@@ -299,13 +299,13 @@ LooFEvaluatorOperation Operation_StrictNotEquals = new LooFEvaluatorOperation() 
 
 
 LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) >= GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 2.0;}
@@ -316,13 +316,13 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
 
 
 LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) <= GetDataValueNumber (RightValue));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
   @Override public float GetOrder() {return 2.0;}
@@ -333,8 +333,8 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
 
 
 LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, FileName, LineNumber);
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
     return (LeftValueAsBool.BoolValue) ? RightValue : new LooFDataValue (false);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -345,8 +345,8 @@ LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, FileName, LineNumber);
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
     return (LeftValueAsBool.BoolValue) ? LeftValue : RightValue;
   }
   @Override public float GetOrder() {return 1.0;}
@@ -357,9 +357,9 @@ LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
-  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, FileName, LineNumber);
-    LooFDataValue RightValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment, FileName, LineNumber);
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
+    LooFDataValue RightValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment);
     return new LooFDataValue (LeftValueAsBool.BoolValue ^ RightValueAsBool.BoolValue);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -385,13 +385,13 @@ LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
 
 
 LooFEvaluatorFunction Function_round = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
       return new LooFDataValue (Math.round(GetDataValueNumber (Input)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function round can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the evaluator function round can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
   }
 };
@@ -401,13 +401,13 @@ LooFEvaluatorFunction Function_round = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_floor = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
       return new LooFDataValue (Math.floor(GetDataValueNumber (Input)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function floor can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the evaluator function floor can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
   }
 };
@@ -417,13 +417,13 @@ LooFEvaluatorFunction Function_floor = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_ceil = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
       return new LooFDataValue (Math.ceil(GetDataValueNumber (Input)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function ceil can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the evaluator function ceil can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
   }
 };
@@ -433,13 +433,13 @@ LooFEvaluatorFunction Function_ceil = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_sqrt = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
       return new LooFDataValue (Math.sqrt(GetDataValueNumber (Input)));
     }
     
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function sqrt can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    throw (new LooFInterpreterException (Environment, "the evaluator function sqrt can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
   }
 };
@@ -449,8 +449,8 @@ LooFEvaluatorFunction Function_sqrt = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_sign = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     double InputNumberValue = GetDataValueNumber (Input);
     return new LooFDataValue (InputNumberValue >= 0 ? 1 : -1);
@@ -463,9 +463,9 @@ LooFEvaluatorFunction Function_sign = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_not = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    LooFDataValue InputAsBool = Function_toBool.HandleFunctionCall (Input, Environment, FileName, LineNumber);
+    LooFDataValue InputAsBool = Function_toBool.HandleFunctionCall (Input, Environment);
     InputAsBool.BoolValue = !InputAsBool.BoolValue;
     
     return InputAsBool;
@@ -478,13 +478,13 @@ LooFEvaluatorFunction Function_not = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_min = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     // ensure input is valid
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function min can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function min can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function min cannot be called with an empty table."));
+    if (InputItemsSize == 0) throw (new LooFInterpreterException (Environment, "the evaluator function min cannot be called with an empty table."));
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
@@ -492,16 +492,16 @@ LooFEvaluatorFunction Function_min = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function min can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function min can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
     }
     
     // if there's a float
     if (DataValueTypesInInput[DataValueType_Float]) {
       LooFDataValue FirstItem = InputItems.get(0);
-      double MinValue = GetDataValueNumber_Unsafe (FirstItem, Environment, FileName, LineNumber, "min");
+      double MinValue = GetDataValueNumber_Unsafe (FirstItem, Environment, "min");
       for (int i = 1; i < InputItemsSize; i ++) {
         LooFDataValue CurrentItem = InputItems.get(i);
-        MinValue = Math.min (MinValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, FileName, LineNumber, "min"));
+        MinValue = Math.min (MinValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, "min"));
       }
       return new LooFDataValue (MinValue);
     }
@@ -523,13 +523,13 @@ LooFEvaluatorFunction Function_min = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_max = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     // ensure input is valid
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function max can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function max can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function max cannot be called with an empty table."));
+    if (InputItemsSize == 0) throw (new LooFInterpreterException (Environment, "the evaluator function max cannot be called with an empty table."));
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
@@ -537,16 +537,16 @@ LooFEvaluatorFunction Function_max = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function max can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function max can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
     }
     
     // if there's a float
     if (DataValueTypesInInput[DataValueType_Float]) {
       LooFDataValue FirstItem = InputItems.get(0);
-      double MaxValue = GetDataValueNumber_Unsafe (FirstItem, Environment, FileName, LineNumber, "max");
+      double MaxValue = GetDataValueNumber_Unsafe (FirstItem, Environment, "max");
       for (int i = 1; i < InputItemsSize; i ++) {
         LooFDataValue CurrentItem = InputItems.get(i);
-        MaxValue = Math.max (MaxValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, FileName, LineNumber, "max"));
+        MaxValue = Math.max (MaxValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, "max"));
       }
       return new LooFDataValue (MaxValue);
     }
@@ -568,9 +568,9 @@ LooFEvaluatorFunction Function_max = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_random = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     double MaxValue = GetDataValueNumber (Input);
     return new LooFDataValue (Math.random() * MaxValue);
@@ -583,7 +583,7 @@ LooFEvaluatorFunction Function_random = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_randomInt = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Int):
@@ -591,13 +591,13 @@ LooFEvaluatorFunction Function_randomInt = new LooFEvaluatorFunction() {
         return new LooFDataValue ((int) (Math.random() * (MaxInt + 1)));
       
       case (DataValueType_Table):
-        if (Input.ArrayValue.size() != 2) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function randomInt can only take an int or a table of two ints, but a table with " + Input.ArrayValue.size() + " items was given."));
+        if (Input.ArrayValue.size() != 2) throw (new LooFInterpreterException (Environment, "the evaluator function randomInt can only take an int or a table of two ints, but a table with " + Input.ArrayValue.size() + " items was given."));
         long MinInt = Input.ArrayValue.get(0).IntValue;
         MaxInt = Input.ArrayValue.get(1).IntValue;
         return new LooFDataValue (MinInt + (int) (Math.random() * ((MaxInt - MinInt) + 1)));
       
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function randomInt can only take an int or a table of two ints, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+        throw (new LooFInterpreterException (Environment, "the evaluator function randomInt can only take an int or a table of two ints, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
       
     }
   }
@@ -608,12 +608,12 @@ LooFEvaluatorFunction Function_randomInt = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_chance = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     double ChanceLimit = GetDataValueNumber (Input);
-    if (ChanceLimit < 0 || ChanceLimit > 100) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function chance can only take a number from 0 to 100 (inclusive)."));
+    if (ChanceLimit < 0 || ChanceLimit > 100) throw (new LooFInterpreterException (Environment, "the evaluator function chance can only take a number from 0 to 100 (inclusive)."));
     
     return new LooFDataValue (Math.random() < ChanceLimit / 100);
     
@@ -625,7 +625,7 @@ LooFEvaluatorFunction Function_chance = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_lengthOf = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Table):
@@ -638,7 +638,7 @@ LooFEvaluatorFunction Function_lengthOf = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ByteArrayValue.length);
       
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function lengthOf can only take a table, string, or byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+        throw (new LooFInterpreterException (Environment, "the evaluator function lengthOf can only take a table, string, or byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
       
     }
   }
@@ -649,9 +649,9 @@ LooFEvaluatorFunction Function_lengthOf = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_totalItemsIn = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     return new LooFDataValue (Input.ArrayValue.size() + Input.HashMapValue.size());
     
@@ -663,7 +663,7 @@ LooFEvaluatorFunction Function_totalItemsIn = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_endOf = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Table):
@@ -673,7 +673,7 @@ LooFEvaluatorFunction Function_endOf = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ByteArrayValue.length - 1);
       
       default:
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function endOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+        throw (new LooFInterpreterException (Environment, "the evaluator function endOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
       
     }
   }
@@ -684,9 +684,9 @@ LooFEvaluatorFunction Function_endOf = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_keysOf = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function keysOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function keysOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     Collection <String> InputKeys = Input.HashMapValue.keySet();
     ArrayList <LooFDataValue> KeysList = new ArrayList <LooFDataValue> ();
@@ -705,9 +705,9 @@ LooFEvaluatorFunction Function_keysOf = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_valuesOf = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     Collection <LooFDataValue> InputValues = Input.HashMapValue.values();
     ArrayList <LooFDataValue> ValuesList = new ArrayList <LooFDataValue> ();
@@ -726,9 +726,9 @@ LooFEvaluatorFunction Function_valuesOf = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_randomItem = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
     if (ArrayValue.size() == 0) return new LooFDataValue();
@@ -742,9 +742,9 @@ LooFEvaluatorFunction Function_randomItem = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_randomValue = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     Collection <LooFDataValue> HashMapValues = Input.HashMapValue.values();
     return GetRandomItemFromCollection (HashMapValues);
@@ -757,15 +757,15 @@ LooFEvaluatorFunction Function_randomValue = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 2) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChar can only take two arguments."));
+    if (Args.size() != 2) throw (new LooFInterpreterException (Environment, "the evaluator function getChar can only take two arguments."));
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue IndexDataValue = Args.get(1);
-    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChar takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
-    if (IndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChar takes an int as its second argument, not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + "."));
+    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getChar takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
+    if (IndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, "the evaluator function getChar takes an int as its second argument, not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + "."));
     
     String StringIn = StringDataValue.StringValue;
     long Index = IndexDataValue.IntValue;
@@ -780,8 +780,8 @@ LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_getCharInts = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
-    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     String StringIn = Input.StringValue;
     char[] InputChars = new char [StringIn.length()];
@@ -803,8 +803,8 @@ LooFEvaluatorFunction Function_getCharInts = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_getCharBytes = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
-    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
     String StringIn = Input.StringValue;
     char[] InputChars = new char [StringIn.length()];
@@ -826,16 +826,16 @@ LooFEvaluatorFunction Function_getCharBytes = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_getSubString = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
-    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 3) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getSubString can only take three arguments."));
+    if (Args.size() != 3) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString can only take three arguments."));
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue StartIndexDataValue = Args.get(1);
     LooFDataValue EndIndexDataValue = Args.get(2);
-    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getSubString takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
-    if (StartIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getSubString takes an int as its second argument, not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + "."));
-    if (EndIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function getSubString takes an int as its third argument, not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + "."));
+    if (StringDataValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + "."));
+    if (StartIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString takes an int as its second argument, not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + "."));
+    if (EndIndexDataValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString takes an int as its third argument, not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + "."));
     
     String StringIn = StringDataValue.StringValue;
     long StartIndex = StartIndexDataValue.IntValue;
@@ -855,11 +855,11 @@ LooFEvaluatorFunction Function_getSubString = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast null to int."));
+        throw (new LooFInterpreterException (Environment, "cannot cast null to int."));
       
       case (DataValueType_Int):
         return new LooFDataValue (Input.IntValue);
@@ -871,17 +871,17 @@ LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
         try {
           return new LooFDataValue (Long.parseLong(Input.StringValue));
         } catch (NumberFormatException e) {
-          throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast string \"" + Input.StringValue + "\" to a number."));
+          throw (new LooFInterpreterException (Environment, "cannot cast string \"" + Input.StringValue + "\" to a number."));
         }
       
       case (DataValueType_Bool):
         return new LooFDataValue (Input.BoolValue ? (long) 1 : (long) 0);
       
       case (DataValueType_Table):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast table to int."));
+        throw (new LooFInterpreterException (Environment, "cannot cast table to int."));
       
       case (DataValueType_ByteArray):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to int."));
+        throw (new LooFInterpreterException (Environment, "cannot cast byteArray to int."));
       
       default:
         throw new AssertionError();
@@ -895,11 +895,11 @@ LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast null to float."));
+        throw (new LooFInterpreterException (Environment, "cannot cast null to float."));
       
       case (DataValueType_Int):
         return new LooFDataValue ((double) Input.IntValue);
@@ -911,17 +911,17 @@ LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
         try {
           return new LooFDataValue (Double.parseDouble(Input.StringValue));
         } catch (NumberFormatException e) {
-          throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast string \"" + Input.StringValue + "\" to a float."));
+          throw (new LooFInterpreterException (Environment, "cannot cast string \"" + Input.StringValue + "\" to a float."));
         }
       
       case (DataValueType_Bool):
         return new LooFDataValue (Input.BoolValue ? (double) 1.0 :  (double) 0.0);
       
       case (DataValueType_Table):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast table to float."));
+        throw (new LooFInterpreterException (Environment, "cannot cast table to float."));
       
       case (DataValueType_ByteArray):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to float."));
+        throw (new LooFInterpreterException (Environment, "cannot cast byteArray to float."));
       
       default:
         throw new AssertionError();
@@ -935,7 +935,7 @@ LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_toString = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
@@ -971,7 +971,7 @@ LooFEvaluatorFunction Function_toString = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
@@ -993,7 +993,7 @@ LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ArrayValue.size() > 0);
       
       case (DataValueType_ByteArray):
-        throw (new LooFInterpreterException (Environment, FileName, LineNumber, "cannot cast byteArray to bool."));
+        throw (new LooFInterpreterException (Environment, "cannot cast byteArray to bool."));
       
       default:
         throw new AssertionError();
@@ -1007,7 +1007,7 @@ LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
 
 
 LooFEvaluatorFunction Function_typeOf = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     return new LooFDataValue (DataValueTypeNames[Input.ValueType]);
   }
 };

@@ -462,6 +462,9 @@ String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
     case (DataValueType_Float):
       return DataValueIn.IntValue + "";
     
+    case (DataValueType_String):
+      return "\"" + DataValueIn.StringValue + "\"";
+    
     case (DataValueType_Bool):
       return DataValueIn.BoolValue ? "true" : "false";
     
@@ -512,7 +515,7 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
       return "{" + HashMapPartString+ "}";
     
     case (3): // ArrayPart and HashMapPart
-      return "{" + ArrayPart + "; " + HashMapPart + "}";
+      return "{" + ArrayPartString + "; " + HashMapPartString + "}";
     
     default:
       throw new AssertionError();
@@ -599,8 +602,8 @@ double GetDataValueNumber (LooFDataValue DataValueIn) {
   return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 
-double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Environment, String FileName, int LineNumber, String FunctionName) {
-  if (!(DataValueIn.ValueType == DataValueType_Int || DataValueIn.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, FileName, LineNumber, "the evaluator function " + FunctionName + " cannot be called with a table containing a non-number value."));
+double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Environment, String FunctionName) {
+  if (!(DataValueIn.ValueType == DataValueType_Int || DataValueIn.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function " + FunctionName + " cannot be called with a table containing a non-number value."));
   return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 

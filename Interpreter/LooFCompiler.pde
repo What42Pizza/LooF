@@ -1554,7 +1554,7 @@ class LooFCompiler {
       if (CurrentToken.IsAction) continue;
       LooFTokenBranch NextToken = FormulaChildren[i + 1];
       if (NextToken.IsAction) continue;
-      throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot have two non-acting tokens next to each other (" + TokenBranchTypeNames[CurrentToken.TokenType] + " and " + TokenBranchTypeNames[NextToken.TokenType] + ")."));
+      throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot have two non-acting tokens next to each other (" + TokenBranchTypeNames[CurrentToken.TokenType] + " and " + TokenBranchTypeNames[NextToken.TokenType] + "). (maybe you misspelled a function name?)"));
     }
     
   }

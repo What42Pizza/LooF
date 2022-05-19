@@ -1,6 +1,6 @@
 class LooFModule {
   
-  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment, String FileName, int LineNumber) {
+  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment) {
     
   }
   
@@ -10,8 +10,8 @@ class LooFModule {
 
 class LooFEvaluatorOperation {
   
-  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, String FileName, int LineNumber) {
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
+  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
   }
   
   public float GetOrder() {
@@ -26,8 +26,8 @@ LooFEvaluatorFunction NullFunction = new LooFEvaluatorFunction();
 
 class LooFEvaluatorFunction {
   
-  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, String FileName, int LineNumber) {
-    throw (new LooFInterpreterException (Environment, FileName, LineNumber, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
+  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
   }
   
 }
@@ -49,9 +49,13 @@ class LooFEnvironment {
   HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
   HashMap <String, LooFEvaluatorFunction > EvaluatorFunctions  = new HashMap <String, LooFEvaluatorFunction > ();
   
-  
-  
   HashMap <String, LooFCodeData> AllCodeDatas;
+  
+  
+  
+  String CurrentCodeDataName;
+  LooFCodeData CurrentCodeData;
+  int CurrentLineNumber;
   
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
@@ -62,6 +66,9 @@ class LooFEnvironment {
   
   public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas) {
     this.AllCodeDatas = AllCodeDatas;
+    this.CurrentCodeDataName = "Main.LOOF";
+    this.CurrentCodeData = AllCodeDatas.get(CurrentCodeDataName);
+    this.CurrentLineNumber = 0;
     this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
   }
   
@@ -264,16 +271,18 @@ String GetCompilerErrorMessage (String LineOfCode, int LineNumber, String LineFi
 
 class LooFInterpreterException extends RuntimeException {
   
-  public LooFInterpreterException (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
-    super (GetInterpreterErrorMessage (Environment, FileName, LineNumber, Message));
+  public LooFInterpreterException (LooFEnvironment Environment, String Message) {
+    super (GetInterpreterErrorMessage (Environment, Message));
   }
   
 }
 
 
 
-String GetInterpreterErrorMessage (LooFEnvironment Environment, String FileName, int LineNumber, String Message) {
-  LooFCodeData CodeData = Environment.AllCodeDatas.get(FileName);
+String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
+  String FileName = Environment.CurrentCodeDataName;
+  LooFCodeData CodeData = Environment.CurrentCodeData;
+  int LineNumber = Environment.CurrentLineNumber;
   
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
