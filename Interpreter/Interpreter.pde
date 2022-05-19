@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 05/18/22
+// Last updated 05/19/22
 
 
 
@@ -26,6 +26,7 @@ void setup() {
   
   LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("")), CompileSettings);
   
+  /*
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 3);
   
   HashMap <String, LooFDataValue> AllVars = TestEnvironment.VariableListsStack.get(0);
@@ -37,6 +38,7 @@ void setup() {
       e.printStackTrace();
     }
   }
+  */
   
   exit();
   

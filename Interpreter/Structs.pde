@@ -504,8 +504,9 @@ final int TokenBranchType_Formula = 6;
 final int TokenBranchType_Index = 7;
 final int TokenBranchType_VarName = 8;
 final int TokenBranchType_OutputVar = 9;
-final int TokenBranchType_Operation = 10;
-final int TokenBranchType_Function = 11;
+final int TokenBranchType_InterpreterCall = 10;
+final int TokenBranchType_Operation = 11;
+final int TokenBranchType_Function = 12;
 
 final String[] TokenBranchTypeNames = {
   "Null",
@@ -518,6 +519,7 @@ final String[] TokenBranchTypeNames = {
   "Index",
   "VarName",
   "OutputVar",
+  "InterpreterCall",
   "Operation",
   "Function",
 };
@@ -533,6 +535,7 @@ final String[] TokenBranchTypeNames_PlusA = {
   "an Index",
   "a VarName",
   "an OutputVar",
+  "an InterpreterCall",
   "an Operation",
   "a Function",
 };

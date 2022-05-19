@@ -1,6 +1,5 @@
 function UpdateAllBalls  -> BallsData, BulletsData
 	AllBalls = BallsData["AllBalls"]
-	unlock BulletsData
 	
 	// update balls
 	NewBalls = {}

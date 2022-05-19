@@ -1283,13 +1283,20 @@ class LooFCompiler {
   
   void LexCodeData (LooFCodeData CodeData, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
+    
     LooFTokenBranch[][] Statements = new LooFTokenBranch [CodeTokens.size()] [];
     for (int i = 0; i < Statements.length; i ++) {
-      LooFTokenBranch[] Statement = GetLexedTokensForLine (CodeTokens.get(i), Operations, Functions, CodeData, i);
-      EnsureStatementIsValid (Statement, CodeData, i);
-      SimplifyStatement (Statement, CodeData, i);
-      Statements[i] = Statement;
+      LooFTokenBranch[] CurrentStatement = GetLexedTokensForLine (CodeTokens.get(i), Operations, Functions, CodeData, i);
+      EnsureStatementIsValid (CurrentStatement, CodeData, i);
+      SimplifyStatement (CurrentStatement, CodeData, i);
+      Statements[i] = CurrentStatement;
     }
+    
+    for (int i = 0; i < Statements.length; i ++) {
+      LooFTokenBranch[] CurrentStatement = Statements[i];
+      Statements[i] = FillAdditionalStatementData (CurrentStatement, i, Statements, CodeData);
+    }
+    
     CodeData.Statements = Statements;
   }
   
@@ -1377,21 +1384,18 @@ class LooFCompiler {
   LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
     if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown / statement is missing \"=\"."));
     
-    
     // statement name
-    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_VarName, CurrentLineTokens.get(0), true, false);
-    
+    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_InterpreterCall, CurrentLineTokens.get(0), true, false);
     
     // get args
     LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
     
-    
     // assemble final statement
     LooFTokenBranch[] Output = new LooFTokenBranch[] {
       StatementName,
-      StatementArgs
+      StatementArgs,
+      null
     };
-    
     
     return Output;
   }
@@ -1491,7 +1495,7 @@ class LooFCompiler {
       throw (new LooFCompileException (CodeData, LineNumber, TokenNumber, "a token can only have a include a period if it is a float."));
     }
     
-    // Type_Name
+    // Type_VarName
     return new LooFTokenBranch (TokenBranchType_VarName, CurrentToken, true, false);
     
   }
@@ -1723,7 +1727,6 @@ class LooFCompiler {
     switch (StringIn) {
       
       case ("default"):
-      case ("unlock"):
       case ("push"):
       case ("pop"):
       case ("call"):
@@ -1743,6 +1746,7 @@ class LooFCompiler {
       case ("breakIf"):
       case ("error"):
       case ("errorIf"):
+      case ("try"):
       case ("callOutside"):
         return true;
       
@@ -1866,9 +1870,6 @@ class LooFCompiler {
       
       case ("default"):
         return;
-      
-      case ("unlock"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
       
       case ("push"):
         EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
@@ -1997,7 +1998,7 @@ class LooFCompiler {
   
   
   void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    if (Statement[0].TokenType != TokenBranchType_VarName) return;
+    if (Statement[0].TokenType != TokenBranchType_InterpreterCall) return;
     switch (Statement[0].StringValue) {
       
       default:
@@ -2006,9 +2007,6 @@ class LooFCompiler {
       case ("default"):
         SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
         return;
-      
-      case ("unlock"):
-        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
       
       case ("push"):
         return;
@@ -2075,6 +2073,9 @@ class LooFCompiler {
       case ("errorIf"):
         return;
       
+      case ("try"):
+        return;
+      
       case ("callOutside"):
         return;
       
@@ -2132,6 +2133,132 @@ class LooFCompiler {
     if (Children.length != 1) return TokenBranch;
     if (Children[0].TokenType != TokenBranchType_Formula) return TokenBranch;
     return Children[0];
+  }
+  
+  
+  
+  
+  
+  LooFTokenBranch[] FillAdditionalStatementData (LooFTokenBranch[] CurrentStatement, int LineNumber, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
+    LooFTokenBranch FirstToken = CurrentStatement[0];
+    if (FirstToken.TokenType != TokenBranchType_InterpreterCall) return CurrentStatement;
+    switch (FirstToken.StringValue) {
+      
+      case ("default"):
+      case ("push"):
+      case ("pop"):
+      case ("call"):
+      case ("return"):
+      case ("returnIf"):
+      case ("if"):
+      case ("end"):
+      case ("error"):
+      case ("errorIf"):
+      case ("try"):
+      case ("callOutside"):
+        return RemoveTrailingToken (CurrentStatement);
+      
+      case ("skip"):
+        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"end"}, +1, AllStatements, CodeData);
+        return CurrentStatement;
+      
+      case ("loop"):
+      case ("forEach"):
+      case ("while"):
+        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"repeat", "repeatIf"}, +1, AllStatements, CodeData);
+        return CurrentStatement;
+      
+      case ("repeat"):
+      case ("repeatIf"):
+      case ("continue"):
+      case ("continueIf"):
+      case ("break"):
+      case ("breakIf"):
+        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"loop", "forEach", "while"}, -1, AllStatements, CodeData);
+        return CurrentStatement;
+      
+      default:
+        throw new AssertionError();
+      
+    }
+  }
+  
+  
+  
+  
+  
+  LooFTokenBranch[] RemoveTrailingToken (LooFTokenBranch[] CurrentStatement) {
+    LooFTokenBranch[] NewStatement = new LooFTokenBranch [CurrentStatement.length - 1];
+    for (int i = 0; i < NewStatement.length; i ++) {
+      NewStatement[i] = CurrentStatement[i];
+    }
+    return NewStatement;
+  }
+  
+  
+  
+  
+  
+  void FillAdditionalStatementData_FindStatement (LooFTokenBranch[] CurrentStatement, int LineNumber, String[] StatementToFind, int Increment, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
+    int NextEndStatement = FindStatementOnSameLevel (StatementToFind, LineNumber, Increment, AllStatements, CodeData);
+    CurrentStatement[2] = new LooFTokenBranch (NextEndStatement);
+  }
+  
+  
+  
+  int FindStatementOnSameLevel (String[] StatementToFind, int StartingLineNumber, int Increment, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
+    int BlockLevel = 0;
+    int StartIndex = StartingLineNumber + Increment;
+    int EndIndex = (Increment > 0) ? AllStatements.length : -1;
+    for (int i = StartIndex; i != EndIndex; i += Increment) {
+      
+      if (BlockLevel < 0) throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (first statement found was not on the same block level)."));
+      
+      LooFTokenBranch[] CurrentStatement = AllStatements[i];
+      LooFTokenBranch FirstToken = CurrentStatement[0];
+      
+      if (FirstToken.TokenType != TokenBranchType_InterpreterCall) continue;
+      
+      if (BlockLevel == 0 && TableContainsItem (StatementToFind, FirstToken.StringValue)) {
+        return i;
+      }
+      
+      switch (FirstToken.StringValue) {
+        
+        case ("default"):
+        case ("push"):
+        case ("pop"):
+        case ("call"):
+        case ("return"):
+        case ("returnIf"):
+        case ("if"):
+        case ("continue"):
+        case ("continueIf"):
+        case ("break"):
+        case ("breakIf"):
+        case ("error"):
+        case ("errorIf"):
+        case ("try"):
+        case ("callOutside"):
+          continue;
+        
+        case ("skip"):
+        case ("loop"):
+        case ("forEach"):
+        case ("while"):
+          BlockLevel ++;
+          continue;
+        
+        case ("repeat"):
+        case ("repeatIf"):
+        case ("end"):
+          BlockLevel --;
+          continue;
+        
+      }
+      
+    }
+    throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (statement completely missing)."));
   }
   
   

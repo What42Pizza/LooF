@@ -227,6 +227,9 @@ class LooFInterpreter {
       case (TokenBranchType_OutputVar):
         throw new AssertionError();
       
+      case (TokenBranchType_InterpreterCall):
+        throw new AssertionError();
+      
       case (TokenBranchType_Operation):
         return null;
       

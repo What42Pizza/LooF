@@ -41,6 +41,15 @@
 
 
 
+<T> boolean TableContainsItem (T[] Input, T Item) {
+  for (int i = 0; i < Input.length; i ++) {
+    if (Input[i].equals(Item)) return true;
+  }
+  return false;
+}
+
+
+
 int[] ToPrimitive (Integer[] ArrayIn) {
   int[] ArrayOut = new int [ArrayIn.length];
   for (int i = 0; i < ArrayIn.length; i ++) {
@@ -339,6 +348,17 @@ String CombineStringsWithSeperator (ArrayList <String> StringsIn, String Seperat
 }
 
 
+String CombineStringsWithSeperator (String[] StringsIn, String Seperator) {
+  int StringsInSize = StringsIn.length;
+  if (StringsInSize == 0) return "";
+  String StringOut = StringsIn[0];
+  for (int i = 1; i < StringsInSize; i ++) {
+    StringOut += Seperator + StringsIn[i];
+  }
+  return StringOut;
+}
+
+
 
 
 
@@ -386,6 +406,7 @@ String ConvertLooFStatementToString (LooFTokenBranch[] Statement) {
 
 
 String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
+  try {
   switch (TokenBranch.TokenType) {
     
     default:
@@ -421,12 +442,19 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_OutputVar):
       return "OutputVar \"" + TokenBranch.StringValue + "\"";
     
+    case (TokenBranchType_InterpreterCall):
+      return "InterpreterCall \"" + TokenBranch.StringValue + "\"";
+    
     case (TokenBranchType_Operation):
       return "Operation \"" + TokenBranch.StringValue + "\"";
     
     case (TokenBranchType_Function):
       return "Function \"" + TokenBranch.StringValue + "\"";
     
+  }
+  } catch (Exception e) {
+    e.printStackTrace();
+    throw new AssertionError();
   }
 }
 
