@@ -13,7 +13,7 @@ class LooFInterpreter {
   
   void ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) {
     for (int i = 0; i < NumOfStatements; i ++) {
-      LooFTokenBranch[] CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
+      LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
       ExecuteStatement (CurrentStatement, Environment);
     }
   }
@@ -22,13 +22,13 @@ class LooFInterpreter {
   
   
   
-  void ExecuteStatement (LooFTokenBranch[] Statement, LooFEnvironment Environment) {
+  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
     
     // execute statement
-    if (Statement[0].TokenType == TokenBranchType_OutputVar)
-      ExecuteAssignmentStatement (Statement, Environment);
+    if (CurrentStatement.StatementType == StatementType_Assignment)
+      ExecuteAssignmentStatement (CurrentStatement, Environment);
     else
-      ExecuteInterpreterCallStatement (Statement, Environment);
+      ExecuteInterpreterCallStatement (CurrentStatement, Environment);
     
     Environment.CurrentLineNumber ++;
     
@@ -45,22 +45,23 @@ class LooFInterpreter {
   
   
   
-  void ExecuteAssignmentStatement (LooFTokenBranch[] Statement, LooFEnvironment Environment) {
-    String OutputVarName = Statement[0].StringValue;
-    LooFDataValue NewVarValue = EvaluateFormula (GetLastItemOf (Statement), Environment);
+  void ExecuteAssignmentStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+    String OutputVarName = CurrentStatement.VarName;
+    LooFDataValue NewVarValue = EvaluateFormula (CurrentStatement.NewValueFormula, Environment);
+    LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
     
-    if (Statement.length == 2) {
+    if (IndexQueries.length == 0) {
       SetVariableValue (OutputVarName, NewVarValue, Environment);
       return;
     }
     
     LooFDataValue TargetTable = GetVariableValue (OutputVarName, Environment, true);
-    for (int i = 1; i < Statement.length - 2; i ++) {
-      LooFDataValue ValueToIndexWith = EvaluateFormula (Statement[i], Environment);
+    for (int i = 0; i < IndexQueries.length - 1; i ++) {
+      LooFDataValue ValueToIndexWith = EvaluateFormula (IndexQueries[i], Environment);
       TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, Environment);
     }
     
-    LooFDataValue IndexValue = EvaluateFormula (Statement[Statement.length - 2], Environment);
+    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment);
     SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
     
   }
@@ -69,7 +70,7 @@ class LooFInterpreter {
   
   
   
-  void ExecuteInterpreterCallStatement (LooFTokenBranch[] Statement, LooFEnvironment Environment) {
+  void ExecuteInterpreterCallStatement (LooFStatement Statement, LooFEnvironment Environment) {
     
   }
   
@@ -227,13 +228,10 @@ class LooFInterpreter {
       case (TokenBranchType_OutputVar):
         throw new AssertionError();
       
-      case (TokenBranchType_InterpreterCall):
-        throw new AssertionError();
-      
-      case (TokenBranchType_Operation):
+      case (TokenBranchType_EvaluatorOperation):
         return null;
       
-      case (TokenBranchType_Function):
+      case (TokenBranchType_EvaluatorFunction):
         return null;
       
     }

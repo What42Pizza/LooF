@@ -35,9 +35,7 @@ class LooFCompiler {
     
     
     // get default addons
-    HashMap <String, LooFInterpreterModule> Modules = GetDefaultModules (CompileSettings);
-    HashMap <String, LooFEvaluatorOperation> Operations = GetDefaultOperations (CompileSettings);
-    HashMap <String, LooFEvaluatorFunction> Functions = GetDefaultFunctions (CompileSettings);
+    LooFAddonsData AddonsData = GetAddonsDataForEnvironment (CompileSettings);
     
     
     
@@ -89,7 +87,7 @@ class LooFCompiler {
     
     // lex CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      LexCodeData (CodeData, Operations, Functions);
+      LexCodeData (CodeData, AddonsData);
     }
     
     if (CompileSettings.LexerOutputPath != null) {
@@ -101,10 +99,7 @@ class LooFCompiler {
     
     
     // create environement
-    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas);
-    NewEnvironment.InterpreterModules = Modules;
-    NewEnvironment.EvaluatorOperations = Operations;
-    NewEnvironment.EvaluatorFunctions = Functions;
+    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas, AddonsData);
     
     
     
@@ -131,106 +126,184 @@ class LooFCompiler {
   
   
   
-  HashMap <String, LooFInterpreterModule> GetDefaultModules (LooFCompileSettings CompileSettings) {
-    HashMap <String, LooFInterpreterModule> Modules = CompileSettings.CustomModules;
-    if (!CompileSettings.AddDefaultModules) return Modules;
-    
-    return Modules;
+  LooFAddonsData GetAddonsDataForEnvironment (LooFCompileSettings CompileSettings) {
+    LooFAddonsData AddonsData = new LooFAddonsData();
+    AddonsData.InterpreterModules          = GetInterpreterModulesForEnvironment          (CompileSettings);
+    AddonsData.EvaluatorOperations         = GetEvaluatorOperationsForEnvironment         (CompileSettings);
+    AddonsData.EvaluatorFunctions          = GetEvaluatorFunctionsForEnvironment          (CompileSettings);
+    AddonsData.InterpreterAssignments      = GetInterpreterAssignmentsForEnvironment      (CompileSettings);
+    AddonsData.InterpreterTweakAssignments = GetInterpreterTweakAssignmentsForEnvironment (CompileSettings);
+    AddonsData.InterpreterFunctions        = GetInterpreterFunctionsForEnvironment        (CompileSettings);
+    return AddonsData;
   }
   
   
   
   
   
-  HashMap <String, LooFEvaluatorOperation> GetDefaultOperations (LooFCompileSettings CompileSettings) {
-    HashMap <String, LooFEvaluatorOperation> Operations = new HashMap <String, LooFEvaluatorOperation> ();
-    if (!CompileSettings.AddDefaultOperations) return Operations;
+  HashMap <String, LooFInterpreterModule> GetInterpreterModulesForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFInterpreterModule> InterpreterModules = new HashMap <String, LooFInterpreterModule> ();
+    if (!CompileSettings.AddDefaultInterpreterModules) return InterpreterModules;
     
-    Operations.put("+", Operation_Add);
-    Operations.put("-", Operation_Subtract);
-    Operations.put("*", Operation_Multiply);
-    Operations.put("/", Operation_Divide);
-    Operations.put("^", Operation_Power);
-    Operations.put("%", Operation_Modulo);
-    Operations.put("..", Operation_Concat);
-    Operations.put("==", Operation_Equals);
-    Operations.put("===", Operation_StrictEquals);
-    Operations.put(">", Operation_GreaterThan);
-    Operations.put("<", Operation_LessThan);
-    Operations.put("!=", Operation_NotEquals);
-    Operations.put("!==", Operation_StrictNotEquals);
-    Operations.put(">=", Operation_GreaterThanOrEqual);
-    Operations.put("<=", Operation_LessThanOrEqual);
-    Operations.put("and", Operation_And);
-    Operations.put("or", Operation_Or);
-    Operations.put("xor", Operation_Xor);
-    
-    return Operations;
+    return InterpreterModules;
   }
   
   
   
   
   
-  HashMap <String, LooFEvaluatorFunction> GetDefaultFunctions (LooFCompileSettings CompileSettings) {
-    HashMap <String, LooFEvaluatorFunction> Functions = new HashMap <String, LooFEvaluatorFunction> ();
-    if (!CompileSettings.AddDefaultFunctions) return Functions;
+  HashMap <String, LooFEvaluatorOperation> GetEvaluatorOperationsForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
+    if (!CompileSettings.AddDefaultEvaluatorOperations) return EvaluatorOperations;
     
-    Functions.put("round", Function_round);
-    Functions.put("floor", Function_floor);
-    Functions.put("ceil", Function_ceil);
-    Functions.put("abs", NullFunction);
-    Functions.put("sqrt", Function_sqrt);
-    Functions.put("sign", Function_sign);
-    Functions.put("not", Function_not);
-    Functions.put("min", Function_min);
-    Functions.put("max", Function_max);
+    EvaluatorOperations.put("+", Operation_Add);
+    EvaluatorOperations.put("-", Operation_Subtract);
+    EvaluatorOperations.put("*", Operation_Multiply);
+    EvaluatorOperations.put("/", Operation_Divide);
+    EvaluatorOperations.put("^", Operation_Power);
+    EvaluatorOperations.put("%", Operation_Modulo);
+    EvaluatorOperations.put("..", Operation_Concat);
+    EvaluatorOperations.put("==", Operation_Equals);
+    EvaluatorOperations.put("===", Operation_StrictEquals);
+    EvaluatorOperations.put(">", Operation_GreaterThan);
+    EvaluatorOperations.put("<", Operation_LessThan);
+    EvaluatorOperations.put("!=", Operation_NotEquals);
+    EvaluatorOperations.put("!==", Operation_StrictNotEquals);
+    EvaluatorOperations.put(">=", Operation_GreaterThanOrEqual);
+    EvaluatorOperations.put("<=", Operation_LessThanOrEqual);
+    EvaluatorOperations.put("and", Operation_And);
+    EvaluatorOperations.put("or", Operation_Or);
+    EvaluatorOperations.put("xor", Operation_Xor);
     
-    Functions.put("random", Function_random);
-    Functions.put("randomInt", Function_randomInt);
-    Functions.put("chance", Function_chance);
+    return EvaluatorOperations;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFEvaluatorFunction> GetEvaluatorFunctionsForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFEvaluatorFunction> EvaluatorFunctions = new HashMap <String, LooFEvaluatorFunction> ();
+    if (!CompileSettings.AddDefaultEvaluatorFunctions) return EvaluatorFunctions;
     
-    Functions.put("lengthOf", Function_lengthOf);
-    Functions.put("totalItemsIn", Function_totalItemsIn);
-    Functions.put("endOf", Function_endOf);
-    Functions.put("lastItemOf", NullFunction);
-    Functions.put("keysOf", Function_keysOf);
-    Functions.put("valuesOf", Function_valuesOf);
-    Functions.put("randomItem", Function_randomItem);
-    Functions.put("randomValue", Function_randomValue);
-    Functions.put("firstIndexOfItem", NullFunction);
-    Functions.put("lastIndexOfItem", NullFunction);
-    Functions.put("allIndexesOfItem", NullFunction);
-    Functions.put("tableContainsItem", NullFunction);
-    Functions.put("arrayContainsItem", NullFunction);
-    Functions.put("hashmapContainsItem", NullFunction);
-    Functions.put("splitTable", NullFunction);
+    EvaluatorFunctions.put("round", Function_round);
+    EvaluatorFunctions.put("floor", Function_floor);
+    EvaluatorFunctions.put("ceil", Function_ceil);
+    EvaluatorFunctions.put("abs", NullEvaluatorFunction);
+    EvaluatorFunctions.put("sqrt", Function_sqrt);
+    EvaluatorFunctions.put("sign", Function_sign);
+    EvaluatorFunctions.put("not", Function_not);
+    EvaluatorFunctions.put("min", Function_min);
+    EvaluatorFunctions.put("max", Function_max);
     
-    Functions.put("getChar", Function_getChar);
-    Functions.put("getCharInts", Function_getCharInts);
-    Functions.put("getCharByes", Function_getCharBytes);
-    Functions.put("getSubString", Function_getSubString);
-    Functions.put("firstIndexOfString", NullFunction);
-    Functions.put("lastIndexOfString", NullFunction);
-    Functions.put("allIndexesOfString", NullFunction);
-    Functions.put("splitString", NullFunction);
-    Functions.put("stringStartsWith", NullFunction);
-    Functions.put("stringEndsWith", NullFunction);
-    Functions.put("replaceStrings", NullFunction);
-    Functions.put("toLowerCase", NullFunction);
-    Functions.put("toUpperCase", NullFunction);
-    Functions.put("trimString", NullFunction);
+    EvaluatorFunctions.put("random", Function_random);
+    EvaluatorFunctions.put("randomInt", Function_randomInt);
+    EvaluatorFunctions.put("chance", Function_chance);
     
-    Functions.put("toInt", Function_toInt);
-    Functions.put("toFloat", Function_toFloat);
-    Functions.put("toString", Function_toString);
-    Functions.put("toBool", Function_toBool);
+    EvaluatorFunctions.put("lengthOf", Function_lengthOf);
+    EvaluatorFunctions.put("totalItemsIn", Function_totalItemsIn);
+    EvaluatorFunctions.put("endOf", Function_endOf);
+    EvaluatorFunctions.put("lastItemOf", NullEvaluatorFunction);
+    EvaluatorFunctions.put("keysOf", Function_keysOf);
+    EvaluatorFunctions.put("valuesOf", Function_valuesOf);
+    EvaluatorFunctions.put("randomItem", Function_randomItem);
+    EvaluatorFunctions.put("randomValue", Function_randomValue);
+    EvaluatorFunctions.put("firstIndexOfItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("lastIndexOfItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("allIndexesOfItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("tableContainsItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("arrayContainsItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("hashmapContainsItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("splitTable", NullEvaluatorFunction);
     
-    Functions.put("typeOf", Function_typeOf);
-    Functions.put("newByteArray", NullFunction);
-    Functions.put("timeSince", NullFunction);
+    EvaluatorFunctions.put("getChar", Function_getChar);
+    EvaluatorFunctions.put("getCharInts", Function_getCharInts);
+    EvaluatorFunctions.put("getCharByes", Function_getCharBytes);
+    EvaluatorFunctions.put("getSubString", Function_getSubString);
+    EvaluatorFunctions.put("firstIndexOfString", NullEvaluatorFunction);
+    EvaluatorFunctions.put("lastIndexOfString", NullEvaluatorFunction);
+    EvaluatorFunctions.put("allIndexesOfString", NullEvaluatorFunction);
+    EvaluatorFunctions.put("splitString", NullEvaluatorFunction);
+    EvaluatorFunctions.put("stringStartsWith", NullEvaluatorFunction);
+    EvaluatorFunctions.put("stringEndsWith", NullEvaluatorFunction);
+    EvaluatorFunctions.put("replaceStrings", NullEvaluatorFunction);
+    EvaluatorFunctions.put("toLowerCase", NullEvaluatorFunction);
+    EvaluatorFunctions.put("toUpperCase", NullEvaluatorFunction);
+    EvaluatorFunctions.put("trimString", NullEvaluatorFunction);
     
-    return Functions;
+    EvaluatorFunctions.put("toInt", Function_toInt);
+    EvaluatorFunctions.put("toFloat", Function_toFloat);
+    EvaluatorFunctions.put("toString", Function_toString);
+    EvaluatorFunctions.put("toBool", Function_toBool);
+    
+    EvaluatorFunctions.put("typeOf", Function_typeOf);
+    EvaluatorFunctions.put("newByteArray", NullEvaluatorFunction);
+    EvaluatorFunctions.put("timeSince", NullEvaluatorFunction);
+    
+    return EvaluatorFunctions;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFInterpreterAssignment> GetInterpreterAssignmentsForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFInterpreterAssignment> InterpreterAssignments = new HashMap <String, LooFInterpreterAssignment> ();
+    if (!CompileSettings.AddDefaultInterpreterAssignments) return InterpreterAssignments;
+    
+    InterpreterAssignments.put("=", Assignment_Equals);
+    InterpreterAssignments.put("defaultsTo", Assignment_DefaultsTo);
+    
+    return InterpreterAssignments;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFInterpreterTweakAssignment> GetInterpreterTweakAssignmentsForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments = new HashMap <String, LooFInterpreterTweakAssignment> ();
+    if (!CompileSettings.AddDefaultInterpreterTweakAssignments) return InterpreterTweakAssignments;
+    
+    return InterpreterTweakAssignments;
+  }
+  
+  
+  
+  
+  
+  HashMap <String, LooFInterpreterFunction> GetInterpreterFunctionsForEnvironment (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFInterpreterFunction> InterpreterFunctions = new HashMap <String, LooFInterpreterFunction> ();
+    if (!CompileSettings.AddDefaultInterpreterTweakAssignments) return InterpreterFunctions;
+    
+    InterpreterFunctions.put("push", InterpreterFunction_Push);
+    InterpreterFunctions.put("pop", InterpreterFunction_Pop);
+    
+    InterpreterFunctions.put("call", InterpreterFunction_Call);
+    InterpreterFunctions.put("return", InterpreterFunction_Return);
+    InterpreterFunctions.put("returnIf", InterpreterFunction_ReturnIf);
+    
+    InterpreterFunctions.put("if", InterpreterFunction_If);
+    InterpreterFunctions.put("skip", InterpreterFunction_Skip);
+    InterpreterFunctions.put("end", InterpreterFunction_End);
+    
+    InterpreterFunctions.put("loop", InterpreterFunction_Loop);
+    InterpreterFunctions.put("forEach", InterpreterFunction_ForEach);
+    InterpreterFunctions.put("while", InterpreterFunction_While);
+    InterpreterFunctions.put("repeat", InterpreterFunction_Repeat);
+    InterpreterFunctions.put("repeatIf", InterpreterFunction_RepeatIf);
+    InterpreterFunctions.put("continue", InterpreterFunction_Continue);
+    InterpreterFunctions.put("continueIf", InterpreterFunction_ContinueIf);
+    InterpreterFunctions.put("break", InterpreterFunction_Break);
+    InterpreterFunctions.put("breakIf", InterpreterFunction_BreakIf);
+    
+    InterpreterFunctions.put("error", InterpreterFunction_Error);
+    InterpreterFunctions.put("errorIf", InterpreterFunction_ErrorIf);
+    InterpreterFunctions.put("try", InterpreterFunction_Try);
+    
+    InterpreterFunctions.put("callOutside", InterpreterFunction_CallOutside);
+    
+    return InterpreterFunctions;
   }
   
   
@@ -1281,44 +1354,73 @@ class LooFCompiler {
   
   
   
-  void LexCodeData (LooFCodeData CodeData, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions) {
+  void LexCodeData (LooFCodeData CodeData, LooFAddonsData AddonsData) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     
-    LooFTokenBranch[][] Statements = new LooFTokenBranch [CodeTokens.size()] [];
+    // generate basic statements
+    LooFStatement[] Statements = new LooFStatement [CodeTokens.size()];
     for (int i = 0; i < Statements.length; i ++) {
-      LooFTokenBranch[] CurrentStatement = GetLexedTokensForLine (CodeTokens.get(i), Operations, Functions, CodeData, i);
-      EnsureStatementIsValid (CurrentStatement, CodeData, i);
-      SimplifyStatement (CurrentStatement, CodeData, i);
+      LooFStatement CurrentStatement = GetStatementFromLine (CodeTokens.get(i), AddonsData, CodeData, i);
+      SimplifyNestedFormulasForStatement (CurrentStatement);
       Statements[i] = CurrentStatement;
     }
     
-    for (int i = 0; i < Statements.length; i ++) {
-      LooFTokenBranch[] CurrentStatement = Statements[i];
-      Statements[i] = FillAdditionalStatementData (CurrentStatement, i, Statements, CodeData);
-    }
-    
     CodeData.Statements = Statements;
+    
+    // make sure they will work and fill in any additional data
+    for (int i = 0; i < Statements.length; i ++) {
+      LooFStatement CurrentStatement = Statements[i];
+      if (CurrentStatement.StatementType != StatementType_Function) continue;
+      CurrentStatement.Function.FinishStatement (CurrentStatement, CodeData, i);
+    }
   }
   
   
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine (ArrayList <String> CurrentLineTokens, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
+  LooFStatement GetStatementFromLine (ArrayList <String> CurrentLineTokens, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
     // get basic data
     ReturnValue BlocksData = GetAllBlockLevelsAndEnds (CurrentLineTokens, CodeData, LineNumber);
     ArrayList <Integer> BlockLevels = BlocksData.IntegerArrayListValue;
     ArrayList <Integer> BlockEnds = BlocksData.SecondIntegerArrayListValue;
+    HashMap <String, LooFInterpreterAssignment> InterpreterAssignments = AddonsData.InterpreterAssignments;
+    HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments = AddonsData.InterpreterTweakAssignments;
+    HashMap <String, LooFInterpreterFunction> InterpreterFunctions = AddonsData.InterpreterFunctions;
     
-    // assignment statements
-    int AssignmentTokenIndex = FindTokenIndex ("=", CurrentLineTokens, 0);
-    if (AssignmentTokenIndex != -1) {
-      return GetLexedTokensForLine_Assignment (CurrentLineTokens, BlockLevels, BlockEnds, AssignmentTokenIndex, Operations, Functions, CodeData, LineNumber);
+    // interpreter functions
+    LooFInterpreterFunction FoundInterpreterFunction = InterpreterFunctions.get(CurrentLineTokens.get(0));
+    if (FoundInterpreterFunction != null) {
+      return GetStatementFromLine_InterpreterFunction (CurrentLineTokens, FoundInterpreterFunction, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     }
     
-    // other statements
-    return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+    if (CurrentLineTokens.size() < 2) throw (new LooFCompileException (CodeData, LineNumber, "could not understand statement type. No interpreter function named \"" + CurrentLineTokens.get(0) + "\" exists, and statement is not long enough to be an assignment."));
+    
+    // get assignment token
+    int PossibleAssignmentTokenIndex = 1;
+    String PossibleAssignmentToken = CurrentLineTokens.get(PossibleAssignmentTokenIndex);
+    while (PossibleAssignmentToken.equals("[")) {
+      PossibleAssignmentTokenIndex = BlockEnds.get(PossibleAssignmentTokenIndex) + 1;
+      PossibleAssignmentToken = CurrentLineTokens.get(PossibleAssignmentTokenIndex);
+    }
+    int AssignmentTokenIndex = PossibleAssignmentTokenIndex;
+    String AssignmentToken = PossibleAssignmentToken;
+    
+    // interpreter assignments
+    LooFInterpreterAssignment FoundInterpreterAssignment = InterpreterAssignments.get(AssignmentToken);
+    if (FoundInterpreterAssignment != null) {
+      return GetStatementFromLine_Assignment (CurrentLineTokens, FoundInterpreterAssignment, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    }
+    
+    // interpreter tweak assignments
+    LooFInterpreterTweakAssignment FoundInterpreterTweakAssignment = InterpreterTweakAssignments.get(AssignmentToken);
+    if (FoundInterpreterTweakAssignment != null) {
+      return GetStatementFromLine_TweakAssignment (CurrentLineTokens, FoundInterpreterTweakAssignment, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    }
+    
+    // unknown statement type
+    throw (new LooFCompileException (CodeData, LineNumber, "could not understand statement type. No interpreter function named \"" + CurrentLineTokens.get(0) + "\" exists, and token number " + AssignmentTokenIndex + " (\"" + AssignmentToken + "\") is not an assignment."));
     
   }
   
@@ -1326,53 +1428,18 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_Assignment (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, int AssignmentTokenIndex, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
+  LooFStatement GetStatementFromLine_Assignment (ArrayList <String> CurrentLineTokens, LooFInterpreterAssignment InterpreterAssignment, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
-    // error if there are multiple "="-s
-    if (FindTokenIndex ("=", CurrentLineTokens, AssignmentTokenIndex + 1) != -1) throw (new LooFCompileException (CodeData, LineNumber, "found two \"=\" tokens but only one can used per statement."));
-    
-    // handle "default " statements
-    if (CurrentLineTokens.get(0).equals("default")) {
-      CurrentLineTokens.set(AssignmentTokenIndex, ",");
-      return GetLexedTokensForLine_InterpreterCall (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-    }
-    
-    // error if var name is invalid
-    if (StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token \"=\" / variables cannot be named \"" + CurrentLineTokens.get(0) +"\"."));
-    
-    
-    // var name
-    LooFTokenBranch TargetVarName = new LooFTokenBranch (TokenBranchType_OutputVar, CurrentLineTokens.get(0), false, false);
-    
-    
-    // indexes
-    int PossibleIndexIndex = 1;
-    ArrayList <LooFTokenBranch> TargetVarIndexes = new ArrayList <LooFTokenBranch> ();
-    while (PossibleIndexIndex < AssignmentTokenIndex) {
-      if (!CurrentLineTokens.get(PossibleIndexIndex).equals("[")) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
-      int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
-      LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-      IndexFormula.TokenType = TokenBranchType_Index;
-      //IndexFormula.IsAction = true;  // this is more correct but it's not needed
-      TargetVarIndexes.add(IndexFormula);
-      PossibleIndexIndex = IndexEndIndex + 2;
-    }
-    if (PossibleIndexIndex != AssignmentTokenIndex) throw (new LooFCompileException (CodeData, LineNumber, "unexpected token (\"" + CurrentLineTokens.get(PossibleIndexIndex) + "\"): must be an index (starting with \"[\") or an assignment (\"=\")."));
-    
+    // index queries
+    LooFTokenBranch[] IndexQueries = GetIndexQueriesForStatement (CurrentLineTokens, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // formula for new value
-    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-    
+    LooFTokenBranch NewValueFormula = GetLexedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // assemble final statement
-    LooFTokenBranch[] Output = new LooFTokenBranch [TargetVarIndexes.size() + 2];
-    Output[0] = TargetVarName;
-    int TargetVarIndexesSize = TargetVarIndexes.size();
-    for (int i = 0; i < TargetVarIndexesSize; i ++) {
-      Output[i + 1] = TargetVarIndexes.get(i);
-    }
-    Output[Output.length - 1] = NewValueFormula;
-    
+    String AssignmentName = CurrentLineTokens.get(AssignmentTokenIndex);
+    String VarName = CurrentLineTokens.get(0);
+    LooFStatement Output = new LooFStatement (AssignmentName, VarName, IndexQueries, InterpreterAssignment, NewValueFormula);
     
     return Output;
   }
@@ -1381,46 +1448,71 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] GetLexedTokensForLine_InterpreterCall (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
-    if (!StringIsInterpreterCall (CurrentLineTokens.get(0))) throw (new LooFCompileException (CodeData, LineNumber, "statement type " + CurrentLineTokens.get(0) + " is unknown / statement is missing \"=\"."));
+  LooFStatement GetStatementFromLine_TweakAssignment (ArrayList <String> CurrentLineTokens, LooFInterpreterTweakAssignment InterpreterTweakAssignment, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
-    // statement name
-    LooFTokenBranch StatementName = new LooFTokenBranch (TokenBranchType_InterpreterCall, CurrentLineTokens.get(0), true, false);
+    // index queries
+    LooFTokenBranch[] IndexQueries = GetIndexQueriesForStatement (CurrentLineTokens, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    
+    // assemble final statement
+    String TweakAssignmentName = CurrentLineTokens.get(AssignmentTokenIndex);
+    String VarName = CurrentLineTokens.get(0);
+    LooFStatement Output = new LooFStatement (TweakAssignmentName, VarName, IndexQueries, InterpreterTweakAssignment);
+    
+    return Output;
+  }
+  
+  
+  
+  
+  
+  LooFTokenBranch[] GetIndexQueriesForStatement (ArrayList <String> CurrentLineTokens, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    ArrayList <LooFTokenBranch> IndexQueriesList = new ArrayList <LooFTokenBranch> ();
+    int PossibleIndexIndex = 1;
+    
+    while (PossibleIndexIndex < AssignmentTokenIndex) {
+      int IndexEndIndex = BlockEnds.get(PossibleIndexIndex) - 1;
+      LooFTokenBranch IndexQueryFormula = GetLexedFormula (CurrentLineTokens, PossibleIndexIndex + 1, IndexEndIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+      IndexQueryFormula.TokenType = TokenBranchType_Index;
+      //IndexFormula.IsAction = true;  // this is more correct but it's not needed
+      IndexQueriesList.add(IndexQueryFormula);
+      PossibleIndexIndex = IndexEndIndex + 2;
+    }
+    
+    return ArrayListToArray (IndexQueriesList, new LooFTokenBranch());
+  }
+  
+  
+  
+  
+  
+  LooFStatement GetStatementFromLine_InterpreterFunction (ArrayList <String> CurrentLineTokens, LooFInterpreterFunction InterpreterFunction, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
     // get args
-    LooFTokenBranch StatementArgs = GetStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+    LooFTokenBranch[] FunctionStatementArgs = GetFunctionStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // assemble final statement
-    LooFTokenBranch[] Output = new LooFTokenBranch[] {
-      StatementName,
-      StatementArgs,
-      null
-    };
+    LooFStatement Output = new LooFStatement (CurrentLineTokens.get(0), InterpreterFunction, FunctionStatementArgs);
     
     return Output;
   }
   
   
   
-  LooFTokenBranch GetStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
-    
-    if (CurrentLineTokens.size() == 1) {
-      return new LooFTokenBranch (TokenBranchType_Formula, new LooFTokenBranch [0], false);
-    }
-    
-    return GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
-    
+  LooFTokenBranch[] GetFunctionStatementArgs (ArrayList <String> CurrentLineTokens, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    if (CurrentLineTokens.size() == 1) return new LooFTokenBranch [0];
+    LooFTokenBranch ArgsAsTable = GetLexedTable (CurrentLineTokens, 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    return ArgsAsTable.Children;
   }
   
   
   
   
   
-  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetLexedFormula (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     ArrayList <LooFTokenBranch> FormulaChildrenList = new ArrayList <LooFTokenBranch> ();
     for (int i = FormulaBlockStart; i < FormulaBlockEnd + 1; i ++) {
       String CurrentToken = CurrentLineTokens.get(i);
-      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+      LooFTokenBranch NewChild = GetTokenBranchFromToken (CurrentToken, CurrentLineTokens, i, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
       FormulaChildrenList.add(NewChild);
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
@@ -1434,7 +1526,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetTokenBranchFromToken (String CurrentToken, ArrayList <String> CurrentLineTokens, int TokenNumber, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
     switch (CurrentToken) {
       
@@ -1444,29 +1536,29 @@ class LooFCompiler {
       
       // Type_Formula
       case ("("):
-        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+        return GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
       
       // Type_Index
       case ("["):
-        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+        LooFTokenBranch IndexFormula = GetLexedFormula (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
         IndexFormula.TokenType = TokenBranchType_Index;
         IndexFormula.IsAction = true;
         return IndexFormula;
       
       // Type_Table
       case ("{"):
-        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber);
+        return GetLexedTable (CurrentLineTokens, TokenNumber + 1, BlockEnds.get(TokenNumber) - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
       
     }
     
     // Type_Operaion
-    LooFEvaluatorOperation FoundOperation = Operations.get(CurrentToken);
+    LooFEvaluatorOperation FoundOperation = AddonsData.EvaluatorOperations.get(CurrentToken);
     if (FoundOperation != null) {
       return new LooFTokenBranch (FoundOperation, CurrentToken);
     }
     
     // Type_Function
-    LooFEvaluatorFunction FoundFunction = Functions.get(CurrentToken);
+    LooFEvaluatorFunction FoundFunction = AddonsData.EvaluatorFunctions.get(CurrentToken);
     if (FoundFunction != null) {
       return new LooFTokenBranch (FoundFunction, CurrentToken);
     }
@@ -1511,17 +1603,17 @@ class LooFCompiler {
       case (TokenBranchType_Index):
         throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot start with an index query."));
       
-      case (TokenBranchType_Operation):
+      case (TokenBranchType_EvaluatorOperation):
         throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot start with an evaluator operation."));
       
     }
     
     switch (GetLastItemOf(FormulaChildren).TokenType) {
       
-      case (TokenBranchType_Operation):
+      case (TokenBranchType_EvaluatorOperation):
         throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot end with an evaluator operation."));
       
-      case (TokenBranchType_Function):
+      case (TokenBranchType_EvaluatorFunction):
         throw (new LooFCompileException (CodeData, LineNumber, TokenOffset, "formulas cannot end with an evaluator function."));
       
     }
@@ -1537,7 +1629,7 @@ class LooFCompiler {
     // ensure evaluator operations are valid
     for (int i = 1; i < FormulaChildren.length - 1; i ++) {
       LooFTokenBranch CurrentToken = FormulaChildren[i];
-      if (CurrentToken.TokenType != TokenBranchType_Operation) continue;
+      if (CurrentToken.TokenType != TokenBranchType_EvaluatorOperation) continue;
       LooFTokenBranch PrevToken = FormulaChildren[i - 1];
       if (!PrevToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot perform an evaluator operation where the left token is of type " + TokenBranchTypeNames[PrevToken.TokenType] + "."));
       LooFTokenBranch NextToken = FormulaChildren[i + 1];
@@ -1547,7 +1639,7 @@ class LooFCompiler {
     // ensure evaluator functions are valid
     for (int i = 0; i < FormulaChildren.length - 1; i ++) {
       LooFTokenBranch CurrentToken = FormulaChildren[i];
-      if (CurrentToken.TokenType != TokenBranchType_Function) continue;
+      if (CurrentToken.TokenType != TokenBranchType_EvaluatorFunction) continue;
       LooFTokenBranch NextToken = FormulaChildren[i + 1];
       if (!NextToken.ConvertsToDataValue) throw (new LooFCompileException (CodeData, LineNumber, i + TokenOffset, "cannot perform an evaluator function on a token of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
     }
@@ -1583,14 +1675,14 @@ class LooFCompiler {
     
     // get function indexes
     for (int i = FormulaChildren.length - 1; i >= 0; i --) {
-      if (FormulaChildren[i].TokenType == TokenBranchType_Function) {
+      if (FormulaChildren[i].TokenType == TokenBranchType_EvaluatorFunction) {
         FunctionIndexes.add(i);
       }
     }
     
     // get operation indexes
     for (int i = 0; i < FormulaChildren.length; i ++) {
-      if (FormulaChildren[i].TokenType == TokenBranchType_Operation) {
+      if (FormulaChildren[i].TokenType == TokenBranchType_EvaluatorOperation) {
         OperationIndexes.add(i);
         OperationOrders.add(FormulaChildren[i].Operation.GetOrder());
       }
@@ -1665,7 +1757,7 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, HashMap <String, LooFEvaluatorOperation> Operations, HashMap <String, LooFEvaluatorFunction> Functions, LooFCodeData CodeData, int LineNumber) {
+  LooFTokenBranch GetLexedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TokenBranchType_Table, new LooFTokenBranch [0], false);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
     ArrayList <LooFTokenBranch> Items = new ArrayList <LooFTokenBranch> ();
@@ -1674,12 +1766,12 @@ class LooFCompiler {
     int PrevNextCommaIndex = ItemStartIndex - 1;
     int NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, TableBlockStart, TableBlockEnd, TableBlockLevel, BlockLevels);
     while (NextCommaIndex != -1) {
-      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber));
+      Items.add (GetLexedFormula (CurrentLineTokens, ItemStartIndex, NextCommaIndex - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber));
       ItemStartIndex = NextCommaIndex + 1;
       PrevNextCommaIndex = NextCommaIndex;
       NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd, TableBlockLevel, BlockLevels);
     }
-    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, Operations, Functions, CodeData, LineNumber));
+    Items.add (GetLexedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber));
     
     return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)), false);
   }
@@ -1719,41 +1811,6 @@ class LooFCompiler {
       if (CurrentLineTokens.get(i).equals(TokenToFind)) return i;
     }
     return -1;
-  }
-  
-  
-  
-  boolean StringIsInterpreterCall (String StringIn) {
-    switch (StringIn) {
-      
-      case ("default"):
-      case ("push"):
-      case ("pop"):
-      case ("call"):
-      case ("return"):
-      case ("returnIf"):
-      case ("if"):
-      case ("skip"):
-      case ("end"):
-      case ("loop"):
-      case ("forEach"):
-      case ("while"):
-      case ("repeat"):
-      case ("repeatIf"):
-      case ("continue"):
-      case ("continueIf"):
-      case ("break"):
-      case ("breakIf"):
-      case ("error"):
-      case ("errorIf"):
-      case ("try"):
-      case ("callOutside"):
-        return true;
-      
-      default:
-        return false;
-      
-    }
   }
   
   
@@ -1862,125 +1919,22 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementIsValid (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    switch (Statement[0].StringValue) {
-      
-      default: // assignments
-        return;
-      
-      case ("default"):
-        return;
-      
-      case ("push"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("pop"):
-        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("call"):
-        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("return"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 1, CodeData, LineNumber);
-        return;
-      
-      case ("returnIf"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, 2, CodeData, LineNumber);
-        return;
-      
-      case ("if"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("skip"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("end"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("loop"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 4, CodeData, LineNumber);
-        return;
-      
-      case ("forEach"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 2, 3, CodeData, LineNumber);
-        return;
-      
-      case ("while"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("repeat"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("repeatIf"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("continue"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("continueIf"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("break"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("breakIf"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("error"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 2, CodeData, LineNumber);
-        return;
-      
-      case ("errorIf"):
-        EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 3, CodeData, LineNumber);
-        return;
-      
-      case ("try"):
-        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-      case ("callOutside"):
-        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-        return;
-      
-    }
-  }
-  
-  
-  
-  
-  
-  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
-    LooFTokenBranch StatementArgs = Statement[1];
-    int NumberOfArgs = StatementArgs.Children.length;
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFStatement Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
+    int NumberOfArgs = Statement.Args.length;
     if (NumberOfArgs != CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but " + (NumberOfArgs < CorrectNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
   }
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
-    LooFTokenBranch StatementArgs = Statement[1];
-    int NumberOfArgs = StatementArgs.Children.length;
+  void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFStatement Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
+    int NumberOfArgs = Statement.Args.length;
     if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
   }
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
-    LooFTokenBranch StatementArgs = Statement[1];
-    int NumberOfArgs = StatementArgs.Children.length;
+  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFStatement Statement, int MinNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
+    int NumberOfArgs = Statement.Args.length;
     if (NumberOfArgs < MinNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + MinNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
   }
   
@@ -1988,108 +1942,8 @@ class LooFCompiler {
   
   
   
-  
-  
-  
-  
-  void SimplifyStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    SimplifyNestedFormulasForStatement (Statement);
-    SimplifyOutputVarsForStatement (Statement, CodeData, LineNumber);
-  }
-  
-  
-  
-  
-  
-  void SimplifyOutputVarsForStatement (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    if (Statement[0].TokenType != TokenBranchType_InterpreterCall) return;
-    switch (Statement[0].StringValue) {
-      
-      default:
-        throw new AssertionError();
-      
-      case ("default"):
-        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
-        return;
-      
-      case ("push"):
-        return;
-      
-      case ("pop"):
-        SimplifyAllOutputVars (Statement, CodeData, LineNumber);
-        return;
-      
-      case ("call"):
-        return;
-      
-      case ("return"):
-        return;
-      
-      case ("returnIf"):
-        return;
-      
-      case ("if"):
-        return;
-      
-      case ("skip"):
-        return;
-      
-      case ("end"):
-        return;
-      
-      case ("loop"):
-        if (Statement[1].Children.length >= 1) {
-          SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
-        }
-        return;
-      
-      case ("forEach"):
-        SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
-        if (Statement[1].Children.length == 3) {
-          SimplifySingleOutputVar (Statement, 2, CodeData, LineNumber);
-        }
-        return;
-      
-      case ("while"):
-        return;
-      
-      case ("repeat"):
-        return;
-      
-      case ("repeatIf"):
-        return;
-      
-      case ("continue"):
-        return;
-      
-      case ("continueIf"):
-        return;
-      
-      case ("break"):
-        return;
-      
-      case ("breakIf"):
-        return;
-      
-      case ("error"):
-        return;
-      
-      case ("errorIf"):
-        return;
-      
-      case ("try"):
-        return;
-      
-      case ("callOutside"):
-        return;
-      
-    }
-  }
-  
-  
-  
-  void SimplifyAllOutputVars (LooFTokenBranch[] Statement, LooFCodeData CodeData, int LineNumber) {
-    int NumberOfArgs = Statement[1].Children.length;
+  void SimplifyAllOutputVars (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+    int NumberOfArgs = Statement.Args.length;
     for (int i = 0; i < NumberOfArgs; i ++) {
       SimplifySingleOutputVar (Statement, i, CodeData, LineNumber);
     }
@@ -2097,35 +1951,41 @@ class LooFCompiler {
   
   
   
-  
-  
-  void SimplifySingleOutputVar (LooFTokenBranch[] Statement, int OutputVarIndex, LooFCodeData CodeData, int LineNumber) {
-    LooFTokenBranch OutputArg = Statement[1].Children[OutputVarIndex];
+  void SimplifySingleOutputVar (LooFStatement Statement, int OutputVarIndex, LooFCodeData CodeData, int LineNumber) {
+    LooFTokenBranch OutputArg = Statement.Args[OutputVarIndex];
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch OutputVarToken = OutputArgChildren[0];
     if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
     OutputVarToken.TokenType = TokenBranchType_OutputVar;
-    Statement[1].Children[OutputVarIndex] = OutputVarToken;
+    Statement.Args[OutputVarIndex] = OutputVarToken;
   }
   
   
   
   
   
-  void SimplifyNestedFormulasForStatement (LooFTokenBranch[] Statement) {
-    if (Statement.length == 1) return;
-    
-    // assignments
-    if (Statement[0].TokenType == TokenBranchType_OutputVar) {
-      Statement[Statement.length - 1] = GetSimplifyNestedFormulas (Statement[Statement.length - 1]);
-      return;
-    }
-    
-    // interpreter calls
-    LooFTokenBranch[] Args = Statement[1].Children;
-    for (int i = 0; i < Args.length; i ++) {
-      Args[i] = GetSimplifyNestedFormulas (Args[i]);
+  void SimplifyNestedFormulasForStatement (LooFStatement Statement) {
+    switch (Statement.StatementType) {
+      
+      case (StatementType_Assignment):
+        Statement.NewValueFormula = GetSimplifyNestedFormulas (Statement.NewValueFormula);
+        return;
+      
+      case (StatementType_TweakAssignment):
+        return;
+      
+      case (StatementType_Function):
+        if (Statement.Args.length == 0) return;
+        LooFTokenBranch[] Args = Statement.Args;
+        for (int i = 0; i < Args.length; i ++) {
+          Args[i] = GetSimplifyNestedFormulas (Args[i]);
+        }
+        return;
+      
+      default:
+        throw new AssertionError();
+      
     }
     
   }
@@ -2143,123 +2003,21 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch[] FillAdditionalStatementData (LooFTokenBranch[] CurrentStatement, int LineNumber, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
-    LooFTokenBranch FirstToken = CurrentStatement[0];
-    if (FirstToken.TokenType != TokenBranchType_InterpreterCall) return CurrentStatement;
-    switch (FirstToken.StringValue) {
-      
-      case ("default"):
-      case ("push"):
-      case ("pop"):
-      case ("call"):
-      case ("return"):
-      case ("returnIf"):
-      case ("if"):
-      case ("end"):
-      case ("error"):
-      case ("errorIf"):
-      case ("try"):
-      case ("callOutside"):
-        return RemoveTrailingToken (CurrentStatement);
-      
-      case ("skip"):
-        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"end"}, +1, AllStatements, CodeData);
-        return CurrentStatement;
-      
-      case ("loop"):
-      case ("forEach"):
-      case ("while"):
-        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"repeat", "repeatIf"}, +1, AllStatements, CodeData);
-        return CurrentStatement;
-      
-      case ("repeat"):
-      case ("repeatIf"):
-      case ("continue"):
-      case ("continueIf"):
-      case ("break"):
-      case ("breakIf"):
-        FillAdditionalStatementData_FindStatement (CurrentStatement, LineNumber, new String[] {"loop", "forEach", "while"}, -1, AllStatements, CodeData);
-        return CurrentStatement;
-      
-      default:
-        throw new AssertionError();
-      
-    }
-  }
-  
-  
-  
-  
-  
-  LooFTokenBranch[] RemoveTrailingToken (LooFTokenBranch[] CurrentStatement) {
-    LooFTokenBranch[] NewStatement = new LooFTokenBranch [CurrentStatement.length - 1];
-    for (int i = 0; i < NewStatement.length; i ++) {
-      NewStatement[i] = CurrentStatement[i];
-    }
-    return NewStatement;
-  }
-  
-  
-  
-  
-  
-  void FillAdditionalStatementData_FindStatement (LooFTokenBranch[] CurrentStatement, int LineNumber, String[] StatementToFind, int Increment, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
-    int NextEndStatement = FindStatementOnSameLevel (StatementToFind, LineNumber, Increment, AllStatements, CodeData);
-    CurrentStatement[2] = new LooFTokenBranch (NextEndStatement);
-  }
-  
-  
-  
-  int FindStatementOnSameLevel (String[] StatementToFind, int StartingLineNumber, int Increment, LooFTokenBranch[][] AllStatements, LooFCodeData CodeData) {
+  int FindStatementOnSameLevel (String[] StatementToFind, int StartingLineNumber, int Increment, LooFStatement[] AllStatements, LooFCodeData CodeData) {
     int BlockLevel = 0;
     int StartIndex = StartingLineNumber + Increment;
     int EndIndex = (Increment > 0) ? AllStatements.length : -1;
     for (int i = StartIndex; i != EndIndex; i += Increment) {
-      
       if (BlockLevel < 0) throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (first statement found was not on the same block level)."));
+      LooFStatement CurrentStatement = AllStatements[i];
+      if (CurrentStatement.StatementType != StatementType_Function) continue;
       
-      LooFTokenBranch[] CurrentStatement = AllStatements[i];
-      LooFTokenBranch FirstToken = CurrentStatement[0];
-      
-      if (FirstToken.TokenType != TokenBranchType_InterpreterCall) continue;
-      
-      if (BlockLevel == 0 && TableContainsItem (StatementToFind, FirstToken.StringValue)) {
+      if (BlockLevel == 0 && TableContainsItem (StatementToFind, CurrentStatement.Name)) {
         return i;
       }
       
-      switch (FirstToken.StringValue) {
-        
-        case ("default"):
-        case ("push"):
-        case ("pop"):
-        case ("call"):
-        case ("return"):
-        case ("returnIf"):
-        case ("if"):
-        case ("continue"):
-        case ("continueIf"):
-        case ("break"):
-        case ("breakIf"):
-        case ("error"):
-        case ("errorIf"):
-        case ("try"):
-        case ("callOutside"):
-          continue;
-        
-        case ("skip"):
-        case ("loop"):
-        case ("forEach"):
-        case ("while"):
-          BlockLevel ++;
-          continue;
-        
-        case ("repeat"):
-        case ("repeatIf"):
-        case ("end"):
-          BlockLevel --;
-          continue;
-        
-      }
+      LooFInterpreterFunction StatementFunction = CurrentStatement.Function;
+      BlockLevel += StatementFunction.GetBlockLevelChange();
       
     }
     throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (statement completely missing)."));
@@ -2384,14 +2142,14 @@ class LooFCompiler {
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
       PrintWriter FileOutput = createWriter (FileOutputName);
       
-      LooFTokenBranch[][] Statements = CodeData.Statements;
+      LooFStatement[] Statements = CodeData.Statements;
       ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
       ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
       for (int i = 0; i < Statements.length; i ++) {
-        LooFTokenBranch[] Line = Statements[i];
+        LooFStatement CurrentStatement = Statements[i];
         int LineNumber = LineNumbers.get(i);
         String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (Line));
+        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
       }
       
       FileOutput.flush();

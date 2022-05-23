@@ -393,12 +393,26 @@ int GetTimerMillis (String TimerName) {
 
 
 
-String ConvertLooFStatementToString (LooFTokenBranch[] Statement) {
-  ArrayList <String> IndividualBranchStrings = new ArrayList <String> ();
-  for (LooFTokenBranch CurrentTokenBranch : Statement) {
-    IndividualBranchStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
+String ConvertLooFStatementToString (LooFStatement Statement) {
+  switch (Statement.StatementType) {
+    
+    case (StatementType_Assignment):
+      return "Assignment \"" + Statement.VarName + "\" " + Statement.Name + " " + ConvertLooFTokenBranchToString (Statement.NewValueFormula);
+    
+    case (StatementType_TweakAssignment):
+      return "TweakAssignment \"" + Statement.VarName + "\" " + Statement.Name;
+    
+    case (StatementType_Function):
+      ArrayList <String> ArgsAsStrings = new ArrayList <String> ();
+      for (LooFTokenBranch CurrentTokenBranch : Statement.Args) {
+        ArgsAsStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
+      }
+      return "Function " + Statement.Name + " (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
+    
+    default:
+      throw new AssertionError();
+    
   }
-  return CombineStringsWithSeperator (IndividualBranchStrings, ", ");
 }
 
 
@@ -442,13 +456,10 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_OutputVar):
       return "OutputVar \"" + TokenBranch.StringValue + "\"";
     
-    case (TokenBranchType_InterpreterCall):
-      return "InterpreterCall \"" + TokenBranch.StringValue + "\"";
-    
-    case (TokenBranchType_Operation):
+    case (TokenBranchType_EvaluatorOperation):
       return "Operation \"" + TokenBranch.StringValue + "\"";
     
-    case (TokenBranchType_Function):
+    case (TokenBranchType_EvaluatorFunction):
       return "Function \"" + TokenBranch.StringValue + "\"";
     
   }

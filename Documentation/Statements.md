@@ -4,8 +4,6 @@
   - Sets VarName to Value
 - **VarName [Index (int or string)] ... = Value**
   -Sets the given index of VarName to Value
-- **default VAR\_NAME = VALUE**
-  - Sets VarName to VALUE only if the value of VarName is null
 
 <br>
 
@@ -64,13 +62,13 @@
   - If VarName plus Increment is greater than End:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
 - **forEach ValueVarName, TableToLoop (table)**
   - Same as statement `forEach ValueVarName, TableToLoop, IncrementVarName` but with IncrementVarName being ValueVarName Proceeded by an underscore
-- **forEach ValueVarName, TableToLoop (table), IncrementVarName**
-  - If IncrementVarName is null:  Sets IncrementVarName to 0 and ValueVarName to TableToLoop indexed with IncrementVarName. Errors if TableToLoop is not a table
-  - If IncrementVarName plus 2 is less than the length of TableToLoop:  Increments IncrementVarName and sets ValueVarName to TableToLoop indexed with IncrementVarName
-  - If IncrementVarName plus 2 is not less than the length of TableToLoop:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
+- **forEach ValueVarName, TableToLoop (table), IndexVarName**
+  - If IndexVarName is null:  Sets IndexVarName to 0 and ValueVarName to TableToLoop indexed with IndexVarName. Errors if TableToLoop is not a table
+  - If IncrementVarName plus 2 is less than the length of TableToLoop:  Increments IndexVarName and sets ValueVarName to TableToLoop indexed with IndexVarName
+  - If IndexVarName plus 2 is not less than the length of TableToLoop:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
 - **while Condition**
-  - If IncrementVarName is truthy:  Effectively nop; only useful because of the other while conditions
-  - If IncrementVarName is falsey:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
+  - If Condition is truthy:  Effectively nop; only useful because of the other while conditions
+  - If Condition is falsey:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
 - **repeat**
   - Jumps execution to the first 'loop', 'while', or 'forEach' statement it can find proceeding this repeat statement that is on the same code block level. Errors if no suitable 'loop' or 'while' statement is found
 - **repeatIf Condition**

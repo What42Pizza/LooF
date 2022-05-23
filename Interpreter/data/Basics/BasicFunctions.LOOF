@@ -99,7 +99,7 @@ end
 
 
 function ensureArgTypesAreCorrect  -> Args, ArgTypes, FunctionName
-	default FunctionName = "unnamed"
+	FunctionName defaultsTo "unnamed"
 	loop i, 0, lengthOf ArgsTypes - 1
 		errorIf (typeOf Args[i] != ArgTypes[i]), ("Arg " .. i .. " of function \"" .. FunctionName .. "\" must be of type " .. ArgTypes[i] .. ", not type " .. typeOf Args[i] .. "."), {"InvalidArgType", FunctionName}
 	repeat

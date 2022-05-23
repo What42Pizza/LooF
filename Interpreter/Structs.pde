@@ -8,6 +8,8 @@ class LooFInterpreterModule {
 
 
 
+
+
 class LooFEvaluatorOperation {
   
   public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
@@ -22,7 +24,9 @@ class LooFEvaluatorOperation {
 
 
 
-LooFEvaluatorFunction NullFunction = new LooFEvaluatorFunction();
+
+
+LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
 
 class LooFEvaluatorFunction {
   
@@ -38,7 +42,7 @@ class LooFEvaluatorFunction {
 
 class LooFInterpreterAssignment {
   
-  public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFDataValue InputValue, LooFEnvironment Environment) {
+  public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment does not have an overridden GetNewVarValue()."));
   }
   
@@ -62,9 +66,32 @@ class LooFInterpreterTweakAssignment {
 
 class LooFInterpreterFunction {
   
-  public void HandleFunctionCall (LooFDataValue Args, LooFEnvironment Environment) {
+  public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall()."));
   }
+  
+  public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+    throw (new LooFCompileException (CodeData, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
+  }
+  
+  public int GetBlockLevelChange() {
+    return 0;
+  }
+  
+}
+
+
+
+
+
+class LooFAddonsData {
+  
+  HashMap <String, LooFInterpreterModule> InterpreterModules;
+  HashMap <String, LooFEvaluatorOperation> EvaluatorOperations;
+  HashMap <String, LooFEvaluatorFunction> EvaluatorFunctions;
+  HashMap <String, LooFInterpreterAssignment> InterpreterAssignments;
+  HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments;
+  HashMap <String, LooFInterpreterFunction> InterpreterFunctions;
   
 }
 
@@ -81,11 +108,9 @@ class LooFEnvironment {
   
   
   
-  HashMap <String, LooFInterpreterModule> InterpreterModules = new HashMap <String, LooFInterpreterModule> ();
-  HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
-  HashMap <String, LooFEvaluatorFunction > EvaluatorFunctions  = new HashMap <String, LooFEvaluatorFunction > ();
-  
   HashMap <String, LooFCodeData> AllCodeDatas;
+  
+  LooFAddonsData AddonsData;
   
   
   
@@ -100,8 +125,9 @@ class LooFEnvironment {
   
   
   
-  public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas) {
+  public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas, LooFAddonsData AddonsData) {
     this.AllCodeDatas = AllCodeDatas;
+    this.AddonsData = AddonsData;
     this.CurrentCodeDataName = "Main.LOOF";
     this.CurrentCodeData = AllCodeDatas.get(CurrentCodeDataName);
     this.CurrentLineNumber = 0;
@@ -124,7 +150,7 @@ class LooFCodeData {
   String[] OriginalCode;
   ArrayList <String> CodeArrayList;
   ArrayList <ArrayList <String>> CodeTokens = new ArrayList <ArrayList <String>> ();
-  LooFTokenBranch[][] Statements;
+  LooFStatement[] Statements;
   ArrayList <Integer> LineNumbers;
   ArrayList <String> LineFileOrigins;
   
@@ -207,9 +233,12 @@ class FloatIntPairComparator implements Comparator <FloatIntPair> {
 
 class LooFCompileSettings {
   
-  boolean AddDefaultModules = true;
-  boolean AddDefaultOperations = true;
-  boolean AddDefaultFunctions = true;
+  boolean AddDefaultInterpreterModules = true;
+  boolean AddDefaultEvaluatorOperations = true;
+  boolean AddDefaultEvaluatorFunctions = true;
+  boolean AddDefaultInterpreterAssignments = true;
+  boolean AddDefaultInterpreterTweakAssignments = true;
+  boolean AddDefaultInterpreterFunctions = true;
   
   HashMap <String, LooFInterpreterModule> CustomModules = new HashMap <String, LooFInterpreterModule> ();
   HashMap <String, LooFEvaluatorOperation> CustomOperations = new HashMap <String, LooFEvaluatorOperation> ();
@@ -511,7 +540,7 @@ class LooFTokenBranch {
   }
   
   public LooFTokenBranch (LooFEvaluatorOperation Operation, String Name) {
-    this.TokenType = TokenBranchType_Operation;
+    this.TokenType = TokenBranchType_EvaluatorOperation;
     this.Operation = Operation;
     this.StringValue = Name;
     this.ConvertsToDataValue = false;
@@ -519,7 +548,7 @@ class LooFTokenBranch {
   }
   
   public LooFTokenBranch (LooFEvaluatorFunction Function, String Name) {
-    this.TokenType = TokenBranchType_Function;
+    this.TokenType = TokenBranchType_EvaluatorFunction;
     this.Function = Function;
     this.StringValue = Name;
     this.ConvertsToDataValue = true;
@@ -540,9 +569,8 @@ final int TokenBranchType_Formula = 6;
 final int TokenBranchType_Index = 7;
 final int TokenBranchType_VarName = 8;
 final int TokenBranchType_OutputVar = 9;
-final int TokenBranchType_InterpreterCall = 10;
-final int TokenBranchType_Operation = 11;
-final int TokenBranchType_Function = 12;
+final int TokenBranchType_EvaluatorOperation = 10;
+final int TokenBranchType_EvaluatorFunction = 11;
 
 final String[] TokenBranchTypeNames = {
   "Null",
@@ -555,9 +583,8 @@ final String[] TokenBranchTypeNames = {
   "Index",
   "VarName",
   "OutputVar",
-  "InterpreterCall",
-  "Operation",
-  "Function",
+  "EvaluatorOperation",
+  "EvaluatorFunction",
 };
 
 final String[] TokenBranchTypeNames_PlusA = {
@@ -571,7 +598,61 @@ final String[] TokenBranchTypeNames_PlusA = {
   "an Index",
   "a VarName",
   "an OutputVar",
-  "an InterpreterCall",
-  "an Operation",
-  "a Function",
+  "an EvaluatorOperation",
+  "an EvaluatorFunction",
 };
+
+
+
+
+
+
+
+
+
+
+class LooFStatement {
+  
+  int StatementType;
+  String Name;
+  
+  LooFInterpreterAssignment Assignment;
+  LooFInterpreterTweakAssignment TweakAssignment;
+  String VarName;
+  LooFTokenBranch[] IndexQueries;
+  LooFTokenBranch NewValueFormula;
+  
+  LooFInterpreterFunction Function;
+  LooFTokenBranch[] Args;
+  
+  public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterAssignment Assignment, LooFTokenBranch NewValueFormula) {
+    this.StatementType = StatementType_Assignment;
+    this.Name = Name;
+    this.VarName = VarName;
+    this.IndexQueries = IndexQueries;
+    this.Assignment = Assignment;
+    this.NewValueFormula = NewValueFormula;
+  }
+  
+  public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterTweakAssignment TweakAssignment) {
+    this.StatementType = StatementType_TweakAssignment;
+    this.Name = Name;
+    this.VarName = VarName;
+    this.IndexQueries = IndexQueries;
+    this.TweakAssignment = TweakAssignment;
+  }
+  
+  public LooFStatement (String Name, LooFInterpreterFunction Function, LooFTokenBranch[] Args) {
+    this.StatementType = StatementType_Function;
+    this.Name = Name;
+    this.Function = Function;
+    this.Args = Args;
+  }
+  
+}
+
+
+
+final int StatementType_Assignment = 0;
+final int StatementType_TweakAssignment = 1;
+final int StatementType_Function = 2;
