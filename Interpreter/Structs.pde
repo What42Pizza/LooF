@@ -1,4 +1,4 @@
-class LooFModule {
+class LooFInterpreterModule {
   
   public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment) {
     
@@ -36,6 +36,42 @@ class LooFEvaluatorFunction {
 
 
 
+class LooFInterpreterAssignment {
+  
+  public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFDataValue InputValue, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment does not have an overridden GetNewVarValue()."));
+  }
+  
+}
+
+
+
+
+
+class LooFInterpreterTweakAssignment {
+  
+  public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterTweakAssignment does not have an overridden GetNewVarValue()."));
+  }
+  
+}
+
+
+
+
+
+class LooFInterpreterFunction {
+  
+  public void HandleFunctionCall (LooFDataValue Args, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall()."));
+  }
+  
+}
+
+
+
+
+
 
 
 
@@ -45,7 +81,7 @@ class LooFEnvironment {
   
   
   
-  HashMap <String, LooFModule> InterpreterModules = new HashMap <String, LooFModule> ();
+  HashMap <String, LooFInterpreterModule> InterpreterModules = new HashMap <String, LooFInterpreterModule> ();
   HashMap <String, LooFEvaluatorOperation> EvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
   HashMap <String, LooFEvaluatorFunction > EvaluatorFunctions  = new HashMap <String, LooFEvaluatorFunction > ();
   
@@ -175,7 +211,7 @@ class LooFCompileSettings {
   boolean AddDefaultOperations = true;
   boolean AddDefaultFunctions = true;
   
-  HashMap <String, LooFModule> CustomModules = new HashMap <String, LooFModule> ();
+  HashMap <String, LooFInterpreterModule> CustomModules = new HashMap <String, LooFInterpreterModule> ();
   HashMap <String, LooFEvaluatorOperation> CustomOperations = new HashMap <String, LooFEvaluatorOperation> ();
   HashMap <String, LooFEvaluatorFunction> CustomFunctions = new HashMap <String, LooFEvaluatorFunction> ();
   

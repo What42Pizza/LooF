@@ -35,7 +35,7 @@ class LooFCompiler {
     
     
     // get default addons
-    HashMap <String, LooFModule> Modules = GetDefaultModules (CompileSettings);
+    HashMap <String, LooFInterpreterModule> Modules = GetDefaultModules (CompileSettings);
     HashMap <String, LooFEvaluatorOperation> Operations = GetDefaultOperations (CompileSettings);
     HashMap <String, LooFEvaluatorFunction> Functions = GetDefaultFunctions (CompileSettings);
     
@@ -131,8 +131,8 @@ class LooFCompiler {
   
   
   
-  HashMap <String, LooFModule> GetDefaultModules (LooFCompileSettings CompileSettings) {
-    HashMap <String, LooFModule> Modules = CompileSettings.CustomModules;
+  HashMap <String, LooFInterpreterModule> GetDefaultModules (LooFCompileSettings CompileSettings) {
+    HashMap <String, LooFInterpreterModule> Modules = CompileSettings.CustomModules;
     if (!CompileSettings.AddDefaultModules) return Modules;
     
     return Modules;
