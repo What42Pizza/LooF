@@ -1947,6 +1947,10 @@ class LooFCompiler {
         EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 3, CodeData, LineNumber);
         return;
       
+      case ("try"):
+        EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+        return;
+      
       case ("callOutside"):
         EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
         return;
@@ -1974,10 +1978,10 @@ class LooFCompiler {
   
   
   
-  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
+  void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFTokenBranch[] Statement, int MinNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch StatementArgs = Statement[1];
     int NumberOfArgs = StatementArgs.Children.length;
-    if (NumberOfArgs < CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
+    if (NumberOfArgs < MinNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + MinNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
   }
   
   
