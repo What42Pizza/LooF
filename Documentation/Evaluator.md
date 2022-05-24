@@ -22,6 +22,16 @@ These use values from both sides of the operator.
 - **and**
 - **or**
 - **xor**
+- **&&**
+  - bitwise and
+- **||**
+  - bitwise or
+- **^^**
+  - bitwise xor
+- **<<**
+  - bitwise shift right
+- **>>**
+  - bitwise shift left
 
 <br>
 <br>
@@ -43,6 +53,8 @@ These use the value directly following the function. If the function takes in mu
 - **sign Input (int or float)**
   - returns 1 if VALUE is >= 0 or -1 if VALUE is < 0
 - **not Input**
+- **!! Input (int)**
+  - returns bitwise not of Input
 - **min InputArgs (table {int or float, ...})**
 - **max InputArgs (table {int or float, ...})**
 - **clamp InputArgs (table {Input (float or int), Min (float or int), Max (float or int)})**
@@ -153,7 +165,6 @@ These use the value directly following the function. If the function takes in mu
 - **toFloat Input**
 - **toString Input**
 - **toBool Input**
-- **toChars Input**
 
 <br>
 
@@ -179,12 +190,13 @@ These use the value directly following the function. If the function takes in mu
 - **1: Index queries**
 - **2: Evaluator functions (left to right)**
 - **3: ^**
-- **4: %**
-- **5: \* and /**
-- **6: + and -**
-- **7: ..**
-- **8: ==, ===, >, < !=, !==, >=, and <=**
-- **9: and, or, not, and xor**
+- **4: bitwise operators**
+- **5: %**
+- **6: \* and /**
+- **7: + and -**
+- **8: ..**
+- **9: ==, ===, >, < !=, !==, >=, and <=**
+- **10: and, or, not, and xor**
 
 <br>
 <br>

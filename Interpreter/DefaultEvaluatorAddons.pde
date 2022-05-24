@@ -104,7 +104,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
     throw (new LooFInterpreterException (Environment, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
     
   }
-  @Override public float GetOrder() {return 7.0;}
+  @Override public float GetOrder() {return 8.0;}
 };
 
 
@@ -363,6 +363,86 @@ LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
     return new LooFDataValue (LeftValueAsBool.BoolValue ^ RightValueAsBool.BoolValue);
   }
   @Override public float GetOrder() {return 1.0;}
+};
+
+
+
+
+
+LooFEvaluatorOperation Operation_BitwiseAnd = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    
+    if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
+      throw (new LooFInterpreterException (Environment, "the operation \"&&\" can only 'and' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    
+    return new LooFDataValue (LeftValue.IntValue & RightValue.IntValue);
+    
+  }
+  @Override public float GetOrder() {return 7.0;}
+};
+
+
+
+
+
+LooFEvaluatorOperation Operation_BitwiseOr = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    
+    if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
+      throw (new LooFInterpreterException (Environment, "the operation \"||\" can only 'or' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    
+    return new LooFDataValue (LeftValue.IntValue | RightValue.IntValue);
+    
+  }
+  @Override public float GetOrder() {return 7.0;}
+};
+
+
+
+
+
+LooFEvaluatorOperation Operation_BitwiseXor = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    
+    if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
+      throw (new LooFInterpreterException (Environment, "the operation \"^^\" can only 'xor' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    
+    return new LooFDataValue (LeftValue.IntValue ^ RightValue.IntValue);
+    
+  }
+  @Override public float GetOrder() {return 7.0;}
+};
+
+
+
+
+
+LooFEvaluatorOperation Operation_ShiftRight = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    
+    if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
+      throw (new LooFInterpreterException (Environment, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    
+    return new LooFDataValue (LeftValue.IntValue << RightValue.IntValue);
+    
+  }
+  @Override public float GetOrder() {return 7.0;}
+};
+
+
+
+
+
+LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    
+    if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
+      throw (new LooFInterpreterException (Environment, "the operation \">>\" can only shift an int with an, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + "."));
+    
+    return new LooFDataValue (LeftValue.IntValue >> RightValue.IntValue);
+    
+  }
+  @Override public float GetOrder() {return 7.0;}
 };
 
 

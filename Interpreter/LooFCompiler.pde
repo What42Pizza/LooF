@@ -77,9 +77,9 @@ class LooFCompiler {
       ParseCodeData (CodeData, CombinedTokens);
     }
     
-    if (CompileSettings.ParserOutputPath != null) {
+    if (CompileSettings.LexerOutputPath != null) {
       StopTimer ("OnlyCompilation");
-      PrintParserOutput (AllCodeDatas, CompileSettings.ParserOutputPath, "ParsedLOOF");
+      PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "ParsedLOOF");
       StartTimer ("OnlyCompilation");
     }
     
@@ -90,9 +90,9 @@ class LooFCompiler {
       LexCodeData (CodeData, AddonsData);
     }
     
-    if (CompileSettings.LexerOutputPath != null) {
+    if (CompileSettings.ParserOutputPath != null) {
       StopTimer ("OnlyCompilation");
-      PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "LexedLOOF");
+      PrintParserOutput (AllCodeDatas, CompileSettings.ParserOutputPath, "LexedLOOF");
       StartTimer ("OnlyCompilation");
     }
     
@@ -174,6 +174,11 @@ class LooFCompiler {
     EvaluatorOperations.put("and", Operation_And);
     EvaluatorOperations.put("or", Operation_Or);
     EvaluatorOperations.put("xor", Operation_Xor);
+    EvaluatorOperations.put("&&", Operation_BitwiseAnd);
+    EvaluatorOperations.put("||", Operation_BitwiseOr);
+    EvaluatorOperations.put("^^", Operation_BitwiseXor);
+    EvaluatorOperations.put("<<", Operation_ShiftRight);
+    EvaluatorOperations.put(">>", Operation_ShiftLeft);
     
     return EvaluatorOperations;
   }
@@ -193,8 +198,10 @@ class LooFCompiler {
     EvaluatorFunctions.put("sqrt", Function_sqrt);
     EvaluatorFunctions.put("sign", Function_sign);
     EvaluatorFunctions.put("not", Function_not);
+    EvaluatorFunctions.put("!!", NullEvaluatorFunction);
     EvaluatorFunctions.put("min", Function_min);
     EvaluatorFunctions.put("max", Function_max);
+    EvaluatorFunctions.put("clamp", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("random", Function_random);
     EvaluatorFunctions.put("randomInt", Function_randomInt);
@@ -2104,7 +2111,7 @@ class LooFCompiler {
   
   
   
-  void PrintParserOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+  void PrintLexerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
@@ -2135,7 +2142,7 @@ class LooFCompiler {
   
   
   
-  void PrintLexerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+  void PrintParserOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.FullFileName;

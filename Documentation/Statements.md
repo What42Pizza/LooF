@@ -1,9 +1,43 @@
-## Variables
+# Assignments
+
+<br>
 
 - **VarName = Value**
   - Sets VarName to Value
-- **VarName [Index (int or string)] ... = Value**
-  -Sets the given index of VarName to Value
+- **VarName defaultsTo Value**
+  - If VarName is null, sets VarName to Value
+- **VarName += Value (int or string)**
+  - Adds Value to VarName
+- **VarName -= Value (int or string)**
+  - Subtracts Value from VarName
+- **VarName \*= Value (int or string)**
+  - Multiplies VarName by Value
+- **VarName /= Value (int or string)**
+  - Divides VarName by Value
+- **VarName ^= Value (int or string)**
+  - Takes VarName to the power of Value
+- **VarName %= Value (int or string)**
+  - Modulo-s VarName by Value
+- **VarName ..= Value (VarName is string: string; VarName is table: any)**
+  - Concatenates Value to VarName
+  - `VarName (table) ..= Value (table)` adds Value as an item to VarName
+
+<br>
+
+- **VarName ++**
+  - Increments VarName
+- **VarName --**
+  - Decrements VarName
+- **VarName !!**
+  - Toggles VarName
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+# Interpreter Functions
 
 <br>
 
@@ -84,7 +118,7 @@
 
 <br>
 
-## Error throwing
+## Error Throwing
 
 - **error ErrorMessage (string)**
   - Stops execution with the interpreter in an error state and with ErrorMessage as the error message. Overrides this error with a new error if ErrorMessage is not a string
@@ -97,7 +131,7 @@
 
 <br>
 
-## Error handling
+## Error Handling
 
 - **try FunctionLineNumber (int)**
   - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any exception occurs, execution is taken back to the statement after this
@@ -123,4 +157,4 @@
 ## Interacting with external code
 
 - **callOutside ModuleName (string), Arg1, Arg2, ...**
-  - Calls the module ModuleName with the remaining arguments
+  - Calls the module ModuleName with the remaining arguments as arguments for the module
