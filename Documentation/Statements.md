@@ -20,7 +20,7 @@
   - Modulo-s VarName by Value
 - **VarName ..= Value (VarName is string: string; VarName is table: any)**
   - Concatenates Value to VarName
-  - `VarName (table) ..= Value (table)` adds Value as an item to VarName
+  - `VarName (table) ..= Value (table)` adds all the items in the array part of Value to VarName. If you want it Value to be added as a single item, you can do `VarName (table) ..= {Value (table)}`.
 
 <br>
 

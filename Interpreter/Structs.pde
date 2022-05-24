@@ -20,6 +20,10 @@ class LooFEvaluatorOperation {
     return 0;
   }
   
+  public boolean AddToCombinedTokens() {
+    return false;
+  }
+  
 }
 
 
@@ -34,6 +38,10 @@ class LooFEvaluatorFunction {
     throw (new LooFInterpreterException (Environment, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
   }
   
+  public boolean AddToCombinedTokens() {
+    return false;
+  }
+  
 }
 
 
@@ -46,6 +54,10 @@ class LooFInterpreterAssignment {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment does not have an overridden GetNewVarValue()."));
   }
   
+  public boolean AddToCombinedTokens() {
+    return false;
+  }
+  
 }
 
 
@@ -56,6 +68,10 @@ class LooFInterpreterTweakAssignment {
   
   public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterTweakAssignment does not have an overridden GetNewVarValue()."));
+  }
+  
+  public boolean AddToCombinedTokens() {
+    return false;
   }
   
 }
@@ -76,6 +92,10 @@ class LooFInterpreterFunction {
   
   public int GetBlockLevelChange() {
     return 0;
+  }
+  
+  public boolean AddToCombinedTokens() {
+    return false;
   }
   
 }
@@ -246,8 +266,8 @@ class LooFCompileSettings {
   
   String PreProcessorOutputPath = null;
   String LinkerOutputPath = null;
-  String ParserOutputPath = null;
   String LexerOutputPath = null;
+  String ParserOutputPath = null;
   
 }
 

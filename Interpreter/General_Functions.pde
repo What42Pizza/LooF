@@ -70,6 +70,16 @@ char[] ToPrimitive (Character[] ArrayIn) {
 
 
 
+class StringComparator_ShortestToLongest implements Comparator <String> {
+  public int compare (String String1, String String2) {
+    return String1.length() - String2.length();
+  }
+}
+
+
+
+
+
 long CorrectModulo (long A, long B) {
   long FirstModulo = A % B;
   long PositiveResult = FirstModulo + B;
@@ -397,17 +407,17 @@ String ConvertLooFStatementToString (LooFStatement Statement) {
   switch (Statement.StatementType) {
     
     case (StatementType_Assignment):
-      return "Assignment \"" + Statement.VarName + "\" " + Statement.Name + " " + ConvertLooFTokenBranchToString (Statement.NewValueFormula);
+      return "Assignment \"" + Statement.VarName + "\" '" + Statement.Name + "' " + ConvertLooFTokenBranchToString (Statement.NewValueFormula);
     
     case (StatementType_TweakAssignment):
-      return "TweakAssignment \"" + Statement.VarName + "\" " + Statement.Name;
+      return "TweakAssignment \"" + Statement.VarName + "\" '" + Statement.Name + "'";
     
     case (StatementType_Function):
       ArrayList <String> ArgsAsStrings = new ArrayList <String> ();
       for (LooFTokenBranch CurrentTokenBranch : Statement.Args) {
         ArgsAsStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
       }
-      return "Function " + Statement.Name + " (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
+      return "Function '" + Statement.Name + "' (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
     
     default:
       throw new AssertionError();
@@ -420,7 +430,6 @@ String ConvertLooFStatementToString (LooFStatement Statement) {
 
 
 String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
-  try {
   switch (TokenBranch.TokenType) {
     
     default:
@@ -462,10 +471,6 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_EvaluatorFunction):
       return "Function \"" + TokenBranch.StringValue + "\"";
     
-  }
-  } catch (Exception e) {
-    e.printStackTrace();
-    throw new AssertionError();
   }
 }
 

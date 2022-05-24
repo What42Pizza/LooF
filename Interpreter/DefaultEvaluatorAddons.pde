@@ -155,6 +155,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 3.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -196,6 +197,7 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
     }
   }
   @Override public float GetOrder() {return 2.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -206,6 +208,7 @@ LooFEvaluatorOperation Operation_StrictEquals = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
     return new LooFDataValue (LeftValue.equals(RightValue));
   };
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -281,6 +284,7 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
     }
   }
   @Override public float GetOrder() {return 2.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -292,6 +296,7 @@ LooFEvaluatorOperation Operation_StrictNotEquals = new LooFEvaluatorOperation() 
     return new LooFDataValue (!LeftValue.equals(RightValue));
   };
   @Override public float GetOrder() {return 2.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -309,6 +314,7 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
     
   }
   @Override public float GetOrder() {return 2.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -326,6 +332,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
     
   }
   @Override public float GetOrder() {return 2.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -379,6 +386,7 @@ LooFEvaluatorOperation Operation_BitwiseAnd = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 7.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -395,6 +403,7 @@ LooFEvaluatorOperation Operation_BitwiseOr = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 7.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -411,6 +420,7 @@ LooFEvaluatorOperation Operation_BitwiseXor = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 7.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -427,6 +437,7 @@ LooFEvaluatorOperation Operation_ShiftRight = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 7.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
@@ -443,6 +454,7 @@ LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
     
   }
   @Override public float GetOrder() {return 7.0;}
+  @Override public boolean AddToCombinedTokens() {return true;}
 };
 
 
