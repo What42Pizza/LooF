@@ -29,7 +29,12 @@ class LooFCompiler {
     
     
     // start CodeData-s
-    LooFLoadedFilesData LoadedFilesData = LoadFilesIntoNewCodeDatas (CodeFolder);
+    LooFLoadedFilesData LoadedFilesData;
+    try {
+      LoadedFilesData = LoadFilesIntoNewCodeDatas (CodeFolder);
+    } catch (IOException e) {
+      throw (new LooFCompileException (e));
+    }
     HashMap <String, LooFCodeData> AllCodeDatas = LoadedFilesData.AllCodeDatas;
     String[] HeaderFileContents = LoadedFilesData.HeaderFileContents;
     
@@ -117,12 +122,11 @@ class LooFCompiler {
   
   LooFAddonsData GetAddonsDataForEnvironment (LooFCompileSettings CompileSettings) {
     LooFAddonsData AddonsData = new LooFAddonsData();
-    AddonsData.InterpreterModules          = GetInterpreterModulesForEnvironment          (CompileSettings);
-    AddonsData.EvaluatorOperations         = GetEvaluatorOperationsForEnvironment         (CompileSettings);
-    AddonsData.EvaluatorFunctions          = GetEvaluatorFunctionsForEnvironment          (CompileSettings);
-    AddonsData.InterpreterAssignments      = GetInterpreterAssignmentsForEnvironment      (CompileSettings);
-    AddonsData.InterpreterTweakAssignments = GetInterpreterTweakAssignmentsForEnvironment (CompileSettings);
-    AddonsData.InterpreterFunctions        = GetInterpreterFunctionsForEnvironment        (CompileSettings);
+    AddonsData.InterpreterModules     = GetInterpreterModulesForEnvironment     (CompileSettings);
+    AddonsData.EvaluatorOperations    = GetEvaluatorOperationsForEnvironment    (CompileSettings);
+    AddonsData.EvaluatorFunctions     = GetEvaluatorFunctionsForEnvironment     (CompileSettings);
+    AddonsData.InterpreterAssignments = GetInterpreterAssignmentsForEnvironment (CompileSettings);
+    AddonsData.InterpreterFunctions   = GetInterpreterFunctionsForEnvironment   (CompileSettings);
     return AddonsData;
   }
   
@@ -257,22 +261,11 @@ class LooFCompiler {
     InterpreterAssignments.put("%=", Assignment_ModuloEquals);
     InterpreterAssignments.put("..=", Assignment_ConcatEquals);
     
+    InterpreterAssignments.put("++", Assignment_PlusPlus);
+    InterpreterAssignments.put("--", Assignment_MinusMinus);
+    InterpreterAssignments.put("!!", Assignment_NotNot);
+    
     return InterpreterAssignments;
-  }
-  
-  
-  
-  
-  
-  HashMap <String, LooFInterpreterTweakAssignment> GetInterpreterTweakAssignmentsForEnvironment (LooFCompileSettings CompileSettings) {
-    HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments = new HashMap <String, LooFInterpreterTweakAssignment> ();
-    if (!CompileSettings.AddDefaultInterpreterTweakAssignments) return InterpreterTweakAssignments;
-    
-    InterpreterTweakAssignments.put("++", TweakAssignment_PlusPlus);
-    InterpreterTweakAssignments.put("--", TweakAssignment_MinusMinus);
-    InterpreterTweakAssignments.put("!!", TweakAssignment_NotNot);
-    
-    return InterpreterTweakAssignments;
   }
   
   
@@ -328,7 +321,6 @@ class LooFCompiler {
     Set <String> EvaluatorOperationNames = AddonsData.EvaluatorOperations.keySet();
     Set <String> EvaluatorFunctionNames = AddonsData.EvaluatorFunctions.keySet();
     Set <String> InterpreterAssignmentNames = AddonsData.InterpreterAssignments.keySet();
-    Set <String> InterpreterTweakAssignmentNames = AddonsData.InterpreterTweakAssignments.keySet();
     Set <String> InterpreterFunctionNames = AddonsData.InterpreterFunctions.keySet();
     
     for (String CurrentName : EvaluatorOperationNames) {
@@ -346,18 +338,13 @@ class LooFCompiler {
       if (CurrentAddon.AddToCombinedTokens()) CombinedTokens.add(CurrentName);
     }
     
-    for (String CurrentName : InterpreterTweakAssignmentNames) {
-      LooFInterpreterTweakAssignment CurrentAddon = AddonsData.InterpreterTweakAssignments.get(CurrentName);
-      if (CurrentAddon.AddToCombinedTokens()) CombinedTokens.add(CurrentName);
-    }
-    
     for (String CurrentName : InterpreterFunctionNames) {
       LooFInterpreterFunction CurrentAddon = AddonsData.InterpreterFunctions.get(CurrentName);
       if (CurrentAddon.AddToCombinedTokens()) CombinedTokens.add(CurrentName);
     }
     
     CombinedTokens.sort(new StringComparator_ShortestToLongest());
-    return ArrayListToArray (CombinedTokens, "");
+    return ListToArray (CombinedTokens, "");
   }
   
   
@@ -369,7 +356,7 @@ class LooFCompiler {
   
   
   
-  LooFLoadedFilesData LoadFilesIntoNewCodeDatas (File CodeFolder) {
+  LooFLoadedFilesData LoadFilesIntoNewCodeDatas (File CodeFolder) throws IOException {
     
     
     
@@ -388,10 +375,10 @@ class LooFCompiler {
       File CurrentFile = AllFilesRaw.get(i);
       String CurrentFileName = CurrentFile.getName();
       if (!CurrentFileName.endsWith(".LOOF")) AllFilesRaw.remove(i);
-      if (CurrentFileName.equals("Header.LOOF")) HeaderFileContents = loadStrings (AllFilesRaw.remove(i));
+      if (CurrentFileName.equals("Header.LOOF")) HeaderFileContents = ReadFileAsStrings (AllFilesRaw.remove(i));
     }
     
-    AllFiles = ArrayListToArray (AllFilesRaw, new File(""));
+    AllFiles = ListToArray (AllFilesRaw, new File(""));
     
     
     
@@ -412,7 +399,7 @@ class LooFCompiler {
     // load file contents and apply header
     AllFileContents = new String [AllFiles.length] [];
     for (int i = 0; i < AllFiles.length; i ++) {
-      AllFileContents[i] = loadStrings (AllFiles[i]);
+      AllFileContents[i] = ReadFileAsStrings (AllFiles[i]);
     }
     
     
@@ -441,28 +428,17 @@ class LooFCompiler {
   
   void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents) {
     
-    //Log.println ("Pre-processing code...");
     if (HeaderFileContents.length > 0) {
-      //Log.println ("     Inserting header");
       InsertHeader (CodeData, HeaderFileContents);
     }
-    //Log.println ("     Removing initial trim");
     RemoveInitialTrim (CodeData);
-    //Log.println ("     Processing if statements");
     ProcessIfStatements (CodeData);
-    //Log.println ("     Processing includes");
     ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length);
-    //Log.println ("     Processing replaces");
     ProcessReplaces (CodeData);
-    //Log.println ("     Removing comments");
     RemoveComments (CodeData);
-    //Log.println ("     Removing excess whitespace");
     RemoveExcessWhitespace (CodeData);
-    //Log.println ("     Checking for incorrect pre-processor statements");
     CheckForIncorrectPreProcessorStatements (CodeData);
-    //Log.println ("     Combining seperated lists");
     CombineSeperatedLists (CodeData);
-    //Log.println ("Done");
     
   }
   
@@ -1441,7 +1417,6 @@ class LooFCompiler {
     ArrayList <Integer> BlockLevels = BlocksData.IntegerArrayListValue;
     ArrayList <Integer> BlockEnds = BlocksData.SecondIntegerArrayListValue;
     HashMap <String, LooFInterpreterAssignment> InterpreterAssignments = AddonsData.InterpreterAssignments;
-    HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments = AddonsData.InterpreterTweakAssignments;
     HashMap <String, LooFInterpreterFunction> InterpreterFunctions = AddonsData.InterpreterFunctions;
     
     // interpreter functions
@@ -1468,12 +1443,6 @@ class LooFCompiler {
       return GetStatementFromLine_Assignment (CurrentLineTokens, FoundInterpreterAssignment, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     }
     
-    // interpreter tweak assignments
-    LooFInterpreterTweakAssignment FoundInterpreterTweakAssignment = InterpreterTweakAssignments.get(AssignmentToken);
-    if (FoundInterpreterTweakAssignment != null) {
-      return GetStatementFromLine_TweakAssignment (CurrentLineTokens, FoundInterpreterTweakAssignment, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
-    }
-    
     // unknown statement type
     throw (new LooFCompileException (CodeData, LineNumber, "could not understand statement type. No interpreter function named \"" + CurrentLineTokens.get(0) + "\" exists, and token number " + AssignmentTokenIndex + " (\"" + AssignmentToken + "\") is not an assignment."));
     
@@ -1483,35 +1452,26 @@ class LooFCompiler {
   
   
   
-  LooFStatement GetStatementFromLine_Assignment (ArrayList <String> CurrentLineTokens, LooFInterpreterAssignment InterpreterAssignment, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+  LooFStatement GetStatementFromLine_Assignment (ArrayList <String> CurrentLineTokens, LooFInterpreterAssignment Assignment, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    
+    // check for args
+    boolean HasArgs = CurrentLineTokens.size() > AssignmentTokenIndex + 1;
+    boolean AssignmentTakesArgs = Assignment.TakesArgs();
+    if (HasArgs != AssignmentTakesArgs) throw (new LooFCompileException (CodeData, LineNumber, "this assignment " + (AssignmentTakesArgs ? "takes" : "does not take") + " arguments, but arguments " + (HasArgs ? "were" : "were not") + " found."));
     
     // index queries
     LooFTokenBranch[] IndexQueries = GetIndexQueriesForStatement (CurrentLineTokens, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // formula for new value
-    LooFTokenBranch NewValueFormula = GetParsedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    LooFTokenBranch NewValueFormula = null;
+    if (HasArgs) {
+      NewValueFormula = GetParsedFormula (CurrentLineTokens, AssignmentTokenIndex + 1, CurrentLineTokens.size() - 1, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
+    }
     
     // assemble final statement
     String AssignmentName = CurrentLineTokens.get(AssignmentTokenIndex);
     String VarName = CurrentLineTokens.get(0);
-    LooFStatement Output = new LooFStatement (AssignmentName, VarName, IndexQueries, InterpreterAssignment, NewValueFormula);
-    
-    return Output;
-  }
-  
-  
-  
-  
-  
-  LooFStatement GetStatementFromLine_TweakAssignment (ArrayList <String> CurrentLineTokens, LooFInterpreterTweakAssignment InterpreterTweakAssignment, int AssignmentTokenIndex, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
-    
-    // index queries
-    LooFTokenBranch[] IndexQueries = GetIndexQueriesForStatement (CurrentLineTokens, AssignmentTokenIndex, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
-    
-    // assemble final statement
-    String TweakAssignmentName = CurrentLineTokens.get(AssignmentTokenIndex);
-    String VarName = CurrentLineTokens.get(0);
-    LooFStatement Output = new LooFStatement (TweakAssignmentName, VarName, IndexQueries, InterpreterTweakAssignment);
+    LooFStatement Output = new LooFStatement (AssignmentName, VarName, IndexQueries, Assignment, NewValueFormula);
     
     return Output;
   }
@@ -1533,7 +1493,7 @@ class LooFCompiler {
       PossibleIndexIndex = IndexEndIndex + 2;
     }
     
-    return ArrayListToArray (IndexQueriesList, new LooFTokenBranch());
+    return ListToArray (IndexQueriesList, new LooFTokenBranch());
   }
   
   
@@ -1546,7 +1506,7 @@ class LooFCompiler {
     LooFTokenBranch[] FunctionStatementArgs = GetFunctionStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // assemble final statement
-    LooFStatement Output = new LooFStatement (CurrentLineTokens.get(0), InterpreterFunction, FunctionStatementArgs);
+    LooFStatement Output = new LooFStatement (CurrentLineTokens.get(0), (LooFInterpreterFunction) InterpreterFunction.clone(), FunctionStatementArgs);
     
     return Output;
   }
@@ -1572,7 +1532,7 @@ class LooFCompiler {
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
     }
-    LooFTokenBranch[] FormulaChildren = ArrayListToArray (FormulaChildrenList, new LooFTokenBranch (0));
+    LooFTokenBranch[] FormulaChildren = ListToArray (FormulaChildrenList, new LooFTokenBranch (0));
     EnsureFormulaTokensAreValid (FormulaChildren, CodeData, LineNumber, FormulaBlockStart);
     LooFTokenBranch ParsedFormula = new LooFTokenBranch (TokenBranchType_Formula, FormulaChildren, false);
     FillFormulaTokenEvaluationOrders (ParsedFormula);
@@ -1625,8 +1585,9 @@ class LooFCompiler {
     }
     
     // Type_Int
-    if (TokenIsInt (CurrentToken)) {
-      return new LooFTokenBranch (Long.parseLong(CurrentToken));
+    Long CurrentTokenAsLong = GetLongFromToken (CurrentToken, CodeData, LineNumber, TokenNumber);
+    if (CurrentTokenAsLong != null) {
+      return new LooFTokenBranch (CurrentTokenAsLong);
     }
     
     // Type_Float
@@ -1644,6 +1605,41 @@ class LooFCompiler {
     
     // Type_VarName
     return new LooFTokenBranch (TokenBranchType_VarName, CurrentToken, true, false);
+    
+  }
+  
+  
+  
+  
+  
+  Long GetLongFromToken (String CurrentToken, LooFCodeData CodeData, int LineNumber, int TokenNumber) {
+    
+    if (TokenIsInt (CurrentToken)) return Long.parseLong(CurrentToken);
+    
+    if (CurrentToken.length() < 3) return null;
+    boolean TokenIsNegative = CurrentToken.charAt(0) == '-';
+    if (TokenIsNegative) CurrentToken = CurrentToken.substring(1);
+    if (CurrentToken.charAt(0) != '0') return null;
+    
+    int Base = 0;
+    switch (CurrentToken.charAt(1)) {
+      case ('x'):
+        Base = 16;
+        break;
+      case ('b'):
+        Base = 2;
+        break;
+      default:
+        return null;
+    }
+    
+    try {
+      Long Output = Long.parseLong (CurrentToken.substring(2), Base);
+      Output *= TokenIsNegative ? -1 : 1;
+      return Output;
+    } catch (NumberFormatException e) {
+      throw (new LooFCompileException (CodeData, LineNumber, TokenNumber, "cannot cast token to int."));
+    }
     
   }
   
@@ -1751,8 +1747,8 @@ class LooFCompiler {
     Arrays.sort(OperationIndexesAndOrders, new FloatIntPairComparator());
     
     // fill orders
-    FormulaToken.IndexQueryIndexes = ToPrimitive (ArrayListToArray (IndexQueryIndexes, 0));
-    FormulaToken.FunctionIndexes = ToPrimitive (ArrayListToArray (FunctionIndexes, 0));
+    FormulaToken.IndexQueryIndexes = ToPrimitive (ListToArray (IndexQueryIndexes, 0));
+    FormulaToken.FunctionIndexes = ToPrimitive (ListToArray (FunctionIndexes, 0));
     FormulaToken.OperationIndexes = OperationIndexesAndOrders;
     
     ShiftAllFormulaTokenEvaluationOrders (FormulaToken);
@@ -1828,7 +1824,7 @@ class LooFCompiler {
     }
     Items.add (GetParsedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber));
     
-    return new LooFTokenBranch (TokenBranchType_Table, ArrayListToArray (Items, new LooFTokenBranch (0)), false);
+    return new LooFTokenBranch (TokenBranchType_Table, ListToArray (Items, new LooFTokenBranch (0)), false);
   }
   
   
@@ -2024,10 +2020,8 @@ class LooFCompiler {
     switch (Statement.StatementType) {
       
       case (StatementType_Assignment):
+        if (!Statement.Assignment.TakesArgs()) return;
         Statement.NewValueFormula = GetSimplifyNestedFormulas (Statement.NewValueFormula);
-        return;
-      
-      case (StatementType_TweakAssignment):
         return;
       
       case (StatementType_Function):
@@ -2063,7 +2057,7 @@ class LooFCompiler {
     int StartIndex = StartingLineNumber + Increment;
     int EndIndex = (Increment > 0) ? AllStatements.length : -1;
     for (int i = StartIndex; i != EndIndex; i += Increment) {
-      if (BlockLevel < 0) throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (first statement found was not on the same block level)."));
+      if (BlockLevel < 0) throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (block ended with wrong statement type)."));
       LooFStatement CurrentStatement = AllStatements[i];
       if (CurrentStatement.StatementType != StatementType_Function) continue;
       

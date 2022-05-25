@@ -47,23 +47,36 @@ class LooFInterpreter {
   
   void ExecuteAssignmentStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
     String OutputVarName = CurrentStatement.VarName;
-    LooFDataValue NewVarValue = EvaluateFormula (CurrentStatement.NewValueFormula, Environment);
+    LooFInterpreterAssignment Assignment = CurrentStatement.Assignment;
     LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
+    LooFTokenBranch NewValueFormula = CurrentStatement.NewValueFormula;
     
     if (IndexQueries.length == 0) {
+      LooFDataValue OldVarValue = GetVariableValue (OutputVarName, Environment, false);
+      LooFDataValue NewVarValue = Assignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
       SetVariableValue (OutputVarName, NewVarValue, Environment);
       return;
     }
     
-    LooFDataValue TargetTable = GetVariableValue (OutputVarName, Environment, true);
+    LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment);
+    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment);
+    LooFDataValue OldVarValue = GetVariableValue (OutputVarName, Environment, false);
+    LooFDataValue NewVarValue = Assignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
+    SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
+    
+  }
+  
+  
+  
+  
+  LooFDataValue GetTargetTableForStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+    LooFDataValue TargetTable = GetVariableValue (CurrentStatement.VarName, Environment, true);
+    LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
     for (int i = 0; i < IndexQueries.length - 1; i ++) {
       LooFDataValue ValueToIndexWith = EvaluateFormula (IndexQueries[i], Environment);
       TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, Environment);
     }
-    
-    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment);
-    SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
-    
+    return TargetTable;
   }
   
   
@@ -93,6 +106,7 @@ class LooFInterpreter {
     }
     CurrentVariableList.put(VariableName, NewValue);
   }
+  
   
   
   

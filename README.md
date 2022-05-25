@@ -48,7 +48,7 @@ call Factorial, 10  -> FactorialResult
 
 function ConvertTableToString  -> TableIn, Seperator
 	returnIf typeOf TableIn != "table"
-	default Seperator = ", "
+	Seperator defaultsTo ", "
 	
 	StringOut = toString TableIn[i]
 	loop i, 1, endOf TableIn

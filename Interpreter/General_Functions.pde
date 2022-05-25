@@ -7,7 +7,7 @@
   return new ArrayList <T> (Arrays.asList (Input));
 }
 
-<T> T[] ArrayListToArray (ArrayList <T> Input, T ExampleItem) {
+<T> T[] ListToArray (List <T> Input, T ExampleItem) {
   return Input.toArray((T[]) Array.newInstance(ExampleItem.getClass(), Input.size()));
 }
 
@@ -27,12 +27,7 @@
 
 
 <T> T GetLastItemOf (ArrayList <T> Input) {
-  try {
-    return Input.get(Input.size() - 1);
-  } catch (Exception e) {
-    e.printStackTrace();
-    throw new AssertionError();
-  }
+  return Input.get(Input.size() - 1);
 }
 
 <T> T GetLastItemOf (T[] Input) {
@@ -46,6 +41,16 @@
     if (Input[i].equals(Item)) return true;
   }
   return false;
+}
+
+
+
+<T> void AddItemToArrayStart (T[] ArrayIn, T Item) {
+  T[] ArrayOut = (T[]) Array.newInstance(Item.getClass(), ArrayIn.length + 1);
+  for (int i = 0; i < ArrayIn.length; i ++) {
+    ArrayOut[i + 1] = ArrayIn[i];
+  }
+  ArrayOut[0] = Item;
 }
 
 
@@ -158,6 +163,15 @@ String GetFileFullName (File CurrentFile, File CodeFolder) {
   }
   FullName = FullName.replace(' ', '_');
   return FullName;
+}
+
+
+
+
+
+String[] ReadFileAsStrings (File FileToRead) throws IOException {
+  List <String> FileContents = Files.readAllLines(FileToRead.toPath());
+  return ListToArray (FileContents, "");
 }
 
 
@@ -407,22 +421,33 @@ String ConvertLooFStatementToString (LooFStatement Statement) {
   switch (Statement.StatementType) {
     
     case (StatementType_Assignment):
-      return "Assignment \"" + Statement.VarName + "\" '" + Statement.Name + "' " + ConvertLooFTokenBranchToString (Statement.NewValueFormula);
-    
-    case (StatementType_TweakAssignment):
-      return "TweakAssignment \"" + Statement.VarName + "\" '" + Statement.Name + "'";
+      String NewValueFormulaAsString = (Statement.Assignment.TakesArgs()) ? " " + ConvertLooFTokenBranchToString (Statement.NewValueFormula) : "";
+      return "Assignment \"" + Statement.VarName + "\"" + ConvertStatementIndexesToString (Statement) + " '" + Statement.Name + "'" + NewValueFormulaAsString;
     
     case (StatementType_Function):
       ArrayList <String> ArgsAsStrings = new ArrayList <String> ();
       for (LooFTokenBranch CurrentTokenBranch : Statement.Args) {
         ArgsAsStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
       }
-      return "Function '" + Statement.Name + "' (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
+      return "Function " + Statement.Function.toString() + " (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
     
     default:
       throw new AssertionError();
     
   }
+}
+
+
+
+
+
+String ConvertStatementIndexesToString (LooFStatement Statement) {
+  String Output = "";
+  LooFTokenBranch[] IndexQueries = Statement.IndexQueries;
+  for (LooFTokenBranch CurrentToken : IndexQueries) {
+    Output += " [" + ConvertLooFTokenBranchToString (CurrentToken) + "]";
+  }
+  return Output;
 }
 
 
@@ -622,6 +647,10 @@ void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   int CurrentLockLevel = GetLastItemOf (LockLevels);
   LockLevels.add(CurrentLockLevel + 1);
+  if (DataValue.ValueType != DataValueType_Table) return;
+  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) IncreaseDataValueLockLevel (CurrentDataValue);
+  Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
+  for (String CurrentKey : HashMapKeys) IncreaseDataValueLockLevel (DataValue.HashMapValue.get(CurrentKey));
 }
 
 
@@ -629,6 +658,10 @@ void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
 void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   LockLevels.remove(LockLevels.size() - 1);
+  if (DataValue.ValueType != DataValueType_Table) return;
+  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) DecreaseDataValueLockLevel (CurrentDataValue);
+  Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
+  for (String CurrentKey : HashMapKeys) DecreaseDataValueLockLevel (DataValue.HashMapValue.get(CurrentKey));
 }
 
 
@@ -636,6 +669,10 @@ void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
 void UnlockDataValue (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   LockLevels.set(LockLevels.size() - 1, 0);
+  if (DataValue.ValueType != DataValueType_Table) return;
+  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) UnlockDataValue (CurrentDataValue);
+  Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
+  for (String CurrentKey : HashMapKeys) UnlockDataValue (DataValue.HashMapValue.get(CurrentKey));
 }
 
 

@@ -58,20 +58,8 @@ class LooFInterpreterAssignment {
     return false;
   }
   
-}
-
-
-
-
-
-class LooFInterpreterTweakAssignment {
-  
-  public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterTweakAssignment does not have an overridden GetNewVarValue()."));
-  }
-  
-  public boolean AddToCombinedTokens() {
-    return false;
+  public boolean TakesArgs() {
+    return true;
   }
   
 }
@@ -80,7 +68,7 @@ class LooFInterpreterTweakAssignment {
 
 
 
-class LooFInterpreterFunction {
+class LooFInterpreterFunction implements Cloneable {
   
   public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall()."));
@@ -98,6 +86,14 @@ class LooFInterpreterFunction {
     return false;
   }
   
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
+  
 }
 
 
@@ -110,7 +106,6 @@ class LooFAddonsData {
   HashMap <String, LooFEvaluatorOperation> EvaluatorOperations;
   HashMap <String, LooFEvaluatorFunction> EvaluatorFunctions;
   HashMap <String, LooFInterpreterAssignment> InterpreterAssignments;
-  HashMap <String, LooFInterpreterTweakAssignment> InterpreterTweakAssignments;
   HashMap <String, LooFInterpreterFunction> InterpreterFunctions;
   
 }
@@ -296,6 +291,10 @@ class LooFCompileException extends RuntimeException {
   
   public LooFCompileException (String Message) {
     super (Message);
+  }
+  
+  public LooFCompileException (Exception e) {
+    super ("An error occured while compiling: " + e.toString());
   }
   
   /*
@@ -637,7 +636,6 @@ class LooFStatement {
   String Name;
   
   LooFInterpreterAssignment Assignment;
-  LooFInterpreterTweakAssignment TweakAssignment;
   String VarName;
   LooFTokenBranch[] IndexQueries;
   LooFTokenBranch NewValueFormula;
@@ -654,14 +652,6 @@ class LooFStatement {
     this.NewValueFormula = NewValueFormula;
   }
   
-  public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterTweakAssignment TweakAssignment) {
-    this.StatementType = StatementType_TweakAssignment;
-    this.Name = Name;
-    this.VarName = VarName;
-    this.IndexQueries = IndexQueries;
-    this.TweakAssignment = TweakAssignment;
-  }
-  
   public LooFStatement (String Name, LooFInterpreterFunction Function, LooFTokenBranch[] Args) {
     this.StatementType = StatementType_Function;
     this.Name = Name;
@@ -674,5 +664,4 @@ class LooFStatement {
 
 
 final int StatementType_Assignment = 0;
-final int StatementType_TweakAssignment = 1;
-final int StatementType_Function = 2;
+final int StatementType_Function = 1;
