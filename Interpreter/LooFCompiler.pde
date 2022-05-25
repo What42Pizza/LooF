@@ -431,11 +431,11 @@ class LooFCompiler {
     if (HeaderFileContents.length > 0) {
       InsertHeader (CodeData, HeaderFileContents);
     }
+    RemoveComments (CodeData);
     RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData);
     ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length);
     ProcessReplaces (CodeData);
-    RemoveComments (CodeData);
     RemoveExcessWhitespace (CodeData);
     CheckForIncorrectPreProcessorStatements (CodeData);
     CombineSeperatedLists (CodeData);

@@ -9,10 +9,9 @@ $link BasicFunctions.LOOF as Basics
 #replaceStart "function " "skip\n$function "
 
 #replaceStart "call " "call $"
-#replaceStart "call $$" "call $"
+#replaceStart "call $$" "call $" // for if the other replace was already preformed
 
-#replaceStart "if_ " "if (not"
-#replaceEnd " then" ")\nskip"
+#replaceEnd " then" ", true"
 
 #replace "  -> " "\npop ARGS, "
 

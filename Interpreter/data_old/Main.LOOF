@@ -1,4 +1,0 @@
-TestVar = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
-TestVar["Test"] = {}
-TestVar["Test"]["Test2"] = "2d value!"
-callOutside "Interpreter", "stop"

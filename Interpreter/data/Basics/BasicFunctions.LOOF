@@ -41,7 +41,7 @@ end
 
 function addAll  -> TargetTable, SourceTable
 	forEach Item, SourceTable
-		Table[lengthOf Table] = Items
+		Table[lengthOf Table] = Item
 	repeat
 	return
 end
@@ -62,14 +62,13 @@ end
 
 
 function cloneTable  -> TableIn
-	errorIf (typeOf TableIn != "table"), ("Basics.cloneTable must take a table as its first argument"), {"InvalidArgType"}
+	errorIf (typeOf TableIn != "table"), "Basics.cloneTable must take a table as its first argument", {"InvalidArgType"}
 	NewTable = {}
 	loop i, 0, endOf TableIn
 		NewTable[i] = TableIn[i]
 	repeat
 	TableInKeys = keysOf TableIn
-	loop i, 0, endOf TableInKeys
-		CurrentKey = TableInKeys[i]
+	forEach CurrentKey, TableInKeys
 		NewTable[CurrentKey] = TableIn[CurrentKey]
 	repeat
 	return NewTable
@@ -86,8 +85,7 @@ function deepCloneTable  -> ValueIn
 		NewTable[i] = ClonedValue
 	repeat
 	TableInKeys = keysOf TableIn
-	loop i, 0, endOf TableInKeys
-		CurrentKey = TableInKeys[i]
+	forEach CurrentKey, TableInKeys
 		:deepCloneTable TableIn[CurrentKey]  -> ClonedValue
 		NewTable[CurrentKey] = ClonedValue
 	repeat
@@ -100,7 +98,7 @@ end
 
 function ensureArgTypesAreCorrect  -> Args, ArgTypes, FunctionName
 	FunctionName defaultsTo "unnamed"
-	loop i, 0, lengthOf ArgsTypes - 1
+	loop i, 0, endOf ArgsTypes
 		errorIf (typeOf Args[i] != ArgTypes[i]), ("Arg " .. i .. " of function \"" .. FunctionName .. "\" must be of type " .. ArgTypes[i] .. ", not type " .. typeOf Args[i] .. "."), {"InvalidArgType", FunctionName}
 	repeat
 	return

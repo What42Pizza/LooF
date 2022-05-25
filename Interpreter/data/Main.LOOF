@@ -66,7 +66,7 @@ repeat
 
 function UpdateAll  -> GameData, BallsData, BulletsData
 	
-	if_ (GameData["Playing"] and not GameData["Paused"]) then
+	if GameData["Playing"] and not GameData["Paused"] then
 		call BallsHandler.UpdateAllBalls, BallsData, BulletsData
 		call BallsHandler.SpawnNewBalls, BallsData
 	end

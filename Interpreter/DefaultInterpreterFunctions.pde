@@ -74,7 +74,7 @@ LooFInterpreterFunction InterpreterFunction_If = new LooFInterpreterFunction() {
     
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
-    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, 2, CodeData, LineNumber);
   }
   @Override public String toString() {return "'if'";}
 };

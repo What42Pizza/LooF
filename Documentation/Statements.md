@@ -77,6 +77,8 @@
 
 - **if Condition**
   - If Condition is truthy, executes the next statement (otherwise skips it)
+- **if Condition, Invert**
+  - If Condition is truthy xor Invert is truthy, executes the next statement (otherwise skips it)
 - **skip**
   - Jumps execution to after the first 'end' statement it can find that is on the same code block level. Errors if no suitable 'end' statement is found
 - **end**

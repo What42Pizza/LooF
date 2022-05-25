@@ -30,9 +30,8 @@ class LooFInterpreter {
     else
       ExecuteInterpreterCallStatement (CurrentStatement, Environment);
     
-    Environment.CurrentLineNumber ++;
-    
     // inc line number
+    Environment.CurrentLineNumber ++;
     int StatementsLength = Environment.CurrentCodeData.Statements.length;
     if (Environment.CurrentLineNumber >= StatementsLength) {
       Environment.CurrentLineNumber = StatementsLength - 1;

@@ -6,7 +6,7 @@ function UpdateAllBalls  -> BallsData, BulletsData
 	BallsToRemove = {}
 	forEach CurrentBall, AllBalls, i
 		call UpdateBall, CurrentBall, BallsData, BulletsData, NewBalls  -> BallIsDestoryed
-		if (BallIsDestroyed)
+		if BallIsDestroyed
 			:addItem BallsToRemove, i
 	repeat
 	
@@ -41,19 +41,19 @@ function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
 	
 	// floor bounce
 	BottomYPos = YPos + Radius / 2
-	if (BottomYPos > 1)
+	if BottomYPos > 1
 		YVel = (BallsData["BounceVelOffset"] + BallsData["BounceVelScale"] * CurrentBall["Size"]) * -1
 	
 	
 	// left wall bounce
 	LeftXPos = XPos - Radius / 2
-	if (LeftXPos < 0)
+	if LeftXPos < 0
 		XVel = abs XVel
 	
 	
 	// right wall bounce
 	RightXPos = XPos + Radius / 2
-	if (LeftXPos < 0)
+	if LeftXPos < 0
 		XVel = abs XVel * -1
 	
 	
@@ -67,7 +67,7 @@ function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
 	CollisionDistance = Radius + BulletsData["Size"]
 	forEach CurrentBullet, AllBullets
 		call CheckIfBallCollidsWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData  -> BulletIsColliding
-		continueIf (not BulletIsColliding)
+		continueIf not BulletIsColliding
 		call CollideWithBullet, CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
 		returnIf BallIsDestroyed, true
 	repeat
@@ -96,7 +96,7 @@ function CheckIfBallCollidsWithBullet  -> CurrentBall, CurrentBullet, BallsData,
 	call F.DistanceBetweenObjects, CurrentBall, CurrentBullet  -> Dsitance
 	call GetBallRadius, CurrentBall, BallsData  -> BallRadius
 	CollisionDistance = BallRadius + BulletsData["BulletRadius"]
-	return (Distance <= CollisionDistance)
+	return Distance <= CollisionDistance
 end
 
 
@@ -108,10 +108,10 @@ function CollideWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsDat
 	CurrentBall["Health"] = CurrentBall["Health"] - BulletDamage
 	
 	// return if done
-	returnIf (CurrentBall["Health"] > 0), false
+	returnIf CurrentBall["Health"] > 0, false
 	
 	// split ball
-	if (CurrentBall["Size"] > 0)
+	if CurrentBall["Size"] > 0
 		call SplitBall, CurrentBall, BallsData, NewBalls
 	
 	return true
@@ -148,7 +148,7 @@ end
 
 function SpawnNewBalls  -> BallsData
 	call GetNumberOfSize0Balls, BallsData["AllBalls"]  -> NumberOfSize0Balls
-	if (NumberOfSize0Balls < BallsData["MaxSize0Balls"])
+	if NumberOfSize0Balls < BallsData["MaxSize0Balls"]
 		call SpawnNewBall, BallsData
 	return
 end
