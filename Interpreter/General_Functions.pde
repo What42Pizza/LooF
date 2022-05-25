@@ -274,6 +274,25 @@ boolean CharIsDigit (char CharIn) {
 
 
 
+boolean StringContainsLetters (String StringIn) {
+  char[] StringChars = StringIn.toCharArray();
+  for (char CurrentChar : StringChars) {
+    if (CharIsLetter (CurrentChar)) return true;
+  }
+  return false;
+}
+
+
+
+boolean CharIsLetter (char CurrentChar) {
+  return
+    (CurrentChar >= 'a' && CurrentChar <= 'z') ||
+    (CurrentChar >= 'A' && CurrentChar <= 'Z')
+  ;
+}
+
+
+
 
 String ReplaceFileExtention (String FileNameIn, String NewFileExtention) {
   int PeriodIndex = FileNameIn.lastIndexOf('.');

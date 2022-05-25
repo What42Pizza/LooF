@@ -9,6 +9,10 @@ import java.nio.file.*;
 
 
 
+LooFCodeData TestCodeData = new LooFCodeData (new String[] {"not actual code"}, "TestCodeData");
+
+
+
 
 
 void setup() {

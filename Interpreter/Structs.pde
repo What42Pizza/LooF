@@ -165,6 +165,7 @@ class LooFCodeData {
   String[] OriginalCode;
   ArrayList <String> CodeArrayList;
   ArrayList <ArrayList <String>> CodeTokens = new ArrayList <ArrayList <String>> ();
+  ArrayList <ArrayList <Boolean>> TokensFollowedBySpaces = new ArrayList <ArrayList <Boolean>> ();
   LooFStatement[] Statements;
   ArrayList <Integer> LineNumbers;
   ArrayList <String> LineFileOrigins;
@@ -209,6 +210,8 @@ class ReturnValue {
   String[] StringArrayValue;
   ArrayList <Integer> IntegerArrayListValue;
   ArrayList <Integer> SecondIntegerArrayListValue;
+  ArrayList <String> StringArrayListValue;
+  ArrayList <Boolean> BooleanArrayListValue;
   
 }
 
@@ -281,8 +284,8 @@ class LooFCompileException extends RuntimeException {
     super (GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message));
   }
   
-  public LooFCompileException (LooFCodeData CodeData, int LineNumber, int TokenNumber, String Message) {
-    super (GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenNumber, Message));
+  public LooFCompileException (LooFCodeData CodeData, int LineNumber, int TokenIndex, String Message) {
+    super (GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenIndex, Message));
   }
   
   public LooFCompileException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
@@ -307,10 +310,10 @@ class LooFCompileException extends RuntimeException {
 
 
 
-String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenNumber, String Message) {
+String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenIndex, String Message) {
   int OriginalLineNumber = CodeData.LineNumbers.get(LineNumber);
   String OriginalFileName = CodeData.LineFileOrigins.get(LineNumber);
-  return "File " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + "   (" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenNumber) + ") :   " + Message;
+  return "File " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + "   (" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenIndex) + ") :   " + Message;
 }
 
 
@@ -322,9 +325,9 @@ String ErrorMessage_GetFileNameToShow (String FileName, String OriginalFileName)
 
 
 
-String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, int LineNumber, Integer TokenNumber) {
+String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, int LineNumber, Integer TokenIndex) {
   String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
-  LineOfCodeToShow += (TokenNumber == null) ? "" : "; token \"" + CodeData.CodeTokens.get(LineNumber).get(TokenNumber) + "\"";
+  LineOfCodeToShow += (TokenIndex == null) ? "" : "; token numer " + TokenIndex + " \"" + CodeData.CodeTokens.get(LineNumber).get(TokenIndex) + "\"";
   return LineOfCodeToShow;
 }
 
@@ -504,6 +507,9 @@ class LooFTokenBranch {
   
   boolean ConvertsToDataValue;
   boolean IsAction;
+  int OriginalTokenIndex;
+  String OriginalString;
+  
   int TokenType;
   long IntValue;
   double FloatValue;
@@ -517,59 +523,75 @@ class LooFTokenBranch {
   int[] FunctionIndexes;
   FloatIntPair[] OperationIndexes;
   
-  public LooFTokenBranch() {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_Null;
     this.ConvertsToDataValue = true;
     this.IsAction = false;
   }
   
-  public LooFTokenBranch (long IntValue) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, long IntValue) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_Int;
     this.IntValue = IntValue;
     this.ConvertsToDataValue = true;
     this.IsAction = false;
   }
   
-  public LooFTokenBranch (double FloatValue) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, double FloatValue) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_Float;
     this.FloatValue = FloatValue;
     this.ConvertsToDataValue = true;
     this.IsAction = false;
   }
   
-  public LooFTokenBranch (int TokenType, String StringValue, boolean ConvertsToDataValue, boolean IsAction) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, int TokenType, String StringValue, boolean ConvertsToDataValue, boolean IsAction) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenType;
     this.StringValue = StringValue;
     this.ConvertsToDataValue = ConvertsToDataValue;
     this.IsAction = IsAction;
   }
   
-  public LooFTokenBranch (boolean BoolValue) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, boolean BoolValue) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_Bool;
     this.BoolValue = BoolValue;
     this.ConvertsToDataValue = true;
     this.IsAction = false;
   }
   
-  public LooFTokenBranch (int TokenType, LooFTokenBranch[] Children, boolean IsAction) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, int TokenType, LooFTokenBranch[] Children, boolean IsAction) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenType;
     this.Children = Children;
     this.ConvertsToDataValue = true;
     this.IsAction = IsAction;
   }
   
-  public LooFTokenBranch (LooFEvaluatorOperation Operation, String Name) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFEvaluatorOperation Operation) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_EvaluatorOperation;
     this.Operation = Operation;
-    this.StringValue = Name;
+    this.StringValue = OriginalString;
     this.ConvertsToDataValue = false;
     this.IsAction = true;
   }
   
-  public LooFTokenBranch (LooFEvaluatorFunction Function, String Name) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFEvaluatorFunction Function) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
     this.TokenType = TokenBranchType_EvaluatorFunction;
     this.Function = Function;
-    this.StringValue = Name;
+    this.StringValue = OriginalString;
     this.ConvertsToDataValue = true;
     this.IsAction = true;
   }
