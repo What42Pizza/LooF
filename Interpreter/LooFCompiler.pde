@@ -505,6 +505,7 @@ class LooFCompiler {
   
   void ProcessReplaces (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
+    HashMap <String, Boolean[]> AllCharsInQuotes = new HashMap <String, Boolean[]> ();
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
       if (!CurrentLine.startsWith("#replace")) continue;
@@ -513,7 +514,16 @@ class LooFCompiler {
         ReturnValue ReplacementData = GetReplacementData (CodeData, i, 10);
         String ReplaceBefore = ReplacementData.StringValue;
         String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, false, false);
+        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, false);
+        i --;
+        continue;
+      }
+      
+      if (CurrentLine.startsWith("#replaceIgnoreQuotes ")) {
+        ReturnValue ReplacementData = GetReplacementData (CodeData, i, 22);
+        String ReplaceBefore = ReplacementData.StringValue;
+        String[] ReplaceAfter = ReplacementData.StringArrayValue;
+        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, true);
         i --;
         continue;
       }
@@ -522,7 +532,7 @@ class LooFCompiler {
         ReturnValue ReplacementData = GetReplacementData (CodeData, i, 15);
         String ReplaceBefore = ReplacementData.StringValue;
         String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, true, false);
+        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, true, false, false);
         i --;
         continue;
       }
@@ -531,7 +541,7 @@ class LooFCompiler {
         ReturnValue ReplacementData = GetReplacementData (CodeData, i, 13);
         String ReplaceBefore = ReplacementData.StringValue;
         String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, false, true);
+        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, true, false);
         i --;
         continue;
       }
@@ -571,14 +581,14 @@ class LooFCompiler {
     
     // find first (not in string) '"'
     int i = SearchStart;
-    for (int VOID = 0; i < CurrentLineLength; i ++) {
+    for (@SuppressWarnings("unused") int VOID = 0; i < CurrentLineLength; i ++) {
       if (CurrentLine.charAt(i) == '"' && CurrentLine.charAt(i - 1) != '\\') break;
     }
     int FirstMiddleQuote = i;
     
     // find second (not in string) '"'
     i ++;
-    for (int VOID = 0; i < CurrentLineLength; i ++) {
+    for (@SuppressWarnings("unused") int VOID = 0; i < CurrentLineLength; i ++) {
       if (CurrentLine.charAt(i) == '"' && CurrentLine.charAt(i - 1) != '\\') break;
     }
     int SecondMiddleQuote = i;
@@ -592,13 +602,27 @@ class LooFCompiler {
   
   
   
-  void ReplaceAllStringOccurancesInCode (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, boolean OnlyStart, boolean OnlyEnd) {
+  void ReplaceAllStringOccurancesInCode (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, HashMap <String, Boolean[]> AllCharsInQuotes, boolean OnlyStart, boolean OnlyEnd, boolean IgnoreQuotes) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     int LinesToJumpPerReplace = ReplaceAfter.length - 1;
+    int FunctionToUse = (OnlyStart ? 1 : 0) + (OnlyEnd ? 2 : 0);
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
       if (CurrentLine.startsWith("#replace")) continue;  // NOT "#replace "
-      ArrayList <Integer> AllReplacementPositions = GetAllPositionsOfString (CurrentLine, ReplaceBefore, OnlyStart, OnlyEnd);
+      ArrayList <Integer> AllReplacementPositions = null;
+      switch (FunctionToUse) {
+        case (0):
+          AllReplacementPositions = GetAllPositionsOfString (CurrentLine, AllCharsInQuotes, ReplaceBefore, IgnoreQuotes);
+          break;
+        case (1):
+          AllReplacementPositions = GetAllPositionsOfString_OnlyStart (CurrentLine, ReplaceBefore);
+          break;
+        case (2):
+          AllReplacementPositions = GetAllPositionsOfString_OnlyEnd (CurrentLine, ReplaceBefore);
+          break;
+        default:
+          throw new AssertionError();
+      }
       ReplaceAllStringOccurancesInLine (CodeData, CurrentLine, i, AllReplacementPositions, ReplaceBefore, ReplaceAfter);
       int LinesToJump = LinesToJumpPerReplace * AllReplacementPositions.size();
       i += LinesToJump;
@@ -607,22 +631,57 @@ class LooFCompiler {
   
   
   
-  ArrayList <Integer> GetAllPositionsOfString (String StringIn, String StringToFind, boolean OnlyStart, boolean OnlyEnd) {
+  ArrayList <Integer> GetAllPositionsOfString_OnlyStart (String StringIn, String StringToFind) {
     ArrayList <Integer> Output = new ArrayList <Integer> ();
-    if (OnlyStart) {
-      if (StringIn.startsWith(StringToFind)) Output.add(0);
-      return Output;
+    if (StringIn.startsWith(StringToFind)) Output.add(0);
+    return Output;
+  }
+  
+  
+  
+  ArrayList <Integer> GetAllPositionsOfString_OnlyEnd (String StringIn, String StringToFind) {
+    ArrayList <Integer> Output = new ArrayList <Integer> ();
+    if (StringIn.endsWith(StringToFind)) Output.add(StringIn.length() - StringToFind.length());
+    return Output;
+  }
+  
+  
+  
+  ArrayList <Integer> GetAllPositionsOfString (String StringIn, HashMap <String, Boolean[]> AllCharsInQuotes, String StringToFind, boolean IgnoreQuotes) {
+    ArrayList <Integer> Output = new ArrayList <Integer> ();
+    
+    Boolean[] CharsInQuotes = null;
+    if (!IgnoreQuotes) {
+      CharsInQuotes = AllCharsInQuotes.getOrDefault (StringIn, null);
+      if (CharsInQuotes == null) {
+        CharsInQuotes = ToObject (GetCharsInQuotes (StringIn));
+        AllCharsInQuotes.put(StringIn, CharsInQuotes);
+      }
     }
-    if (OnlyEnd) {
-      if (StringIn.endsWith(StringToFind)) Output.add(StringIn.length() - StringToFind.length());
-      return Output;
-    }
+    
     int FoundIndex = StringIn.indexOf(StringToFind);
     while (FoundIndex != -1) {
-      Output.add(FoundIndex);
+      if (IgnoreQuotes || !CharsInQuotes[FoundIndex]) Output.add(FoundIndex);
       FoundIndex = StringIn.indexOf(StringToFind, FoundIndex + 1);
     }
     return Output;
+    
+  }
+  
+  
+  
+  boolean[] GetCharsInQuotes (String StringIn) {
+    boolean[] CharsInQuotes = new boolean [StringIn.length()];
+    int StartQuoteIndex = StringIn.indexOf('"');
+    while (StartQuoteIndex != -1) {
+      int EndQuoteIndex = StringIn.indexOf('"', StartQuoteIndex + 1);
+      if (EndQuoteIndex == -1) return CharsInQuotes;
+      for (int i = StartQuoteIndex + 1; i < EndQuoteIndex; i ++) {
+        CharsInQuotes[i] = true;
+      }
+      StartQuoteIndex = StringIn.indexOf('"', EndQuoteIndex + 1);
+    }
+    return CharsInQuotes;
   }
   
   
@@ -1290,7 +1349,7 @@ class LooFCompiler {
       FakeEndQuoteIndex = CurrentLine.indexOf('\\', EndQuoteIndex + 1);
       EndQuoteIndex = CurrentLine.indexOf('"', EndQuoteIndex + 1);
       if (EndQuoteIndex == -1) {
-        throw (new LooFCompileException (CodeData, LineNumber, "could not find a matching end-quote for the quote at index " + i + "."));
+        throw (new LooFCompileException (CodeData, LineNumber, "could not find a matching end-quote for the quote at char " + i + "."));
       }
     }
     return EndQuoteIndex;

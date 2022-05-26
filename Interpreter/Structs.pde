@@ -316,7 +316,7 @@ class LooFCompileException extends RuntimeException {
 String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenIndex, String Message) {
   int OriginalLineNumber = CodeData.LineNumbers.get(LineNumber);
   String OriginalFileName = CodeData.LineFileOrigins.get(LineNumber);
-  return "File " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + "   (" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenIndex) + ") :   " + Message;
+  return "File " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":   " + Message + "\n\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenIndex);
 }
 
 
@@ -330,7 +330,7 @@ String ErrorMessage_GetFileNameToShow (String FileName, String OriginalFileName)
 
 String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, int LineNumber, Integer TokenIndex) {
   String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
-  LineOfCodeToShow += (TokenIndex == null) ? "" : "; token numer " + TokenIndex + " \"" + CodeData.CodeTokens.get(LineNumber).get(TokenIndex) + "\"";
+  LineOfCodeToShow += (TokenIndex == null) ? "" : "\nToken number " + TokenIndex + " `" + CodeData.CodeTokens.get(LineNumber).get(TokenIndex) + "`";
   return LineOfCodeToShow;
 }
 
@@ -344,8 +344,8 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
   if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
   
-  if (LineHasChanged) return "\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"";
-  return "\"" + LineOfCode + "\"";
+  if (LineHasChanged) return "Original line of code: `" + OriginalLineOfCode + "`\nAfter pre-processor:   `" + LineOfCode + "`";
+  return "Line of code:  `" + LineOfCode + "`";
   
 }
 

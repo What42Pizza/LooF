@@ -3,6 +3,8 @@
 - **\#include FileName**
   - copies and pastes the contents from FileName (this copies the original contents of FileName (without the header added))
 - **\#replace "String1" "String2"**
+  - replaces all non-quote occurrences of String1 with String2
+- **\#replaceIgnoreQuotes "String1" "String2"**
   - replaces all occurrences of String1 with String2
 - **\#if\_equal "String1" "String2"**
   - deletes all following code up to and including the next #end\_if (on same level) if String1 does not equal String2

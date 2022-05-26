@@ -71,6 +71,14 @@ char[] ToPrimitive (Character[] ArrayIn) {
   return ArrayOut;
 }
 
+Boolean[] ToObject (boolean[] ArrayIn) {
+  Boolean[] ArrayOut = new Boolean [ArrayIn.length];
+  for (int i = 0; i < ArrayIn.length; i ++) {
+    ArrayOut[i] = ArrayIn[i];
+  }
+  return ArrayOut;
+}
+
 
 
 

@@ -45,7 +45,7 @@ I want this language to be very modular, and there are currently 5 ways to easil
 
 ### Decent speed
 
-I'm doing my best to take performance into account, and I'm having the compiler do as much of the work as possible.
+I'm doing my best to take performance into account, and I'm having the compiler do as much of the work as possible. Being that the core interpreter (not counting the add-ons) is (currently) 5.5x times smaller than the compiler, I'm pretty sure I've done a good job.
 
 ### Decent error messages
 
