@@ -97,13 +97,12 @@ class LooFCompiler {
     
     
     
-    
     StopTimer ("OnlyCompilation");
     StopTimer ("Total");
     
-    println ("Compiled environment from folder " + CodeFolder + ".");
-    println ("Total time for only compiling: " + GetTimerMillis ("OnlyCompilation") + " ms.");
-    println ("Total time: " + GetTimerMillis ("Total") + " ms.");
+    System.out.println ("Compiled environment from folder " + CodeFolder + ".");
+    System.out.println ("Total time for only compiling: " + GetTimerMillis ("OnlyCompilation") + " ms.");
+    System.out.println ("Total time: " + GetTimerMillis ("Total") + " ms.");
     
     
     
@@ -184,30 +183,30 @@ class LooFCompiler {
     HashMap <String, LooFEvaluatorFunction> EvaluatorFunctions = new HashMap <String, LooFEvaluatorFunction> ();
     if (!CompileSettings.AddDefaultEvaluatorFunctions) return EvaluatorFunctions;
     
-    EvaluatorFunctions.put("round", Function_round);
-    EvaluatorFunctions.put("floor", Function_floor);
-    EvaluatorFunctions.put("ceil", Function_ceil);
+    EvaluatorFunctions.put("round", Function_Round);
+    EvaluatorFunctions.put("floor", Function_Floor);
+    EvaluatorFunctions.put("ceil", Function_Ceil);
     EvaluatorFunctions.put("abs", NullEvaluatorFunction);
-    EvaluatorFunctions.put("sqrt", Function_sqrt);
-    EvaluatorFunctions.put("sign", Function_sign);
-    EvaluatorFunctions.put("not", Function_not);
+    EvaluatorFunctions.put("sqrt", Function_Sqrt);
+    EvaluatorFunctions.put("sign", Function_Sign);
+    EvaluatorFunctions.put("not", Function_Not);
     EvaluatorFunctions.put("!!", NullEvaluatorFunction);
-    EvaluatorFunctions.put("min", Function_min);
-    EvaluatorFunctions.put("max", Function_max);
+    EvaluatorFunctions.put("min", Function_Min);
+    EvaluatorFunctions.put("max", Function_Max);
     EvaluatorFunctions.put("clamp", NullEvaluatorFunction);
     
-    EvaluatorFunctions.put("random", Function_random);
-    EvaluatorFunctions.put("randomInt", Function_randomInt);
-    EvaluatorFunctions.put("chance", Function_chance);
+    EvaluatorFunctions.put("random", Function_Random);
+    EvaluatorFunctions.put("randomInt", Function_RandomInt);
+    EvaluatorFunctions.put("chance", Function_Chance);
     
-    EvaluatorFunctions.put("lengthOf", Function_lengthOf);
-    EvaluatorFunctions.put("totalItemsIn", Function_totalItemsIn);
-    EvaluatorFunctions.put("endOf", Function_endOf);
+    EvaluatorFunctions.put("lengthOf", Function_LengthOf);
+    EvaluatorFunctions.put("totalItemsIn", Function_TotalItemsIn);
+    EvaluatorFunctions.put("endOf", Function_EndOf);
     EvaluatorFunctions.put("lastItemOf", NullEvaluatorFunction);
-    EvaluatorFunctions.put("keysOf", Function_keysOf);
-    EvaluatorFunctions.put("valuesOf", Function_valuesOf);
-    EvaluatorFunctions.put("randomItem", Function_randomItem);
-    EvaluatorFunctions.put("randomValue", Function_randomValue);
+    EvaluatorFunctions.put("keysOf", Function_KeysOf);
+    EvaluatorFunctions.put("valuesOf", Function_ValuesOf);
+    EvaluatorFunctions.put("randomItem", Function_RandomItem);
+    EvaluatorFunctions.put("randomValue", Function_RandomValue);
     EvaluatorFunctions.put("firstIndexOfItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("lastIndexOfItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("allIndexesOfItem", NullEvaluatorFunction);
@@ -216,10 +215,10 @@ class LooFCompiler {
     EvaluatorFunctions.put("hashmapContainsItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("splitTable", NullEvaluatorFunction);
     
-    EvaluatorFunctions.put("getChar", Function_getChar);
-    EvaluatorFunctions.put("getCharInts", Function_getCharInts);
-    EvaluatorFunctions.put("getCharByes", Function_getCharBytes);
-    EvaluatorFunctions.put("getSubString", Function_getSubString);
+    EvaluatorFunctions.put("getChar", Function_GetChar);
+    EvaluatorFunctions.put("getCharInts", Function_GetCharInts);
+    EvaluatorFunctions.put("getCharByes", Function_GetCharBytes);
+    EvaluatorFunctions.put("getSubString", Function_GetSubString);
     EvaluatorFunctions.put("firstIndexOfString", NullEvaluatorFunction);
     EvaluatorFunctions.put("lastIndexOfString", NullEvaluatorFunction);
     EvaluatorFunctions.put("allIndexesOfString", NullEvaluatorFunction);
@@ -231,12 +230,12 @@ class LooFCompiler {
     EvaluatorFunctions.put("toUpperCase", NullEvaluatorFunction);
     EvaluatorFunctions.put("trimString", NullEvaluatorFunction);
     
-    EvaluatorFunctions.put("toInt", Function_toInt);
-    EvaluatorFunctions.put("toFloat", Function_toFloat);
-    EvaluatorFunctions.put("toString", Function_toString);
-    EvaluatorFunctions.put("toBool", Function_toBool);
+    EvaluatorFunctions.put("toInt", Function_ToInt);
+    EvaluatorFunctions.put("toFloat", Function_ToFloat);
+    EvaluatorFunctions.put("toString", Function_ToString);
+    EvaluatorFunctions.put("toBool", Function_ToBool);
     
-    EvaluatorFunctions.put("typeOf", Function_typeOf);
+    EvaluatorFunctions.put("typeOf", Function_TypeOf);
     EvaluatorFunctions.put("newByteArray", NullEvaluatorFunction);
     EvaluatorFunctions.put("timeSince", NullEvaluatorFunction);
     

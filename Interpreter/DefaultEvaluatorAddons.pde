@@ -341,7 +341,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
 
 LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
     return (LeftValueAsBool.BoolValue) ? RightValue : new LooFDataValue (false);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -353,7 +353,7 @@ LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
 
 LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
     return (LeftValueAsBool.BoolValue) ? LeftValue : RightValue;
   }
   @Override public float GetOrder() {return 1.0;}
@@ -365,8 +365,8 @@ LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
 
 LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
-    LooFDataValue LeftValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
-    LooFDataValue RightValueAsBool = Function_toBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment);
+    LooFDataValue RightValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment);
     return new LooFDataValue (LeftValueAsBool.BoolValue ^ RightValueAsBool.BoolValue);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -476,7 +476,7 @@ LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
 
 
 
-LooFEvaluatorFunction Function_round = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Round = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
@@ -492,7 +492,7 @@ LooFEvaluatorFunction Function_round = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_floor = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Floor = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
@@ -508,7 +508,7 @@ LooFEvaluatorFunction Function_floor = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_ceil = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Ceil = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
@@ -524,7 +524,7 @@ LooFEvaluatorFunction Function_ceil = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_sqrt = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
@@ -540,7 +540,7 @@ LooFEvaluatorFunction Function_sqrt = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_sign = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Sign = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
@@ -554,10 +554,10 @@ LooFEvaluatorFunction Function_sign = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_not = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Not = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
-    LooFDataValue InputAsBool = Function_toBool.HandleFunctionCall (Input, Environment);
+    LooFDataValue InputAsBool = Function_ToBool.HandleFunctionCall (Input, Environment);
     InputAsBool.BoolValue = !InputAsBool.BoolValue;
     
     return InputAsBool;
@@ -569,7 +569,7 @@ LooFEvaluatorFunction Function_not = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_min = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Min = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     // ensure input is valid
@@ -614,7 +614,7 @@ LooFEvaluatorFunction Function_min = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_max = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     // ensure input is valid
@@ -659,7 +659,7 @@ LooFEvaluatorFunction Function_max = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_random = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Random = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -674,7 +674,7 @@ LooFEvaluatorFunction Function_random = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_randomInt = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_RandomInt = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -699,7 +699,7 @@ LooFEvaluatorFunction Function_randomInt = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_chance = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_Chance = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -716,7 +716,7 @@ LooFEvaluatorFunction Function_chance = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_lengthOf = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_LengthOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -740,7 +740,7 @@ LooFEvaluatorFunction Function_lengthOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_totalItemsIn = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_TotalItemsIn = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -754,7 +754,7 @@ LooFEvaluatorFunction Function_totalItemsIn = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_endOf = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_EndOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -775,7 +775,7 @@ LooFEvaluatorFunction Function_endOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_keysOf = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_KeysOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function keysOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -796,7 +796,7 @@ LooFEvaluatorFunction Function_keysOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_valuesOf = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -817,7 +817,7 @@ LooFEvaluatorFunction Function_valuesOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_randomItem = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -833,7 +833,7 @@ LooFEvaluatorFunction Function_randomItem = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_randomValue = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -848,7 +848,7 @@ LooFEvaluatorFunction Function_randomValue = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_GetChar = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -871,7 +871,7 @@ LooFEvaluatorFunction Function_getChar = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_getCharInts = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_GetCharInts = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
@@ -894,7 +894,7 @@ LooFEvaluatorFunction Function_getCharInts = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_getCharBytes = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_GetCharBytes = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     if (Input.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the evaluator function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     
@@ -917,7 +917,7 @@ LooFEvaluatorFunction Function_getCharBytes = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_getSubString = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_GetSubString = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     if (Input.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
@@ -946,7 +946,7 @@ LooFEvaluatorFunction Function_getSubString = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_ToInt = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -986,7 +986,7 @@ LooFEvaluatorFunction Function_toInt = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_ToFloat = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -1026,7 +1026,7 @@ LooFEvaluatorFunction Function_toFloat = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_toString = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_ToString = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -1062,7 +1062,7 @@ LooFEvaluatorFunction Function_toString = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     switch (Input.ValueType) {
       
@@ -1098,7 +1098,7 @@ LooFEvaluatorFunction Function_toBool = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_typeOf = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_TypeOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     return new LooFDataValue (DataValueTypeNames[Input.ValueType]);
   }

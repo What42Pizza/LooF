@@ -108,7 +108,7 @@ function CollideWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsDat
 	CurrentBall["Health"] = CurrentBall["Health"] - BulletDamage
 	
 	// return if done
-	returnIf CurrentBall["Health"] > 0, false
+	returnIf (CurrentBall["Health"] > 0), false
 	
 	// split ball
 	if CurrentBall["Size"] > 0

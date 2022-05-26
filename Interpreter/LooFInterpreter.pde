@@ -28,7 +28,7 @@ class LooFInterpreter {
     if (CurrentStatement.StatementType == StatementType_Assignment)
       ExecuteAssignmentStatement (CurrentStatement, Environment);
     else
-      ExecuteInterpreterCallStatement (CurrentStatement, Environment);
+      ExecuteFunctionStatement (CurrentStatement, Environment);
     
     // inc line number
     Environment.CurrentLineNumber ++;
@@ -46,24 +46,25 @@ class LooFInterpreter {
   
   void ExecuteAssignmentStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
     String OutputVarName = CurrentStatement.VarName;
-    LooFInterpreterAssignment Assignment = CurrentStatement.Assignment;
+    LooFInterpreterAssignment StatementAssignment = CurrentStatement.Assignment;
     LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
     LooFTokenBranch NewValueFormula = CurrentStatement.NewValueFormula;
     
     if (IndexQueries.length == 0) {
       LooFDataValue OldVarValue = GetVariableValue (OutputVarName, Environment, false);
-      LooFDataValue NewVarValue = Assignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
+      LooFDataValue NewVarValue = StatementAssignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
       SetVariableValue (OutputVarName, NewVarValue, Environment);
       return;
     }
     
     LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment);
     LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment);
-    LooFDataValue OldVarValue = GetVariableValue (OutputVarName, Environment, false);
-    LooFDataValue NewVarValue = Assignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
+    LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, Environment);
+    LooFDataValue NewVarValue = StatementAssignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
     SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
     
   }
+  
   
   
   
@@ -82,10 +83,11 @@ class LooFInterpreter {
   
   
   
-  void ExecuteInterpreterCallStatement (LooFStatement Statement, LooFEnvironment Environment) {
-    
+  void ExecuteFunctionStatement (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFInterpreterFunction StatementFunction = Statement.Function;
+    LooFTokenBranch[] StatementArgs = Statement.Args;
+    StatementFunction.HandleFunctionCall(StatementArgs, Environment);
   }
-  
   
   
   

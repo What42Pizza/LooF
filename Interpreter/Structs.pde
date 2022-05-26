@@ -10,44 +10,6 @@ class LooFInterpreterModule {
 
 
 
-class LooFEvaluatorOperation {
-  
-  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
-  }
-  
-  public float GetOrder() {
-    return 0;
-  }
-  
-  public boolean AddToCombinedTokens() {
-    return false;
-  }
-  
-}
-
-
-
-
-
-LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
-
-class LooFEvaluatorFunction {
-  
-  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
-  }
-  
-  public boolean AddToCombinedTokens() {
-    return false;
-  }
-  
-}
-
-
-
-
-
 class LooFInterpreterAssignment {
   
   public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
@@ -100,6 +62,44 @@ class LooFInterpreterFunction implements Cloneable {
 
 
 
+class LooFEvaluatorOperation {
+  
+  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
+  }
+  
+  public float GetOrder() {
+    return 0;
+  }
+  
+  public boolean AddToCombinedTokens() {
+    return false;
+  }
+  
+}
+
+
+
+
+
+LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
+
+class LooFEvaluatorFunction {
+  
+  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
+  }
+  
+  public boolean AddToCombinedTokens() {
+    return false;
+  }
+  
+}
+
+
+
+
+
 class LooFAddonsData {
   
   HashMap <String, LooFInterpreterModule> InterpreterModules;
@@ -129,22 +129,25 @@ class LooFEnvironment {
   
   
   
-  String CurrentCodeDataName;
+  String CurrentFileName;
   LooFCodeData CurrentCodeData;
   int CurrentLineNumber;
   
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
   
-  ArrayList <LooFDataValue[]> LockedArgumentDataValues = new ArrayList <LooFDataValue[]> ();
+  ArrayList <String> CallStackFileNames = new ArrayList <String> ();
+  ArrayList <Integer> CallStackLineNumbers = new ArrayList <Integer> ();
+  ArrayList <String[]> CallStackErrorsToCatch = new ArrayList <String[]> (); 
+  ArrayList <LooFDataValue[]> CallStackLockedArguments = new ArrayList <LooFDataValue[]> ();
   
   
   
   public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas, LooFAddonsData AddonsData) {
     this.AllCodeDatas = AllCodeDatas;
     this.AddonsData = AddonsData;
-    this.CurrentCodeDataName = "Main.LOOF";
-    this.CurrentCodeData = AllCodeDatas.get(CurrentCodeDataName);
+    this.CurrentFileName = "Main.LOOF";
+    this.CurrentCodeData = AllCodeDatas.get(CurrentFileName);
     this.CurrentLineNumber = 0;
     this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
   }
@@ -367,7 +370,7 @@ class LooFInterpreterException extends RuntimeException {
 
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
-  String FileName = Environment.CurrentCodeDataName;
+  String FileName = Environment.CurrentFileName;
   LooFCodeData CodeData = Environment.CurrentCodeData;
   int LineNumber = Environment.CurrentLineNumber;
   
