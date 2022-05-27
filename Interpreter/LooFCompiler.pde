@@ -29,14 +29,14 @@ class LooFCompiler {
     
     
     // start CodeData-s
-    LooFLoadedFilesData LoadedFilesData;
+    ReturnValue LoadedFilesData;
     try {
       LoadedFilesData = LoadFilesIntoNewCodeDatas (CodeFolder);
     } catch (IOException e) {
       throw (new LooFCompileException ("could not load files into CodeData-s: " + e.toString()));
     }
     HashMap <String, LooFCodeData> AllCodeDatas = LoadedFilesData.AllCodeDatas;
-    String[] HeaderFileContents = LoadedFilesData.HeaderFileContents;
+    String[] HeaderFileContents = LoadedFilesData.StringArrayValue;
     
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     
@@ -94,6 +94,19 @@ class LooFCompiler {
     
     // create environement
     LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas, AddonsData);
+    
+    
+    
+    // finish statements
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      FinishStatements (CodeData, NewEnvironment);
+    }
+    
+    if (CompileSettings.FinalOutputPath != null) {
+      StopTimer ("OnlyCompilation");
+      PrintFinalOutput (AllCodeDatas, CompileSettings.FinalOutputPath, "FinalLOOF");
+      StartTimer ("OnlyCompilation");
+    }
     
     
     
@@ -355,7 +368,7 @@ class LooFCompiler {
   
   
   
-  LooFLoadedFilesData LoadFilesIntoNewCodeDatas (File CodeFolder) throws IOException {
+  ReturnValue LoadFilesIntoNewCodeDatas (File CodeFolder) throws IOException {
     
     
     
@@ -410,10 +423,10 @@ class LooFCompiler {
     
     
     
-    return new LooFLoadedFilesData (AllCodeDatas, HeaderFileContents);
-    
-    
-    
+    ReturnValue Return = new ReturnValue();
+    Return.AllCodeDatas = AllCodeDatas;
+    Return.StringArrayValue = HeaderFileContents;
+    return Return;
   }
   
   
@@ -1394,7 +1407,7 @@ class LooFCompiler {
     ReturnValue FoundCombinedTokenData = GetCombinedTokenFromPosition (CurrentLineTokens, TokensFollowedBySpaces, CombinedTokens, StartIndex);
     if (FoundCombinedTokenData == null) return;
     String FoundCombinedToken = FoundCombinedTokenData.StringValue;
-    int FoundCombinedTokenEndIndex = FoundCombinedTokenData.IntegerValue;
+    int FoundCombinedTokenEndIndex = FoundCombinedTokenData.IntValue;
     
     // remove tokens to combine
     for (int i = FoundCombinedTokenEndIndex; i > StartIndex; i --) {
@@ -1437,7 +1450,7 @@ class LooFCompiler {
         if (PossibleCombinedToken.equals(CombinedTokens[ResultIndex])) {
           Return = new ReturnValue();
           Return.StringValue = PossibleCombinedToken;
-          Return.IntegerValue = i;
+          Return.IntValue = i;
         }
         ResultIndex ++;
         if (ResultIndex == CombinedTokensLength) return Return;
@@ -1460,23 +1473,13 @@ class LooFCompiler {
   
   void ParseCodeData (LooFCodeData CodeData, LooFAddonsData AddonsData) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
-    
-    // generate basic statements
     LooFStatement[] Statements = new LooFStatement [CodeTokens.size()];
     for (int i = 0; i < Statements.length; i ++) {
       LooFStatement CurrentStatement = GetStatementFromLine (CodeTokens.get(i), AddonsData, CodeData, i);
       SimplifyNestedFormulasForStatement (CurrentStatement);
       Statements[i] = CurrentStatement;
     }
-    
     CodeData.Statements = Statements;
-    
-    // make sure they will work and fill in any additional data
-    for (int i = 0; i < Statements.length; i ++) {
-      LooFStatement CurrentStatement = Statements[i];
-      if (CurrentStatement.StatementType != StatementType_Function) continue;
-      CurrentStatement.Function.FinishStatement (CurrentStatement, CodeData, i);
-    }
   }
   
   
@@ -1610,6 +1613,7 @@ class LooFCompiler {
     EnsureFormulaTokensAreValid (FormulaChildren, CodeData, LineNumber);
     LooFTokenBranch ParsedFormula = new LooFTokenBranch (FormulaBlockStart - 1, "(", TokenBranchType_Formula, FormulaChildren, false);
     FillFormulaTokenEvaluationOrders (ParsedFormula);
+    FillTokenBranchCanBePreEvaluated (ParsedFormula);
     return ParsedFormula;
   }
   
@@ -1887,6 +1891,26 @@ class LooFCompiler {
   
   
   
+  void FillTokenBranchCanBePreEvaluated (LooFTokenBranch TokenBranch) {
+    boolean CanBePreEvaluated = true;
+    for (LooFTokenBranch CurrentToken : TokenBranch.Children) {
+      if (
+        !CurrentToken.CanBePreEvaluated ||
+        CurrentToken.TokenType == TokenBranchType_VarName ||
+        (CurrentToken.TokenType == TokenBranchType_EvaluatorOperation && !CurrentToken.Operation.CanBePreEvaluated()) ||
+        (CurrentToken.TokenType == TokenBranchType_EvaluatorFunction && !CurrentToken.Function.CanBePreEvaluated())
+      ) {
+        CanBePreEvaluated = false;
+        break;
+      }
+    }
+    TokenBranch.CanBePreEvaluated = CanBePreEvaluated;
+  }
+  
+  
+  
+  
+  
   LooFTokenBranch GetParsedTable (ArrayList <String> CurrentLineTokens, int TableBlockStart, int TableBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     if (TableBlockStart == TableBlockEnd + 1) return new LooFTokenBranch (TableBlockStart - 1, "{", TokenBranchType_Table, new LooFTokenBranch [0], false);
     int TableBlockLevel = BlockLevels.get(TableBlockStart);
@@ -1903,7 +1927,9 @@ class LooFCompiler {
     }
     Items.add (GetParsedFormula (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber));
     
-    return new LooFTokenBranch (TableBlockStart - 1, "{", TokenBranchType_Table, ListToArray (Items, new LooFTokenBranch (0, "")), false);
+    LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", TokenBranchType_Table, ListToArray (Items, new LooFTokenBranch (0, "")), false);
+    FillTokenBranchCanBePreEvaluated (ParsedTable);
+    return ParsedTable;
   }
   
   
@@ -2086,7 +2112,7 @@ class LooFCompiler {
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch OutputVarToken = OutputArgChildren[0];
-    if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
+    if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompileException (CodeData, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not " + TokenBranchTypeNames_PlusA[OutputVarToken.TokenType] + "."));
     OutputVarToken.TokenType = TokenBranchType_OutputVar;
     Statement.Args[OutputVarIndex] = OutputVarToken;
   }
@@ -2149,6 +2175,94 @@ class LooFCompiler {
       
     }
     throw (new LooFCompileException (CodeData, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (statement completely missing)."));
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void FinishStatements (LooFCodeData CodeData, LooFEnvironment Environment) {
+    
+    // change LooFEnvironment data for correct error messages
+    String Original_FileName = Environment.CurrentFileName;
+    LooFCodeData Original_CodeData = Environment.CurrentCodeData;
+    int Original_LineNumber = Environment.CurrentLineNumber;
+    Environment.CurrentFileName = CodeData.FullFileName;
+    Environment.CurrentCodeData = CodeData;
+    
+    // do FinishStatement() stuff
+    LooFStatement[] Statements = CodeData.Statements;
+    for (int i = 0; i < Statements.length; i ++) {
+      Environment.CurrentLineNumber = i;
+      LooFStatement CurrentStatement = Statements[i];
+      switch (CurrentStatement.StatementType) {
+        
+        case (StatementType_Assignment):
+          PreEvaluateStatementIndexQueries (CurrentStatement, Environment);
+          CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, Environment);
+          continue;
+        
+        case (StatementType_Function):
+          PreEvaluateStatementArgs (CurrentStatement, Environment);
+          CurrentStatement.Function.FinishStatement (CurrentStatement, CodeData, i);
+          continue;
+        
+        default:
+          throw new AssertionError();
+        
+      }
+    }
+    
+    // revert LooFEnvironment data
+    Environment.CurrentFileName = Original_FileName;
+    Environment.CurrentCodeData = Original_CodeData;
+    Environment.CurrentLineNumber = Original_LineNumber;
+    
+  }
+  
+  
+  
+  
+  
+  void PreEvaluateStatementIndexQueries (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] IndexQueries = Statement.IndexQueries;
+    for (int i = 0; i < IndexQueries.length; i ++) {
+      IndexQueries[i] = PreEvaluateFormula (IndexQueries[i], Environment);
+    }
+  }
+  
+  
+  
+  void PreEvaluateStatementArgs (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = CurrentStatement.Args;
+    for (int i = 0; i < Args.length; i ++) {
+      Args[i] = PreEvaluateFormula (Args[i], Environment);
+    }
+  }
+  
+  
+  
+  
+  
+  LooFTokenBranch PreEvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment) {
+    
+    if (Formula.CanBePreEvaluated) {
+      LooFDataValue Result = LooFInterpreter.EvaluateFormula (Formula, Environment);
+      return new LooFTokenBranch (Formula.OriginalTokenIndex, Formula.OriginalString, Result);
+    }
+    
+    LooFTokenBranch[] Children = Formula.Children;
+    for (int i = 0; i < Children.length; i ++) {
+      LooFTokenBranch CurrentChild = Children[i];
+      if (CurrentChild.TokenType == TokenBranchType_Formula) Children[i] = PreEvaluateFormula (CurrentChild, Environment);
+    }
+    return Formula;
+    
   }
   
   
@@ -2264,6 +2378,37 @@ class LooFCompiler {
   
   
   void PrintParserOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
+    for (LooFCodeData CodeData : AllCodeDatasCollection) {
+      String FileOutputName = OutputPath + "/" + CodeData.FullFileName;
+      FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
+      PrintWriter FileOutput = createWriter (FileOutputName);
+      
+      LooFStatement[] Statements = CodeData.Statements;
+      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+      for (int i = 0; i < Statements.length; i ++) {
+        LooFStatement CurrentStatement = Statements[i];
+        int LineNumber = LineNumbers.get(i);
+        String LineFileOrigin = LineFileOrigins.get(i);
+        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
+      }
+      
+      FileOutput.flush();
+      FileOutput.close();
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void PrintFinalOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.FullFileName;

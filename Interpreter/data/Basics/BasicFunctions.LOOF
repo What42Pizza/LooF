@@ -52,8 +52,8 @@ function removeDuplicateitems  -> TableIn
 	loop i, endOf TableIn, 0, -1
 		CurrentItem = TableIn[i]
 		DuplicateIndex = lastIndexOfItem {TableIn, CurrentItem, i - 1}
-		if not DuplicateIndex; continue
-		:removeIndex TableIn, DuplicateIndex
+		continueIf DuplicateIndex == -1
+		call removeIndex, TableIn, DuplicateIndex
 		// `i --` is not needed since this will search for CurrentItem again on the next loop, which is what we want
 	repeat
 	return
@@ -64,7 +64,7 @@ end
 function cloneTable  -> TableIn
 	errorIf (typeOf TableIn != "table"), "Basics.cloneTable must take a table as its first argument", {"InvalidArgType"}
 	NewTable = {}
-	loop i, 0, endOf TableIn
+	loop i, endOf TableIn
 		NewTable[i] = TableIn[i]
 	repeat
 	TableInKeys = keysOf TableIn
@@ -80,13 +80,13 @@ function deepCloneTable  -> ValueIn
 	returnIf (typeOf ValueIn != "table"), ValueIn
 	TableIn = ValueIn
 	NewTable = {}
-	loop i, 0, endOf TableIn
-		:deepCloneTable TableIn[i]  -> ClonedValue
+	loop i, endOf TableIn
+		call deepCloneTable, TableIn[i]  -> ClonedValue
 		NewTable[i] = ClonedValue
 	repeat
 	TableInKeys = keysOf TableIn
 	forEach CurrentKey, TableInKeys
-		:deepCloneTable TableIn[CurrentKey]  -> ClonedValue
+		call deepCloneTable, TableIn[CurrentKey]  -> ClonedValue
 		NewTable[CurrentKey] = ClonedValue
 	repeat
 	return NewTable
@@ -98,7 +98,7 @@ end
 
 function ensureArgTypesAreCorrect  -> Args, ArgTypes, FunctionName
 	FunctionName defaultsTo "unnamed"
-	loop i, 0, endOf ArgsTypes
+	loop i, endOf ArgsTypes
 		errorIf (typeOf Args[i] != ArgTypes[i]), ("Arg " .. i .. " of function \"" .. FunctionName .. "\" must be of type " .. ArgTypes[i] .. ", not type " .. typeOf Args[i] .. "."), {"InvalidArgType", FunctionName}
 	repeat
 	return

@@ -8,6 +8,8 @@
 
 ### This is a language that is loosely functional. It's interpreted, loosely typed, and has (mostly) mutable data.
 
+### The interpreter for this language was made using Processing 3 (and it should work with Processing 4), and you need Processing 3 or 4 to use this.
+
 <br>
 <br>
 <br>
@@ -26,7 +28,7 @@ I want this to be a decent choice for actually getting something done, which wou
 
 ### Simplicity
 
-I want this language to be really simple (partially so that it's easier to make), and I'm okay with this goal sometimes getting in the way of being easy to use.
+I want this language to be really simple (partially so that it's easier to make), and I'm okay with this goal sometimes getting in the way of the language being easy to use.
 
 ### Modularity
 

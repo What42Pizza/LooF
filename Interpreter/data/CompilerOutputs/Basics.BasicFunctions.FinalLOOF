@@ -1,0 +1,78 @@
+Basics.BasicFunctions.LOOF 8: Function 'skip' (end at 4) ()
+Basics.BasicFunctions.LOOF 8: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "ToPrint"})
+Basics.BasicFunctions.LOOF 9: Function 'callOutside' (Formula {String "console"}, Formula {String "println"}, Formula {VarName "ToPrint"})
+Basics.BasicFunctions.LOOF 10: Function 'return' ()
+Basics.BasicFunctions.LOOF 11: Function 'end' ()
+Basics.BasicFunctions.LOOF 15: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 16: Function 'callOutside' (Formula {String "interpreter"}, Formula {String "stop"})
+Basics.BasicFunctions.LOOF 17: Function 'return' ()
+Basics.BasicFunctions.LOOF 18: Function 'end' ()
+Basics.BasicFunctions.LOOF 24: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 24: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Table"}, Formula {VarName "Item"})
+Basics.BasicFunctions.LOOF 25: Assignment "Table" [Index {Function "lengthOf", VarName "Table"}] '=' Formula {VarName "Item"}
+Basics.BasicFunctions.LOOF 26: Function 'return' ()
+Basics.BasicFunctions.LOOF 27: Function 'end' ()
+Basics.BasicFunctions.LOOF 31: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 31: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Table"}, Formula {VarName "Index"})
+Basics.BasicFunctions.LOOF 32: Function 'loop' (repeat at 0) (Formula {VarName "i"}, Formula {VarName "Index"}, Formula {Function "endOf", VarName "Table", Operation "-", Int 1})
+Basics.BasicFunctions.LOOF 33: Assignment "Table" [Index {VarName "i"}] '=' Formula {VarName "Table", Index {VarName "i", Operation "+", Int 1}}
+Basics.BasicFunctions.LOOF 34: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 35: Assignment "Table" [Index {Function "endOf", VarName "Table"}] '=' Formula {Null}
+Basics.BasicFunctions.LOOF 36: Function 'return' ()
+Basics.BasicFunctions.LOOF 37: Function 'end' ()
+Basics.BasicFunctions.LOOF 41: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 41: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "TargetTable"}, Formula {VarName "SourceTable"})
+Basics.BasicFunctions.LOOF 42: Function 'forEach' (repeat at 0) (Formula {VarName "Item"}, Formula {VarName "SourceTable"})
+Basics.BasicFunctions.LOOF 43: Assignment "Table" [Index {Function "lengthOf", VarName "Table"}] '=' Formula {VarName "Item"}
+Basics.BasicFunctions.LOOF 44: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 45: Function 'return' ()
+Basics.BasicFunctions.LOOF 46: Function 'end' ()
+Basics.BasicFunctions.LOOF 50: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 50: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "TableIn"})
+Basics.BasicFunctions.LOOF 51: Function 'loop' (repeat at 0) (Formula {VarName "i"}, Formula {Function "endOf", VarName "TableIn"}, Formula {Int 0}, Formula {Int -1})
+Basics.BasicFunctions.LOOF 52: Assignment "CurrentItem" '=' Formula {VarName "TableIn", Index {VarName "i"}}
+Basics.BasicFunctions.LOOF 53: Assignment "DuplicateIndex" '=' Formula {Function "lastIndexOfItem", Table {Formula {VarName "TableIn"}, Formula {VarName "CurrentItem"}, Formula {VarName "i", Operation "-", Int 1}}}
+Basics.BasicFunctions.LOOF 54: Function 'continueIf' (loop at 0) (Formula {VarName "DuplicateIndex", Operation "==", Int -1})
+Basics.BasicFunctions.LOOF 55: Function 'call' (Formula {Int 15}, Formula {VarName "TableIn"}, Formula {VarName "DuplicateIndex"})
+Basics.BasicFunctions.LOOF 57: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 58: Function 'return' ()
+Basics.BasicFunctions.LOOF 59: Function 'end' ()
+Basics.BasicFunctions.LOOF 63: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 63: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "TableIn"})
+Basics.BasicFunctions.LOOF 64: Function 'errorIf' (Formula {Function "typeOf", VarName "TableIn", Operation "!=", String "table"}, Formula {String "Basics.cloneTable must take a table as its first argument"}, Formula {Table {Formula {String "InvalidArgType"}}})
+Basics.BasicFunctions.LOOF 65: Assignment "NewTable" '=' Formula {Table {}}
+Basics.BasicFunctions.LOOF 66: Function 'loop' (repeat at 0) (Formula {VarName "i"}, Formula {Function "endOf", VarName "TableIn"})
+Basics.BasicFunctions.LOOF 67: Assignment "NewTable" [Index {VarName "i"}] '=' Formula {VarName "TableIn", Index {VarName "i"}}
+Basics.BasicFunctions.LOOF 68: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 69: Assignment "TableInKeys" '=' Formula {Function "keysOf", VarName "TableIn"}
+Basics.BasicFunctions.LOOF 70: Function 'forEach' (repeat at 0) (Formula {VarName "CurrentKey"}, Formula {VarName "TableInKeys"})
+Basics.BasicFunctions.LOOF 71: Assignment "NewTable" [Index {VarName "CurrentKey"}] '=' Formula {VarName "TableIn", Index {VarName "CurrentKey"}}
+Basics.BasicFunctions.LOOF 72: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 73: Function 'return' (Formula {VarName "NewTable"})
+Basics.BasicFunctions.LOOF 74: Function 'end' ()
+Basics.BasicFunctions.LOOF 78: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 78: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "ValueIn"})
+Basics.BasicFunctions.LOOF 79: Function 'returnIf' (Formula {Function "typeOf", VarName "ValueIn", Operation "!=", String "table"}, Formula {VarName "ValueIn"})
+Basics.BasicFunctions.LOOF 80: Assignment "TableIn" '=' Formula {VarName "ValueIn"}
+Basics.BasicFunctions.LOOF 81: Assignment "NewTable" '=' Formula {Table {}}
+Basics.BasicFunctions.LOOF 82: Function 'loop' (repeat at 0) (Formula {VarName "i"}, Formula {Function "endOf", VarName "TableIn"})
+Basics.BasicFunctions.LOOF 83: Function 'call' (Formula {Int 53}, Formula {VarName "TableIn", Index {VarName "i"}})
+Basics.BasicFunctions.LOOF 83: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "ClonedValue"})
+Basics.BasicFunctions.LOOF 84: Assignment "NewTable" [Index {VarName "i"}] '=' Formula {VarName "ClonedValue"}
+Basics.BasicFunctions.LOOF 85: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 86: Assignment "TableInKeys" '=' Formula {Function "keysOf", VarName "TableIn"}
+Basics.BasicFunctions.LOOF 87: Function 'forEach' (repeat at 0) (Formula {VarName "CurrentKey"}, Formula {VarName "TableInKeys"})
+Basics.BasicFunctions.LOOF 88: Function 'call' (Formula {Int 53}, Formula {VarName "TableIn", Index {VarName "CurrentKey"}})
+Basics.BasicFunctions.LOOF 88: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "ClonedValue"})
+Basics.BasicFunctions.LOOF 89: Assignment "NewTable" [Index {VarName "CurrentKey"}] '=' Formula {VarName "ClonedValue"}
+Basics.BasicFunctions.LOOF 90: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 91: Function 'return' (Formula {VarName "NewTable"})
+Basics.BasicFunctions.LOOF 92: Function 'end' ()
+Basics.BasicFunctions.LOOF 98: Function 'skip' (end at 0) ()
+Basics.BasicFunctions.LOOF 98: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Args"}, Formula {VarName "ArgTypes"}, Formula {VarName "FunctionName"})
+Basics.BasicFunctions.LOOF 99: Assignment "FunctionName" 'defaultsTo' Formula {String "unnamed"}
+Basics.BasicFunctions.LOOF 100: Function 'loop' (repeat at 0) (Formula {VarName "i"}, Formula {Function "endOf", VarName "ArgsTypes"})
+Basics.BasicFunctions.LOOF 101: Function 'errorIf' (Formula {Function "typeOf", VarName "Args", Index {VarName "i"}, Operation "!=", VarName "ArgTypes", Index {VarName "i"}}, Formula {String "Arg ", Operation "..", VarName "i", Operation "..", String " of function \"", Operation "..", VarName "FunctionName", Operation "..", String "\" must be of type ", Operation "..", VarName "ArgTypes", Index {VarName "i"}, Operation "..", String ", not type ", Operation "..", Function "typeOf", VarName "Args", Index {VarName "i"}, Operation "..", String "."}, Formula {Table {Formula {String "InvalidArgType"}, Formula {VarName "FunctionName"}}})
+Basics.BasicFunctions.LOOF 102: Function 'repeat' (loop at 0) ()
+Basics.BasicFunctions.LOOF 103: Function 'return' ()
+Basics.BasicFunctions.LOOF 104: Function 'end' ()

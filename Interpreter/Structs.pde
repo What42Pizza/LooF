@@ -76,6 +76,10 @@ class LooFEvaluatorOperation {
     return false;
   }
   
+  public boolean CanBePreEvaluated() {
+    return true;
+  }
+  
 }
 
 
@@ -92,6 +96,10 @@ class LooFEvaluatorFunction {
   
   public boolean AddToCombinedTokens() {
     return false;
+  }
+  
+  public boolean CanBePreEvaluated() {
+    return true;
   }
   
 }
@@ -190,31 +198,17 @@ class LooFCodeData {
 
 
 
-class LooFLoadedFilesData {
-  
-  HashMap <String, LooFCodeData> AllCodeDatas;
-  String[] HeaderFileContents;
-  
-  public LooFLoadedFilesData (HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents) {
-    this.AllCodeDatas = AllCodeDatas;
-    this.HeaderFileContents = HeaderFileContents;
-  }
-  
-}
-
-
-
-
-
 class ReturnValue {
   
-  int IntegerValue;
+  int IntValue;
+  Integer IntegerValue;
   String StringValue;
   String[] StringArrayValue;
   ArrayList <Integer> IntegerArrayListValue;
   ArrayList <Integer> SecondIntegerArrayListValue;
   ArrayList <String> StringArrayListValue;
   ArrayList <Boolean> BooleanArrayListValue;
+  HashMap <String, LooFCodeData> AllCodeDatas;
   
 }
 
@@ -269,6 +263,7 @@ class LooFCompileSettings {
   String LinkerOutputPath = null;
   String LexerOutputPath = null;
   String ParserOutputPath = null;
+  String FinalOutputPath = null;
   
 }
 
@@ -344,7 +339,7 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
   if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
   
-  if (LineHasChanged) return "Original line of code: `" + OriginalLineOfCode + "`\nAfter pre-processor:   `" + LineOfCode + "`";
+  if (LineHasChanged) return "Original line of code:        `" + OriginalLineOfCode + "`\nAfter pre-processor & linker: `" + LineOfCode + "`";
   return "Line of code:  `" + LineOfCode + "`";
   
 }
@@ -379,10 +374,14 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
   
-  String FileNameToShow = (FileName.equals(LineFileOrigin)) ? ("\"" + FileName + "\"") : ("\"" + FileName + "\" (originally from file \"" + LineFileOrigin + "\")");
+  boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
+  
+  if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
+  if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
+  
   String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
   
-  return "File " + FileNameToShow + " line " + LineNumber + "   (" + LineOfCodeToShow + ") :   " + Message;
+  return "File " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":   " + Message + "\n\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
 }
 
 
@@ -394,7 +393,7 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
 
 
 
-class LooFDataValue {
+class LooFDataValue implements Cloneable {
   
   
   
@@ -463,6 +462,47 @@ class LooFDataValue {
   
   
   
+  public LooFDataValue clone() {
+    switch (ValueType) {
+      
+      case (DataValueType_Null):
+        return new LooFDataValue();
+      
+      case (DataValueType_Int):
+        return new LooFDataValue (IntValue);
+      
+      case (DataValueType_Float):
+        return new LooFDataValue (FloatValue);
+      
+      case (DataValueType_String):
+        return new LooFDataValue (StringValue);
+      
+      case (DataValueType_Bool):
+        return new LooFDataValue (BoolValue);
+      
+      case (DataValueType_Table):
+        ArrayList <LooFDataValue> NewArrayValue = new ArrayList <LooFDataValue> ();
+        HashMap <String, LooFDataValue> NewHashMapValue = new HashMap <String, LooFDataValue> ();
+        for (LooFDataValue CurrentValue : ArrayValue) {
+          NewArrayValue.add (CurrentValue.clone());
+        }
+        Set <String> HashMapKeys = HashMapValue.keySet();
+        for (String CurrentKey : HashMapKeys) {
+          NewHashMapValue.put(CurrentKey, HashMapValue.get(CurrentKey).clone());
+        }
+        return new LooFDataValue (NewArrayValue, NewHashMapValue);
+      
+      case (DataValueType_ByteArray):
+        return new LooFDataValue (ByteArrayValue.clone());
+      
+      default:
+        throw new AssertionError();
+      
+    }
+  }
+  
+  
+  
 }
 
 
@@ -512,6 +552,7 @@ class LooFTokenBranch {
   boolean IsAction;
   int OriginalTokenIndex;
   String OriginalString;
+  boolean CanBePreEvaluated = true;
   
   int TokenType;
   long IntValue;
@@ -521,6 +562,7 @@ class LooFTokenBranch {
   LooFTokenBranch[] Children;
   LooFEvaluatorOperation Operation;
   LooFEvaluatorFunction Function;
+  LooFDataValue Result;
   
   int[] IndexQueryIndexes;
   int[] FunctionIndexes;
@@ -599,6 +641,15 @@ class LooFTokenBranch {
     this.IsAction = true;
   }
   
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFDataValue Result) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
+    this.TokenType = TokenBranchType_PreEvaluatedFormula;
+    this.Result = Result;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
+  }
+  
 }
 
 
@@ -615,6 +666,7 @@ final int TokenBranchType_VarName = 8;
 final int TokenBranchType_OutputVar = 9;
 final int TokenBranchType_EvaluatorOperation = 10;
 final int TokenBranchType_EvaluatorFunction = 11;
+final int TokenBranchType_PreEvaluatedFormula = 12;
 
 final String[] TokenBranchTypeNames = {
   "Null",
@@ -629,6 +681,7 @@ final String[] TokenBranchTypeNames = {
   "OutputVar",
   "EvaluatorOperation",
   "EvaluatorFunction",
+  "PreEvaluatedFormula",
 };
 
 final String[] TokenBranchTypeNames_PlusA = {
@@ -644,6 +697,7 @@ final String[] TokenBranchTypeNames_PlusA = {
   "an OutputVar",
   "an EvaluatorOperation",
   "an EvaluatorFunction",
+  "a PreEvaluatedFormula",
 };
 
 

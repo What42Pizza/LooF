@@ -28,14 +28,94 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
 
 
 LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction() {
+  String NewIPFileName;
+  Integer NewIPLineNumber;
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+    ReturnValue Return = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
+    NewIPFileName = Return.StringValue;
+    NewIPLineNumber = Return.IntegerValue;
   }
   @Override public String toString() {return "'call'";}
 };
+
+
+
+
+
+ReturnValue GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesToCatch, LooFCodeData CodeData, int LineNumber, String FunctionName) {
+  LooFTokenBranch FirstArg = Args[0];
+  if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new ReturnValue(); // if we don't know the type of the first value, we can't figure out anything else
+  LooFDataValue FirstArgValue = FirstArg.Result;
+  ReturnValue Return = new ReturnValue ();
+  switch (FirstArgValue.ValueType) {
+    
+    
+    
+    case (DataValueType_Int):
+      
+      // line number
+      Return.IntValue = (int) FirstArgValue.IntValue;
+      
+      // error types to catch
+      if (GetErrorTypesToCatch)
+        Return.StringArrayValue = GetErrorTypesToCatch (Args[1], CodeData, LineNumber, 2);
+      
+      return Return;
+    
+    
+    
+    case (DataValueType_String):
+      if (Args.length == 1) throw (new LooFCompileException (CodeData, LineNumber, FunctionName + "statements that take a string as its first arg must have an int as its second arg, but only one arg was found. (maybe you don't need quotation marks?)"));
+      
+      // file name
+      Return.StringValue = FirstArgValue.StringValue;
+      
+      // line number
+      LooFTokenBranch SecondArg = Args[1];
+      if (SecondArg.TokenType == TokenBranchType_PreEvaluatedFormula) {
+        LooFDataValue SecondArgValue = SecondArg.Result;
+        if (SecondArgValue.ValueType != DataValueType_Int) throw (new LooFCompileException (CodeData, LineNumber, FunctionName + "statements that take a string as its first arg must have an int as its second arg, but the second arg was of type " + TokenBranchTypeNames[SecondArg.TokenType] + ". (maybe you don't need quotation marks?)"));
+        Return.IntegerValue = (int) SecondArgValue.IntValue;
+      }
+      
+      // error types to catch
+      if (GetErrorTypesToCatch)
+        Return.StringArrayValue = GetErrorTypesToCatch (Args[2], CodeData, LineNumber, 3);
+      
+      return Return;
+    
+    
+    
+    default:
+      throw (new LooFCompileException (CodeData, LineNumber, FunctionName + "statements must take an int or a string as its first arg, but the first arg was of type " + TokenBranchTypeNames[FirstArgValue.ValueType] + "."));
+    
+    
+    
+  }
+}
+
+
+
+
+
+String[] GetErrorTypesToCatch (LooFTokenBranch InputArg, LooFCodeData CodeData, int LineNumber, int ArgNumber) {
+  if (InputArg.TokenType != TokenBranchType_PreEvaluatedFormula) return null;
+  LooFDataValue InputArgValue = InputArg.Result;
+  if (InputArgValue.ValueType != DataValueType_Table) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be a table for the error types to catch, but the table given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
+  ArrayList <LooFDataValue> ErrorTypesAsValues = InputArgValue.ArrayValue;
+  String[] ErrorTypesToCatch = new String [ErrorTypesAsValues.size()];
+  for (int i = 0; i < ErrorTypesToCatch.length; i ++) {
+    LooFDataValue CurrentErrorTypeAsValue = ErrorTypesAsValues.get(i);
+    if (CurrentErrorTypeAsValue.ValueType != DataValueType_String) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be a table of strings for the error types to catch, but the table given contained a value of type " + TokenBranchTypeNames[CurrentErrorTypeAsValue.ValueType] + "."));
+    String CurrentErrorTypeToCatch = CurrentErrorTypeAsValue.StringValue;
+    ErrorTypesToCatch[i] = CurrentErrorTypeToCatch;
+  }
+  return ErrorTypesToCatch;
+}
 
 
 
@@ -312,13 +392,20 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
 
 
 LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() {
+  String NewIPFileName;
+  Integer NewIPLineNumber;
+  String[] ErrorTypesToCatch;
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
-    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 2, CodeData, LineNumber);
+    ReturnValue Return = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
+    NewIPFileName = Return.StringValue;
+    NewIPLineNumber = Return.IntegerValue;
+    ErrorTypesToCatch = Return.StringArrayValue;
   }
-  @Override public String toString() {return "'try'";}
+  @Override public String toString() {return "'call'";}
 };
 
 

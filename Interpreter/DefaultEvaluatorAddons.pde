@@ -496,7 +496,7 @@ LooFEvaluatorFunction Function_Floor = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
-      return new LooFDataValue (Math.floor(GetDataValueNumber (Input)));
+      return new LooFDataValue ((long) Math.floor(GetDataValueNumber (Input)));
     }
     
     throw (new LooFInterpreterException (Environment, "the evaluator function floor can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -512,7 +512,7 @@ LooFEvaluatorFunction Function_Ceil = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
     
     if (Input.ValueType == DataValueType_Float || Input.ValueType == DataValueType_Int) {
-      return new LooFDataValue (Math.ceil(GetDataValueNumber (Input)));
+      return new LooFDataValue ((long) Math.ceil(GetDataValueNumber (Input)));
     }
     
     throw (new LooFInterpreterException (Environment, "the evaluator function ceil can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + "."));
@@ -584,7 +584,7 @@ LooFEvaluatorFunction Function_Min = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function min can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function min can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + "."));
     }
     
     // if there's a float
@@ -629,7 +629,7 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function max can only take a table with ints and floats, but " + DataValueTypeNames_PlusA[i] + " was found."));
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) throw (new LooFInterpreterException (Environment, "the evaluator function max can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + "."));
     }
     
     // if there's a float
@@ -668,6 +668,7 @@ LooFEvaluatorFunction Function_Random = new LooFEvaluatorFunction() {
     return new LooFDataValue (Math.random() * MaxValue);
     
   }
+  @Override public boolean CanBePreEvaluated() {return false;}
 };
 
 
@@ -693,6 +694,7 @@ LooFEvaluatorFunction Function_RandomInt = new LooFEvaluatorFunction() {
       
     }
   }
+  @Override public boolean CanBePreEvaluated() {return false;}
 };
 
 
@@ -710,6 +712,7 @@ LooFEvaluatorFunction Function_Chance = new LooFEvaluatorFunction() {
     return new LooFDataValue (Math.random() < ChanceLimit / 100);
     
   }
+  @Override public boolean CanBePreEvaluated() {return false;}
 };
 
 
@@ -827,6 +830,7 @@ LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
     return ArrayValue.get((int) (Math.random() * ArrayValue.size()));
     
   }
+  @Override public boolean CanBePreEvaluated() {return false;}
 };
 
 
@@ -842,6 +846,7 @@ LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
     return GetRandomItemFromCollection (HashMapValues);
     
   }
+  @Override public boolean CanBePreEvaluated() {return false;}
 };
 
 

@@ -53,6 +53,14 @@
   ArrayOut[0] = Item;
 }
 
+<T> T[] RemoveItemsFromArrayStart (T[] ArrayIn, T Item, int NumOfItemsToRemove) {
+  T[] ArrayOut = (T[]) Array.newInstance(Item.getClass(), ArrayIn.length - NumOfItemsToRemove);
+  for (int i = 0; i < ArrayOut.length; i ++) {
+    ArrayOut[i] = ArrayIn[i + NumOfItemsToRemove];
+  }
+  return ArrayOut;
+}
+
 
 
 int[] ToPrimitive (Integer[] ArrayIn) {
@@ -523,6 +531,9 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
     case (TokenBranchType_EvaluatorFunction):
       return "Function \"" + TokenBranch.StringValue + "\"";
     
+    case (TokenBranchType_PreEvaluatedFormula):
+      return "PreEvaluatedFormula {" + ConvertLooFDataValueToString (TokenBranch.Result) + "}";
+    
   }
 }
 
@@ -624,47 +635,6 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
 
 
 
-
-
-
-
-
-void CopyDataValueIntoDataValue (LooFDataValue SourceDataValue, LooFDataValue TargetDataValue) {
-    TargetDataValue.ValueType = SourceDataValue.ValueType;
-    switch (SourceDataValue.ValueType) {
-      
-      case (DataValueType_Null):
-        return;
-      
-      case (DataValueType_Int):
-        TargetDataValue.IntValue = SourceDataValue.IntValue;
-        return;
-      
-      case (DataValueType_Float):
-        TargetDataValue.FloatValue = SourceDataValue.FloatValue;
-        return;
-      
-      case (DataValueType_String):
-        TargetDataValue.StringValue = SourceDataValue.StringValue;
-        return;
-      
-      case (DataValueType_Bool):
-        TargetDataValue.BoolValue = SourceDataValue.BoolValue;
-        return;
-      
-      case (DataValueType_Table):
-        TargetDataValue.ArrayValue = (ArrayList <LooFDataValue>) SourceDataValue.ArrayValue.clone();
-        TargetDataValue.HashMapValue = (HashMap <String, LooFDataValue>) SourceDataValue.HashMapValue.clone();
-        return;
-      
-      case (DataValueType_ByteArray):
-        TargetDataValue.ByteArrayValue = SourceDataValue.ByteArrayValue.clone();
-      
-      default:
-        throw (new RuntimeException ("LooF Data Value " + SourceDataValue + " has an invalid Type (" + SourceDataValue.ValueType + ")."));
-      
-    }
-}
 
 
 

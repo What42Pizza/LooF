@@ -153,12 +153,9 @@ LooFInterpreterAssignment Assignment_ConcatEquals = new LooFInterpreterAssignmen
 LooFInterpreterAssignment Assignment_PlusPlus = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
     if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '++' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + "."));
-    if (OldVarValue.ValueType == DataValueType_Int) {
-      OldVarValue.IntValue ++;
-      return OldVarValue;
-    }
-    OldVarValue.FloatValue ++;
-    return OldVarValue;
+    if (OldVarValue.ValueType == DataValueType_Int)
+      return new LooFDataValue (OldVarValue.IntValue + 1);
+    return new LooFDataValue (OldVarValue.FloatValue + 1);
   }
   @Override public boolean AddToCombinedTokens() {return true;}
   @Override public boolean TakesArgs() {return false;}
@@ -171,12 +168,9 @@ LooFInterpreterAssignment Assignment_PlusPlus = new LooFInterpreterAssignment() 
 LooFInterpreterAssignment Assignment_MinusMinus = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
     if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '--' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + "."));
-    if (OldVarValue.ValueType == DataValueType_Int) {
-      OldVarValue.IntValue --;
-      return OldVarValue;
-    }
-    OldVarValue.FloatValue --;
-    return OldVarValue;
+    if (OldVarValue.ValueType == DataValueType_Int)
+      return new LooFDataValue (OldVarValue.IntValue - 1);
+    return new LooFDataValue (OldVarValue.FloatValue - 1);
   }
   @Override public boolean AddToCombinedTokens() {return true;}
   @Override public boolean TakesArgs() {return false;}
@@ -189,8 +183,7 @@ LooFInterpreterAssignment Assignment_MinusMinus = new LooFInterpreterAssignment(
 LooFInterpreterAssignment Assignment_NotNot = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
     if (OldVarValue.ValueType != DataValueType_Bool) throw (new LooFInterpreterException (Environment, "the assignment '!!' only works on a var with a bool value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + "."));
-    OldVarValue.BoolValue ^= true;
-    return OldVarValue;
+    return new LooFDataValue (!OldVarValue.BoolValue);
   }
   @Override public boolean AddToCombinedTokens() {return true;}
   @Override public boolean TakesArgs() {return false;}

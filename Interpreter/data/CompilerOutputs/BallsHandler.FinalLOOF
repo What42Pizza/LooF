@@ -1,0 +1,134 @@
+BallsHandler.LOOF 0: Assignment "Test" '=' Formula {Formula {Int 3, Operation "+", VarName "a"}, Operation "-", PreEvaluatedFormula {8}}
+BallsHandler.LOOF 2: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 2: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"})
+BallsHandler.LOOF 3: Assignment "AllBalls" '=' Formula {VarName "BallsData", Index {String "AllBalls"}}
+BallsHandler.LOOF 6: Assignment "NewBalls" '=' Formula {Table {}}
+BallsHandler.LOOF 7: Assignment "BallsToRemove" '=' Formula {Table {}}
+BallsHandler.LOOF 8: Function 'forEach' (repeat at 0) (Formula {VarName "CurrentBall"}, Formula {VarName "AllBalls"}, Formula {VarName "i"})
+BallsHandler.LOOF 9: Function 'call' (Formula {Int 19}, Formula {VarName "CurrentBall"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 9: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BallIsDestoryed"})
+BallsHandler.LOOF 10: Function 'if' (Formula {VarName "BallIsDestroyed"})
+BallsHandler.LOOF 11: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {VarName "BallsToRemove"}, Formula {VarName "i"})
+BallsHandler.LOOF 12: Function 'repeat' (loop at 0) ()
+BallsHandler.LOOF 15: Function 'forEach' (repeat at 0) (Formula {VarName "Index"}, Formula {VarName "BallsToRemove"})
+BallsHandler.LOOF 16: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 15}, Formula {VarName "AllBalls"}, Formula {VarName "Index"})
+BallsHandler.LOOF 17: Function 'repeat' (loop at 0) ()
+BallsHandler.LOOF 20: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 23}, Formula {VarName "AllBalls"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 22: Function 'return' ()
+BallsHandler.LOOF 23: Function 'end' ()
+BallsHandler.LOOF 29: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 29: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "CurrentBall"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 30: Assignment "Size" '=' Formula {VarName "CurrentBall", Index {String "Size"}}
+BallsHandler.LOOF 31: Assignment "XPos" '=' Formula {VarName "CurrentBall", Index {String "XPos"}}
+BallsHandler.LOOF 32: Assignment "YPos" '=' Formula {VarName "CurrentBall", Index {String "YPos"}}
+BallsHandler.LOOF 33: Assignment "XVel" '=' Formula {VarName "CurrentBall", Index {String "XVel"}}
+BallsHandler.LOOF 34: Assignment "YVel" '=' Formula {VarName "CurrentBall", Index {String "YVel"}}
+BallsHandler.LOOF 36: Function 'call' (Formula {Int 129}, Formula {VarName "CurrentBall"}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 36: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Radius"})
+BallsHandler.LOOF 40: Assignment "YVel" '=' Formula {VarName "YVel", Operation "+", VarName "BallsData", Index {String "Gravity"}}
+BallsHandler.LOOF 44: Assignment "BottomYPos" '=' Formula {VarName "YPos", Operation "+", VarName "Radius", Operation "/", Int 2}
+BallsHandler.LOOF 45: Function 'if' (Formula {VarName "BottomYPos", Operation ">", Int 1})
+BallsHandler.LOOF 46: Assignment "YVel" '=' Formula {Formula {VarName "BallsData", Index {String "BounceVelOffset"}, Operation "+", VarName "BallsData", Index {String "BounceVelScale"}, Operation "*", VarName "CurrentBall", Index {String "Size"}}, Operation "*", Int -1}
+BallsHandler.LOOF 50: Assignment "LeftXPos" '=' Formula {VarName "XPos", Operation "-", VarName "Radius", Operation "/", Int 2}
+BallsHandler.LOOF 51: Function 'if' (Formula {VarName "LeftXPos", Operation "<", Int 0})
+BallsHandler.LOOF 52: Assignment "XVel" '=' Formula {Function "abs", VarName "XVel"}
+BallsHandler.LOOF 56: Assignment "RightXPos" '=' Formula {VarName "XPos", Operation "+", VarName "Radius", Operation "/", Int 2}
+BallsHandler.LOOF 57: Function 'if' (Formula {VarName "LeftXPos", Operation "<", Int 0})
+BallsHandler.LOOF 58: Assignment "XVel" '=' Formula {Function "abs", VarName "XVel", Operation "*", Int -1}
+BallsHandler.LOOF 62: Assignment "XPos" '=' Formula {VarName "XPos", Operation "+", VarName "XVel"}
+BallsHandler.LOOF 63: Assignment "YPos" '=' Formula {VarName "YPos", Operation "+", VarName "YVel"}
+BallsHandler.LOOF 67: Assignment "AllBullets" '=' Formula {VarName "BulletsData", Index {String "AllBullets"}}
+BallsHandler.LOOF 68: Assignment "CollisionDistance" '=' Formula {VarName "Radius", Operation "+", VarName "BulletsData", Index {String "Size"}}
+BallsHandler.LOOF 69: Function 'forEach' (repeat at 0) (Formula {VarName "CurrentBullet"}, Formula {VarName "AllBullets"})
+BallsHandler.LOOF 70: Function 'call' (Formula {Int 55}, Formula {VarName "CurrentBall"}, Formula {VarName "CurrentBullet"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"})
+BallsHandler.LOOF 70: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BulletIsColliding"})
+BallsHandler.LOOF 71: Function 'continueIf' (loop at 0) (Formula {Function "not", VarName "BulletIsColliding"})
+BallsHandler.LOOF 72: Function 'call' (Formula {Int 64}, Formula {VarName "CurrentBall"}, Formula {VarName "CurrentBullet"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 73: Function 'returnIf' (Formula {VarName "BallIsDestroyed"}, Formula {VarName "true"})
+BallsHandler.LOOF 74: Function 'repeat' (loop at 0) ()
+BallsHandler.LOOF 78: Assignment "CurrentBall" [Index {String "XPos"}] '=' Formula {VarName "XPos"}
+BallsHandler.LOOF 79: Assignment "CurrentBall" [Index {String "YPos"}] '=' Formula {VarName "YPos"}
+BallsHandler.LOOF 80: Assignment "CurrentBall" [Index {String "XVel"}] '=' Formula {VarName "XVel"}
+BallsHandler.LOOF 81: Assignment "CurrentBall" [Index {String "YVel"}] '=' Formula {VarName "YVel"}
+BallsHandler.LOOF 85: Function 'return' (Formula {VarName "false"})
+BallsHandler.LOOF 86: Function 'end' ()
+BallsHandler.LOOF 96: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 96: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "CurrentBall"}, Formula {VarName "CurrentBullet"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"})
+BallsHandler.LOOF 97: Function 'call' (Formula {String "GeneralFunctions.LOOF"}, Formula {Int 1}, Formula {VarName "CurrentBall"}, Formula {VarName "CurrentBullet"})
+BallsHandler.LOOF 97: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Dsitance"})
+BallsHandler.LOOF 98: Function 'call' (Formula {Int 129}, Formula {VarName "CurrentBall"}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 98: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BallRadius"})
+BallsHandler.LOOF 99: Assignment "CollisionDistance" '=' Formula {VarName "BallRadius", Operation "+", VarName "BulletsData", Index {String "BulletRadius"}}
+BallsHandler.LOOF 100: Function 'return' (Formula {VarName "Distance", Operation "<=", VarName "CollisionDistance"})
+BallsHandler.LOOF 101: Function 'end' ()
+BallsHandler.LOOF 105: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 105: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "CurrentBall"}, Formula {VarName "CurrentBullet"}, Formula {VarName "BallsData"}, Formula {VarName "BulletsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 108: Assignment "BulletDamage" '=' Formula {VarName "BulletsData", Index {String "BulletDamage"}}
+BallsHandler.LOOF 109: Assignment "CurrentBall" [Index {String "Health"}] '=' Formula {VarName "CurrentBall", Index {String "Health"}, Operation "-", VarName "BulletDamage"}
+BallsHandler.LOOF 112: Function 'returnIf' (Formula {VarName "CurrentBall", Index {String "Health"}, Operation ">", Int 0}, Formula {VarName "false"})
+BallsHandler.LOOF 115: Function 'if' (Formula {VarName "CurrentBall", Index {String "Size"}, Operation ">", Int 0})
+BallsHandler.LOOF 116: Function 'call' (Formula {Int 73}, Formula {VarName "CurrentBall"}, Formula {VarName "BallsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 118: Function 'return' (Formula {VarName "true"})
+BallsHandler.LOOF 119: Function 'end' ()
+BallsHandler.LOOF 123: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 123: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Ball"}, Formula {VarName "BallsData"}, Formula {VarName "NewBalls"})
+BallsHandler.LOOF 125: Assignment "NewSize" '=' Formula {VarName "Ball", Index {String "Size"}, Operation "-", Int 1}
+BallsHandler.LOOF 126: Assignment "NewHealth" '=' Formula {VarName "Ball", Index {String "Health"}, Operation "/", Int 2}
+BallsHandler.LOOF 127: Assignment "NewXPos" '=' Formula {VarName "Ball", Index {String "XPos"}}
+BallsHandler.LOOF 128: Assignment "NewYPos" '=' Formula {VarName "Ball", Index {String "YPos"}}
+BallsHandler.LOOF 129: Assignment "NewXVel" '=' Formula {VarName "Ball", Index {String "XVel"}}
+BallsHandler.LOOF 130: Assignment "NewYVel" '=' Formula {VarName "BallsData", Index {String "BounceYVel"}, Operation "/", Int 2}
+BallsHandler.LOOF 132: Function 'call' (Formula {Int 115}, Formula {String "Normal"}, Formula {VarName "NewSize"}, Formula {VarName "NewHealth"}, Formula {VarName "NewXPos"}, Formula {VarName "NewYPos"}, Formula {VarName "NewXVel"}, Formula {VarName "NewYVel"})
+BallsHandler.LOOF 132: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Ball1"})
+BallsHandler.LOOF 133: Function 'call' (Formula {Int 115}, Formula {String "Normal"}, Formula {VarName "NewSize"}, Formula {VarName "NewHealth"}, Formula {VarName "NewXPos"}, Formula {VarName "NewYPos"}, Formula {VarName "NewXVel", Operation "*", Int -1}, Formula {VarName "NewYVel"})
+BallsHandler.LOOF 133: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Ball2"})
+BallsHandler.LOOF 135: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {VarName "NewBalls"}, Formula {VarName "Ball1"})
+BallsHandler.LOOF 136: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {VarName "NewBalls"}, Formula {VarName "Ball2"})
+BallsHandler.LOOF 138: Function 'return' ()
+BallsHandler.LOOF 139: Function 'end' ()
+BallsHandler.LOOF 150: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 150: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 151: Function 'call' (Formula {Int 97}, Formula {VarName "BallsData", Index {String "AllBalls"}})
+BallsHandler.LOOF 151: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "NumberOfSize0Balls"})
+BallsHandler.LOOF 152: Function 'if' (Formula {VarName "NumberOfSize0Balls", Operation "<", VarName "BallsData", Index {String "MaxSize0Balls"}})
+BallsHandler.LOOF 153: Function 'call' (Formula {Int 105}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 154: Function 'return' ()
+BallsHandler.LOOF 155: Function 'end' ()
+BallsHandler.LOOF 159: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 159: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "AllBalls"})
+BallsHandler.LOOF 160: Assignment "Total" '=' Formula {Int 0}
+BallsHandler.LOOF 161: Function 'forEach' (repeat at 0) (Formula {VarName "CurrentBall"}, Formula {VarName "AllBalls"})
+BallsHandler.LOOF 162: Assignment "Total" '=' Formula {VarName "Total", Operation "+", Int 2, Operation "^", VarName "CurrentBall", Index {String "Size"}}
+BallsHandler.LOOF 163: Function 'repeat' (loop at 0) ()
+BallsHandler.LOOF 164: Function 'return' (Formula {VarName "Total"})
+BallsHandler.LOOF 165: Function 'end' ()
+BallsHandler.LOOF 171: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 171: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 172: Assignment "StartingXPos" '=' Formula {Formula {Function "chance", Int 50}, Operation "and", Float -0.2, Operation "or", Float 1.2}
+BallsHandler.LOOF 173: Assignment "StartingYPos" '=' Formula {Float 0.75, Operation "+", Function "random", Float 0.25}
+BallsHandler.LOOF 174: Assignment "Size" '=' Formula {Function "randomInt", Formula {VarName "BallsData", Index {String "MaxBallSize"}}}
+BallsHandler.LOOF 175: Function 'call' (Formula {Int 115}, Formula {String "normal"}, Formula {VarName "Size"}, Formula {VarName "BallsData", Index {String "StartingHealth"}}, Formula {VarName "StartingXPos"}, Formula {VarName "StartingYPos"}, Formula {Int 0}, Formula {Int 0})
+BallsHandler.LOOF 175: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "NewBall"})
+BallsHandler.LOOF 176: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 10}, Formula {VarName "BallsData", Index {String "AllBalls"}}, Formula {VarName "NewBall"})
+BallsHandler.LOOF 177: Function 'return' ()
+BallsHandler.LOOF 178: Function 'end' ()
+BallsHandler.LOOF 182: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 182: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Type"}, Formula {VarName "Size"}, Formula {VarName "Health"}, Formula {VarName "XPos"}, Formula {VarName "YPos"}, Formula {VarName "XVel"}, Formula {VarName "YVel"})
+BallsHandler.LOOF 183: Function 'call' (Formula {String "Basics.BasicFunctions.LOOF"}, Formula {Int 71}, Formula {VarName "ARGS"}, Formula {Table {Formula {String "string"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}, Formula {String "number"}}})
+BallsHandler.LOOF 184: Assignment "NewBall" '=' Formula {Table {}}
+BallsHandler.LOOF 185: Assignment "NewBall" [Index {String "Type"}] '=' Formula {VarName "Type"}
+BallsHandler.LOOF 186: Assignment "NewBall" [Index {String "Size"}] '=' Formula {VarName "Size"}
+BallsHandler.LOOF 187: Assignment "NewBall" [Index {String "Health"}] '=' Formula {VarName "Health"}
+BallsHandler.LOOF 188: Assignment "NewBall" [Index {String "StartingHealth"}] '=' Formula {VarName "Health"}
+BallsHandler.LOOF 189: Assignment "NewBall" [Index {String "XPos"}] '=' Formula {VarName "XPos"}
+BallsHandler.LOOF 190: Assignment "NewBall" [Index {String "YPos"}] '=' Formula {VarName "YPos"}
+BallsHandler.LOOF 191: Assignment "NewBall" [Index {String "XVel"}] '=' Formula {VarName "XVel"}
+BallsHandler.LOOF 192: Assignment "NewBall" [Index {String "YVel"}] '=' Formula {VarName "YVel"}
+BallsHandler.LOOF 193: Function 'return' (Formula {VarName "NewBall"})
+BallsHandler.LOOF 194: Function 'end' ()
+BallsHandler.LOOF 198: Function 'skip' (end at 0) ()
+BallsHandler.LOOF 198: Function 'pop' (Formula {VarName "ARGS"}, Formula {VarName "Ball"}, Formula {VarName "BallsData"})
+BallsHandler.LOOF 199: Assignment "BallSize" '=' Formula {VarName "Ball", Index {String "Size"}}
+BallsHandler.LOOF 200: Assignment "BallRadius" '=' Formula {Formula {VarName "BallSize", Operation "+", Int 1}, Operation "*", VarName "BallsData", Index {String "Size"}}
+BallsHandler.LOOF 201: Function 'return' (Formula {VarName "BallRadius"})
+BallsHandler.LOOF 202: Function 'end' ()

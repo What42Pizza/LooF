@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 05/25/22
+// Last updated 05/27/22
 
 
 
@@ -21,7 +21,8 @@ void setup() {
   //CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.LinkerOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
-  CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
+  //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   
   LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("")), CompileSettings);
   

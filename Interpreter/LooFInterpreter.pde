@@ -133,6 +133,7 @@ class LooFInterpreter {
   
   
   LooFDataValue EvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment) {
+    if (Formula.TokenType == TokenBranchType_PreEvaluatedFormula) return Formula.Result;
     ArrayList <LooFTokenBranch> FormulaTokens = ArrayToArrayList (Formula.Children);
     if (FormulaTokens.size() == 0) return new LooFDataValue();
     ArrayList <LooFDataValue> FormulaValues = GetFormulaValuesFromTokens (FormulaTokens, Environment);
@@ -249,6 +250,9 @@ class LooFInterpreter {
       case (TokenBranchType_EvaluatorFunction):
         return null;
       
+      case (TokenBranchType_PreEvaluatedFormula):
+        return CurrentToken.Result.clone();
+      
     }
   }
   
@@ -279,7 +283,7 @@ class LooFInterpreter {
         CaseToUse += 2;
         break;
       default:
-        throw (new LooFInterpreterException (Environment, "cannot index " + DataValueTypeNames_PlusA[SourceTable.ValueType] + "."));
+        throw (new LooFInterpreterException (Environment, "cannot index value of type " + DataValueTypeNames_PlusA[SourceTable.ValueType] + "."));
     }
     
     // get index
