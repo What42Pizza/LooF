@@ -35,7 +35,7 @@ class LooFInterpreter {
     int StatementsLength = Environment.CurrentCodeData.Statements.length;
     if (Environment.CurrentLineNumber >= StatementsLength) {
       Environment.CurrentLineNumber = StatementsLength - 1;
-      throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file.", new String[] {"ReachedEndOfFile"}));
+      throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file. (maybe a function is missing a return statement?)", new String[] {"ReachedEndOfFile"}));
     }
     
   }

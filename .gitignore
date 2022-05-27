@@ -1,4 +1,5 @@
 *.PreProcessedLOOF
 *.LinkedLOOF
-*.ParsedLOOF
 *.LexedLOOF
+*.ParsedLOOF
+*.FinalLOOF

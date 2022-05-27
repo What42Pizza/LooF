@@ -185,6 +185,18 @@ String GetFileFullName (File CurrentFile, File CodeFolder) {
 
 
 
+void DeleteAllFilesOfType (String FolderPath, String TypeToRemove) {
+  File FolderAsFile = new File (FolderPath);
+  File[] FolderChildren = FolderAsFile.listFiles();
+  for (File CurrentFile : FolderChildren) {
+    if (CurrentFile.getName().endsWith(TypeToRemove)) CurrentFile.delete();
+  }
+}
+
+
+
+
+
 String[] ReadFileAsStrings (File FileToRead) throws IOException {
   List <String> FileContents = Files.readAllLines(FileToRead.toPath());
   return ListToArray (FileContents, "");

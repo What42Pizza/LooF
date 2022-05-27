@@ -21,32 +21,24 @@
 ### Variable definition:
 
 <br>
-
+```
 ExampleVar = 123 // start ExampleVar with the number 123
-
 ExampleVar = {} // set it to an empty array
-
 ExampleVar[0] = 456 // add 456 to the array
-
 ExampleVar["1"] = 789 // add 789 to the hashmap part of the array
+```
 
 <br>
 
 #### Data Value types:
 
-null
-
-int
-
-float
-
-string
-
-bool
-
-table (with both an array part and a hashmap part (with String keys))
-
-byteArray
+- **null**
+- **int**
+- **float**
+- **string**
+- **bool**
+- **table (with both an array part and a hashmap part (with String keys))**
+- **byteArray**
 
 <br>
 <br>
@@ -64,7 +56,7 @@ if ExampleCondition
 
 OR
 
-if\_ ExampleCondition then
+if ExampleCondition then
 	// multiple statement code block
 end
 ```
@@ -83,6 +75,13 @@ if not ExampleCondition
 skip
 	// multiple statement code block
 end
+
+OR
+
+if ExampleCondition, true   // the second arg invert the condition if truthy
+skip
+	// multiple statement code block
+end
 ```
 
 <br>
@@ -96,7 +95,28 @@ end
 With Basics.LOOF:
 
 ```
+function ExampleFunction
+	// do stuff
+	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
+end
+
+OR
+
 function ExampleFunction  -> Arg1, Arg2, etc
+	// do stuff
+	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
+end
+
+OR
+
+function ExampleFunction  throwsErrors {"ErrorType1", "ErrorType2", etc}
+	// do stuff
+	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
+end
+
+OR
+
+function ExampleFunction  -> Arg1, Arg2, etc  throwsErrors {"ErrorType1", "ErrorType2", etc}
 	// do stuff
 	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
 end
@@ -109,7 +129,34 @@ Without Basics.LOOF:
 ```
 skip
 $function ExampleFunction
+	// do stuff
+	return
+end
+
+OR
+
+skip
+$function ExampleFunction
 	pop ARGS, Arg1, Arg2, etc
+	// do stuff
+	return
+end
+
+OR
+
+skip
+$function ExampleFunction
+	setPassedErrors {"ErrorType1", "ErrorType2", etc}
+	// do stuff
+	return
+end
+
+OR
+
+skip
+$function ExampleFunction
+	pop ARGS, Arg1, Arg2, etc
+	setpassedErrors {"ErrorType1", "ErrorType2", etc}
 	// do stuff
 	return
 end
@@ -130,7 +177,11 @@ Functions work like labels, so you have to put a "skip" statement proceeding a f
 With Basics.LOOF:
 
 ```
+call ExampleFunction
+OR
 call ExampleFunction, Arg1, Arg2, etc
+OR
+call ExampleFunction  -> ReturnValue1, ReturnValue2, etc
 OR
 call ExampleFunction, Arg1, Arg2, etc  -> ReturnValue1, ReturnValue2, etc
 ```
@@ -140,8 +191,19 @@ call ExampleFunction, Arg1, Arg2, etc  -> ReturnValue1, ReturnValue2, etc
 Without Basics.LOOF:
 
 ```
-call $ExampleFunction, Arg1, Arg2, etc
+call $ExampleFunction
+
 OR
+
+call $ExampleFunction, Arg1, Arg2, etc
+
+OR
+
+call $ExampleFunction
+pop ARGS, ReturnValue1, ReturnValue2, etc
+
+OR
+
 call $ExampleFunction, Arg1, Arg2, etc
 pop ARGS, ReturnValue1, ReturnValue2, etc
 ```
@@ -155,9 +217,9 @@ pop ARGS, ReturnValue1, ReturnValue2, etc
 <br>
 
 ```
-$link ExampleFolder.ExampleFolder... .ExampleFileName
+$link ExampleFolder.ExampleFolder.ExampleFileName
 OR
-$link ExampleFolder.ExampleFolder... .ExampleFileName as ExampleShortenedName
+$link ExampleFolder.ExampleFolder.ExampleFileName as ExampleShortenedName
 ```
 
 <br>
@@ -201,6 +263,7 @@ With Basics.LOOF:
 ```
 :println "ExampleString"
 :println 12345
+:println "ExampleString2", "ExampleString3", 12345
 ```
 
 <br>
@@ -210,6 +273,7 @@ Without Basics.LOOF:
 ```
 callOutside "console", "println", "ExampleString"
 callOutside "console", "println", 12345
+callOutside "console", "println" "ExampleString2", "ExampleString3", 12345
 ```
 
 <br>

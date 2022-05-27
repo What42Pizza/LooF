@@ -6,8 +6,8 @@
 
 
 
-function print  -> ToPrint
-	callOutside "console", "println", ToPrint
+function print  -> ValueToPrint
+	callOutside "console", "println", ValueToPrint
 	return
 end
 
@@ -22,74 +22,30 @@ end
 
 
 
-function addItem  -> Table, Item
+function addItem  -> Table, Item  throwsErrors {"InvalidTypeIndexed"}
 	Table[lengthOf Table] = Item
 	return
 end
 
 
 
-function removeIndex  -> Table, Index
+function removeIndex  -> Table, Index  throwsErrors {"InvalidTypeIndexed"}
+	ValueToReturn = Table[Index]
 	loop i, Index, endOf Table - 1
 		Table[i] = Table[i + 1]
 	repeat
 	Table[endOf Table] = null
-	return
+	return ValueToReturn
 end
 
 
 
-function addAll  -> TargetTable, SourceTable
+function addAll  -> TargetTable, SourceTable  throwsErrors {"InvalidArgType"}
+	call EnsureArgTypesAreCorrect, Args, {"table", "table"}, "Basics.addAll"
 	forEach Item, SourceTable
 		Table[lengthOf Table] = Item
 	repeat
 	return
-end
-
-
-
-function removeDuplicateitems  -> TableIn
-	loop i, endOf TableIn, 0, -1
-		CurrentItem = TableIn[i]
-		DuplicateIndex = lastIndexOfItem {TableIn, CurrentItem, i - 1}
-		continueIf DuplicateIndex == -1
-		call removeIndex, TableIn, DuplicateIndex
-		// `i --` is not needed since this will search for CurrentItem again on the next loop, which is what we want
-	repeat
-	return
-end
-
-
-
-function cloneTable  -> TableIn
-	errorIf (typeOf TableIn != "table"), "Basics.cloneTable must take a table as its first argument", {"InvalidArgType"}
-	NewTable = {}
-	loop i, endOf TableIn
-		NewTable[i] = TableIn[i]
-	repeat
-	TableInKeys = keysOf TableIn
-	forEach CurrentKey, TableInKeys
-		NewTable[CurrentKey] = TableIn[CurrentKey]
-	repeat
-	return NewTable
-end
-
-
-
-function deepCloneTable  -> ValueIn
-	returnIf (typeOf ValueIn != "table"), ValueIn
-	TableIn = ValueIn
-	NewTable = {}
-	loop i, endOf TableIn
-		call deepCloneTable, TableIn[i]  -> ClonedValue
-		NewTable[i] = ClonedValue
-	repeat
-	TableInKeys = keysOf TableIn
-	forEach CurrentKey, TableInKeys
-		call deepCloneTable, TableIn[CurrentKey]  -> ClonedValue
-		NewTable[CurrentKey] = ClonedValue
-	repeat
-	return NewTable
 end
 
 

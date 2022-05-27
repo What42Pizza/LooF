@@ -117,7 +117,13 @@ These use the value directly following the function. If the function takes in mu
 - **hashmapContainsItem InputArgs (table {TableIn, Item})**
   - returns true if the hashmap part of TableIn contains Item
 - **splitTable InputArgs (table {TableIn, Position (int)})**
-  - returns a table containing two more tables which are TableIn split at Position. (splitTable {{0, 1, 2}, 1} would evaluate to {{0}, {1, 2}})
+  - returns a table containing two more tables which are TableIn split at Position. (`splitTable {{0, 1, 2}, 1}` would evaluate to {{0}, {1, 2}})
+- **removeDuplicateItems TableIn**
+  - returns a new table which contains a single instance of each item in TableIn
+- **cloneTable TableIn**
+  - returns a new table which contains all the items of TableIn
+- **deepCloneTable TableIn**
+  - returns a new table which contains deep cloned versions of all the items in TableIn
 
 <br>
 
