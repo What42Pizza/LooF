@@ -181,7 +181,7 @@ end
 
 
 
-function GetNewBallStruct  -> Type, Size, Health, XPos, YPos, XVel, YVel
+function GetNewBallStruct  -> Type, Size, Health, XPos, YPos, XVel, YVel  throwsErrors {"InvalidArgType"}
 	:ensureArgTypesAreCorrect ARGS, {"string", "number", "number", "number", "number", "number", "number"}
 	NewBall = {}
 	NewBall["Type"] = Type

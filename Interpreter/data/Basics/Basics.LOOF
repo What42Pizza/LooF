@@ -14,6 +14,7 @@ $link BasicFunctions.LOOF as Basics
 #replaceEnd " then" ", true\nskip"
 
 #replace "  -> " "\npop ARGS, "
+#replace "  throwsErrors " "\nsetPassedErrors "
 
 #replace ";" "\n"
 

@@ -132,19 +132,21 @@
   - If Condition is truthy, stops execution with the interpreter in an error state and with ErrorMessage as the error message. Overrides this error with a new error if ErrorMessage is not a string
 - **errorIf Condition, ErrorMessage (string), ErrorTypeTags (table {string, ...})**
   - If Condition is truthy, stops execution with the interpreter in an error state, with ErrorMessage as the error message, and with ErrorTypeTags as the tags for the error. Overrides this error with a new error if ErrorMessage is not a string or if ErrorTypeTags is not a table
+- **setPassedErrors ErrorTypesToPass (table {string, ...})**
+  - When any error occurs with at least one tag that is in ErrorTypesToPass, the error's call stack will be cut off so that it does not include the function that this statement is in (or any following functions)
 
 <br>
 
 ## Error Handling
 
 - **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any exception occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
 - **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName. When any exception occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
 - **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any exception occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
 - **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in the file FileName, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any exception occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in the file FileName, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
 
 (this can be represented with `try (optional) FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), (optional) Arg1, (optional) Arg2, ...`)
 

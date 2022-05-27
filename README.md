@@ -47,7 +47,7 @@ I want this language to be very modular, and there are currently 5 ways to easil
 
 ### Decent speed
 
-I'm doing my best to take performance into account, and I'm having the compiler do as much of the work as possible. Being that the core interpreter (not counting the add-ons) is (currently) 5.5x times smaller than the compiler, I'm pretty sure I've done a good job.
+I'm doing my best to take performance into account, and I'm having the compiler do as much of the work as possible. Being that the core interpreter (not counting the add-ons) is (currently) 6x times smaller than the compiler, I'm pretty sure I've done a good job.
 
 ### Decent error messages
 
@@ -91,11 +91,12 @@ call Factorial, 10  -> FactorialResult
 
 #include Basics.LOOF
 
-function ConvertTableToString  -> TableIn, Seperator
-	returnIf typeOf TableIn != "table"
+function ConvertTableToString  -> TableIn, Seperator  throwsErrors {"InvalidArgType"}
+	errorIf typeOf TableIn != "table", "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
 	Seperator defaultsTo ", "
+	errorIf typeOf Seperator != "string", "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}
 	
-	StringOut = toString TableIn[i]
+	StringOut = toString TableIn[0]
 	loop i, 1, endOf TableIn
 		StringOut ..= Sepeator .. toString TableIn[i]
 	repeat

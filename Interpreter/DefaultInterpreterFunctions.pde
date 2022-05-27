@@ -391,6 +391,20 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
 
 
 
+LooFInterpreterFunction InterpreterFunction_SetPassedErrors = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
+    
+  }
+  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
+  }
+  @Override public String toString() {return "'setPassedErrors'";}
+};
+
+
+
+
+
 LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() {
   String NewIPFileName;
   Integer NewIPLineNumber;

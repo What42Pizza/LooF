@@ -10,7 +10,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) + GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -33,7 +33,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) - GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -56,7 +56,7 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) * GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -71,18 +71,18 @@ LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
-      if (RightValue.IntValue == 0) ThrowLooFException (Environment, CodeData, "cannot divide by 0.");
+      if (RightValue.IntValue == 0) ThrowLooFException (Environment, CodeData, "cannot divide by 0.", new String[] {"DivideByZero"});
       long NewIntValue = LeftValue.IntValue / RightValue.IntValue;
       return new LooFDataValue (NewIntValue);
     }
     
     if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
       double RightFloatValue = GetDataValueNumber (RightValue);
-      if (RightFloatValue == 0) ThrowLooFException (Environment, CodeData, "cannot divide by 0.");
+      if (RightFloatValue == 0) ThrowLooFException (Environment, CodeData, "cannot divide by 0.", new String[] {"DivideByZero"});
       return new LooFDataValue (GetDataValueNumber (LeftValue) / RightFloatValue);
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -105,7 +105,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
       return new LooFDataValue (Math.pow (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -128,7 +128,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
       return new LooFDataValue (CorrectModulo (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -157,7 +157,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewArrayValue, NewHashMapValue);
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -229,7 +229,7 @@ LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) > GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -247,7 +247,7 @@ LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) < GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -319,7 +319,7 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
       return new LooFDataValue (GetDataValueNumber (LeftValue) >= GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -338,7 +338,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
       return new LooFDataValue (GetDataValueNumber (LeftValue) <= GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -391,7 +391,7 @@ LooFEvaluatorOperation Operation_BitwiseAnd = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \"&&\" can only 'and' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+      ThrowLooFException (Environment, CodeData, "the operation \"&&\" can only 'and' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue & RightValue.IntValue);
     
@@ -408,7 +408,7 @@ LooFEvaluatorOperation Operation_BitwiseOr = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \"||\" can only 'or' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+      ThrowLooFException (Environment, CodeData, "the operation \"||\" can only 'or' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue | RightValue.IntValue);
     
@@ -425,7 +425,7 @@ LooFEvaluatorOperation Operation_BitwiseXor = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \"^^\" can only 'xor' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+      ThrowLooFException (Environment, CodeData, "the operation \"^^\" can only 'xor' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue ^ RightValue.IntValue);
     
@@ -442,7 +442,7 @@ LooFEvaluatorOperation Operation_ShiftRight = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+      ThrowLooFException (Environment, CodeData, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue << RightValue.IntValue);
     
@@ -459,7 +459,7 @@ LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \">>\" can only shift an int with an, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".");
+      ThrowLooFException (Environment, CodeData, "the operation \">>\" can only shift an int with an, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue >> RightValue.IntValue);
     
@@ -494,7 +494,7 @@ LooFEvaluatorFunction Function_Round = new LooFEvaluatorFunction() {
       return new LooFDataValue (Math.round(GetDataValueNumber (Input)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the evaluator function round can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the evaluator function round can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -511,7 +511,7 @@ LooFEvaluatorFunction Function_Floor = new LooFEvaluatorFunction() {
       return new LooFDataValue ((long) Math.floor(GetDataValueNumber (Input)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the evaluator function floor can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the evaluator function floor can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -528,7 +528,7 @@ LooFEvaluatorFunction Function_Ceil = new LooFEvaluatorFunction() {
       return new LooFDataValue ((long) Math.ceil(GetDataValueNumber (Input)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the evaluator function ceil can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the evaluator function ceil can only round an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -545,7 +545,7 @@ LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
       return new LooFDataValue (Math.sqrt(GetDataValueNumber (Input)));
     }
     
-    ThrowLooFException (Environment, CodeData, "the evaluator function sqrt can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    ThrowLooFException (Environment, CodeData, "the evaluator function sqrt can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -557,7 +557,7 @@ LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_Sign = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     double InputNumberValue = GetDataValueNumber (Input);
     return new LooFDataValue (InputNumberValue >= 0 ? 1 : -1);
@@ -588,10 +588,10 @@ LooFEvaluatorFunction Function_Min = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     // ensure input is valid
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function min can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function min can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function min cannot be called with an empty table.");
+    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function min cannot be called with an empty table.", new String[] {"TableIsEmpty", "InvalidArgType"});
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
@@ -599,16 +599,16 @@ LooFEvaluatorFunction Function_Min = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) ThrowLooFException (Environment, CodeData, "the evaluator function min can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + ".");
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) ThrowLooFException (Environment, CodeData, "the evaluator function min can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + ".", new String[] {"InvalidArgType"});
     }
     
     // if there's a float
     if (DataValueTypesInInput[DataValueType_Float]) {
       LooFDataValue FirstItem = InputItems.get(0);
-      double MinValue = GetDataValueNumber_Unsafe (FirstItem, Environment, "min");
+      double MinValue = GetDataValueNumber_Unsafe (FirstItem, Environment, CodeData, "min");
       for (int i = 1; i < InputItemsSize; i ++) {
         LooFDataValue CurrentItem = InputItems.get(i);
-        MinValue = Math.min (MinValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, "min"));
+        MinValue = Math.min (MinValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, CodeData, "min"));
       }
       return new LooFDataValue (MinValue);
     }
@@ -633,10 +633,10 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     // ensure input is valid
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function max can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function max can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function max cannot be called with an empty table.");
+    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function max cannot be called with an empty table.", new String[] {"TableIsEmpty", "InvalidArgType"});
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
@@ -644,16 +644,16 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
     AllowedDataValueTypes[DataValueType_Int] = true;
     AllowedDataValueTypes[DataValueType_Float] = true;
     for (int i = 0; i < AllowedDataValueTypes.length; i ++) {
-      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) ThrowLooFException (Environment, CodeData, "the evaluator function max can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + ".");
+      if (DataValueTypesInInput[i] && !AllowedDataValueTypes[i]) ThrowLooFException (Environment, CodeData, "the evaluator function max can only take a table with ints and floats, but the table given contained a value of type " + DataValueTypeNames[i] + ".", new String[] {"InvalidArgType"});
     }
     
     // if there's a float
     if (DataValueTypesInInput[DataValueType_Float]) {
       LooFDataValue FirstItem = InputItems.get(0);
-      double MaxValue = GetDataValueNumber_Unsafe (FirstItem, Environment, "max");
+      double MaxValue = GetDataValueNumber_Unsafe (FirstItem, Environment, CodeData, "max");
       for (int i = 1; i < InputItemsSize; i ++) {
         LooFDataValue CurrentItem = InputItems.get(i);
-        MaxValue = Math.max (MaxValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, "max"));
+        MaxValue = Math.max (MaxValue, GetDataValueNumber_Unsafe (CurrentItem, Environment, CodeData, "max"));
       }
       return new LooFDataValue (MaxValue);
     }
@@ -677,7 +677,7 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_Random = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     double MaxValue = GetDataValueNumber (Input);
     return new LooFDataValue (Math.random() * MaxValue);
@@ -699,13 +699,13 @@ LooFEvaluatorFunction Function_RandomInt = new LooFEvaluatorFunction() {
         return new LooFDataValue ((int) (Math.random() * (MaxInt + 1)));
       
       case (DataValueType_Table):
-        if (Input.ArrayValue.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function randomInt can only take an int or a table of two ints, but a table with " + Input.ArrayValue.size() + " items was given.");
+        if (Input.ArrayValue.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function randomInt can only take an int or a table of two ints, but a table with " + Input.ArrayValue.size() + " items was given.", new String[] {"InvalidArgType"});
         long MinInt = Input.ArrayValue.get(0).IntValue;
         MaxInt = Input.ArrayValue.get(1).IntValue;
         return new LooFDataValue (MinInt + (int) (Math.random() * ((MaxInt - MinInt) + 1)));
       
       default:
-        ThrowLooFException (Environment, CodeData, "the evaluator function randomInt can only take an int or a table of two ints, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, "the evaluator function randomInt can only take an int or a table of two ints, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
         throw new AssertionError();
       
     }
@@ -720,10 +720,10 @@ LooFEvaluatorFunction Function_RandomInt = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_Chance = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     double ChanceLimit = GetDataValueNumber (Input);
-    if (ChanceLimit < 0 || ChanceLimit > 100) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take a number from 0 to 100 (inclusive).");
+    if (ChanceLimit < 0 || ChanceLimit > 100) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take a number from 0 to 100 (inclusive).", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (Math.random() < ChanceLimit / 100);
     
@@ -749,7 +749,7 @@ LooFEvaluatorFunction Function_LengthOf = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ByteArrayValue.length);
       
       default:
-        ThrowLooFException (Environment, CodeData, "the evaluator function lengthOf can only take a table, string, or byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, "the evaluator function lengthOf can only take a table, string, or byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
         throw new AssertionError();
       
     }
@@ -763,7 +763,7 @@ LooFEvaluatorFunction Function_LengthOf = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_TotalItemsIn = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (Input.ArrayValue.size() + Input.HashMapValue.size());
     
@@ -785,7 +785,7 @@ LooFEvaluatorFunction Function_EndOf = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ByteArrayValue.length - 1);
       
       default:
-        ThrowLooFException (Environment, CodeData, "the evaluator function endOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, "the evaluator function endOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
         throw new AssertionError();
       
     }
@@ -799,7 +799,7 @@ LooFEvaluatorFunction Function_EndOf = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_KeysOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function keysOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function keysOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <String> InputKeys = Input.HashMapValue.keySet();
     ArrayList <LooFDataValue> KeysList = new ArrayList <LooFDataValue> ();
@@ -820,7 +820,7 @@ LooFEvaluatorFunction Function_KeysOf = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <LooFDataValue> InputValues = Input.HashMapValue.values();
     ArrayList <LooFDataValue> ValuesList = new ArrayList <LooFDataValue> ();
@@ -841,7 +841,7 @@ LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
     if (ArrayValue.size() == 0) return new LooFDataValue();
@@ -858,7 +858,7 @@ LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <LooFDataValue> HashMapValues = Input.HashMapValue.values();
     return GetRandomItemFromCollection (HashMapValues);
@@ -874,13 +874,13 @@ LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_GetChar = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take two arguments.");
+    if (Args.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take two arguments (in the given table), but " + Args.size() + " were found.", new String[] {"InvalidNumOfArgs"});
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue IndexDataValue = Args.get(1);
-    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".");
-    if (IndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes an int as its second argument, not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + ".");
+    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes a string as its first argument (in the given table), not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (IndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes an int as its second argument (in the given table), not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = StringDataValue.StringValue;
     long Index = IndexDataValue.IntValue;
@@ -896,7 +896,7 @@ LooFEvaluatorFunction Function_GetChar = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_GetCharInts = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    if (Input.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChars can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = Input.StringValue;
     char[] InputChars = new char [StringIn.length()];
@@ -919,7 +919,7 @@ LooFEvaluatorFunction Function_GetCharInts = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_GetCharBytes = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    if (Input.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getCharBytes can only take a string, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = Input.StringValue;
     char[] InputChars = new char [StringIn.length()];
@@ -942,15 +942,15 @@ LooFEvaluatorFunction Function_GetCharBytes = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_GetSubString = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".");
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 3) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take three arguments.");
+    if (Args.size() != 3) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take three arguments (in the given table), but " + Args.size() + " were found.", new String[] {"InvalidArgType"});
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue StartIndexDataValue = Args.get(1);
     LooFDataValue EndIndexDataValue = Args.get(2);
-    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".");
-    if (StartIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its second argument, not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + ".");
-    if (EndIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its third argument, not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + ".");
+    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes a string as its first argument (in the given table), not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (StartIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its second argument (in the given table), not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (EndIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its third argument (in the given table), not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = StringDataValue.StringValue;
     long StartIndex = StartIndexDataValue.IntValue;
@@ -974,7 +974,7 @@ LooFEvaluatorFunction Function_ToInt = new LooFEvaluatorFunction() {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
-        ThrowLooFException (Environment, CodeData, "cannot cast null to int.");
+        ThrowLooFException (Environment, CodeData, "cannot cast null to int.", new String[] {"InvalidCast", "InalidArgType"});
       
       case (DataValueType_Int):
         return new LooFDataValue (Input.IntValue);
@@ -986,17 +986,17 @@ LooFEvaluatorFunction Function_ToInt = new LooFEvaluatorFunction() {
         try {
           return new LooFDataValue (Long.parseLong(Input.StringValue));
         } catch (NumberFormatException e) {
-          ThrowLooFException (Environment, CodeData, "cannot cast string \"" + Input.StringValue + "\" to a number.");
+          ThrowLooFException (Environment, CodeData, "cannot cast the string \"" + Input.StringValue + "\" to a number.", new String[] {"InvalidCast", "InalidArgType"});
         }
       
       case (DataValueType_Bool):
         return new LooFDataValue (Input.BoolValue ? (long) 1 : (long) 0);
       
       case (DataValueType_Table):
-        ThrowLooFException (Environment, CodeData, "cannot cast table to int.");
+        ThrowLooFException (Environment, CodeData, "cannot cast table to int.", new String[] {"InvalidCast", "InalidArgType"});
       
       case (DataValueType_ByteArray):
-        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to int.");
+        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to int.", new String[] {"InvalidCast", "InalidArgType"});
       
       default:
         throw new AssertionError();
@@ -1014,7 +1014,7 @@ LooFEvaluatorFunction Function_ToFloat = new LooFEvaluatorFunction() {
     switch (Input.ValueType) {
       
       case (DataValueType_Null):
-        ThrowLooFException (Environment, CodeData, "cannot cast null to float.");
+        ThrowLooFException (Environment, CodeData, "cannot cast null to float.", new String[] {"InvalidCast", "InalidArgType"});
       
       case (DataValueType_Int):
         return new LooFDataValue ((double) Input.IntValue);
@@ -1026,17 +1026,17 @@ LooFEvaluatorFunction Function_ToFloat = new LooFEvaluatorFunction() {
         try {
           return new LooFDataValue (Double.parseDouble(Input.StringValue));
         } catch (NumberFormatException e) {
-          ThrowLooFException (Environment, CodeData, "cannot cast string \"" + Input.StringValue + "\" to a float.");
+          ThrowLooFException (Environment, CodeData, "cannot cast string \"" + Input.StringValue + "\" to a float.", new String[] {"InvalidCast", "InalidArgType"});
         }
       
       case (DataValueType_Bool):
         return new LooFDataValue (Input.BoolValue ? (double) 1.0 :  (double) 0.0);
       
       case (DataValueType_Table):
-        ThrowLooFException (Environment, CodeData, "cannot cast table to float.");
+        ThrowLooFException (Environment, CodeData, "cannot cast table to float.", new String[] {"InvalidCast", "InalidArgType"});
       
       case (DataValueType_ByteArray):
-        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to float.");
+        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to float.", new String[] {"InvalidCast", "InalidArgType"});
       
       default:
         throw new AssertionError();
@@ -1108,7 +1108,7 @@ LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ArrayValue.size() > 0);
       
       case (DataValueType_ByteArray):
-        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to bool.");
+        ThrowLooFException (Environment, CodeData, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
       
       default:
         throw new AssertionError();

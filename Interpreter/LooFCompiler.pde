@@ -311,6 +311,7 @@ class LooFCompiler {
     
     InterpreterFunctions.put("error", InterpreterFunction_Error);
     InterpreterFunctions.put("errorIf", InterpreterFunction_ErrorIf);
+    InterpreterFunctions.put("setPassedErrors", InterpreterFunction_SetPassedErrors);
     InterpreterFunctions.put("try", InterpreterFunction_Try);
     
     InterpreterFunctions.put("callOutside", InterpreterFunction_CallOutside);
@@ -2077,21 +2078,21 @@ class LooFCompiler {
   
   void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFStatement Statement, int CorrectNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     int NumberOfArgs = Statement.Args.length;
-    if (NumberOfArgs != CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + CorrectNumberOfArgs + " arguments, but " + (NumberOfArgs < CorrectNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
+    if (NumberOfArgs != CorrectNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement takes " + CorrectNumberOfArgs + " arguments, but " + (NumberOfArgs < CorrectNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
   }
   
   
   
   void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFStatement Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     int NumberOfArgs = Statement.Args.length;
-    if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
+    if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement takes " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
   }
   
   
   
   void EnsureStatementHasCorrectNumberOfArgs_Unbounded (LooFStatement Statement, int MinNumberOfArgs, LooFCodeData CodeData, int LineNumber) {
     int NumberOfArgs = Statement.Args.length;
-    if (NumberOfArgs < MinNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement needs to have " + MinNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
+    if (NumberOfArgs < MinNumberOfArgs) throw (new LooFCompileException (CodeData, LineNumber, "this statement takes " + MinNumberOfArgs + " arguments, but only " + NumberOfArgs + " were found."));
   }
   
   

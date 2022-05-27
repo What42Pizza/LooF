@@ -35,7 +35,7 @@ class LooFInterpreter {
     int StatementsLength = Environment.CurrentCodeData.Statements.length;
     if (Environment.CurrentLineNumber >= StatementsLength) {
       Environment.CurrentLineNumber = StatementsLength - 1;
-      throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file."));
+      throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file.", new String[] {"ReachedEndOfFile"}));
     }
     
   }
@@ -117,7 +117,7 @@ class LooFInterpreter {
     HashMap <String, LooFDataValue> CurrentVariableList = GetLastItemOf (VariableListsStack);
     LooFDataValue FoundVariableValue = CurrentVariableList.get(VariableName);
     if (FoundVariableValue != null) return CurrentVariableList.get(VariableName);
-    if (!CreateNullVar) throw (new LooFInterpreterException (Environment, "could not find any variable named \"" + VariableName + "\"."));
+    if (!CreateNullVar) throw (new LooFInterpreterException (Environment, "could not find any variable named \"" + VariableName + "\".", new String[] {"VariableNotFound"}));
     LooFDataValue NewVariableValue = new LooFDataValue ();
     CurrentVariableList.put(VariableName, NewVariableValue);
     return NewVariableValue;
@@ -272,7 +272,7 @@ class LooFInterpreter {
         CaseToUse += 1;
         break;
       default:
-        ThrowLooFException (Environment, CodeData, DataValueTypeNames[SourceTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, DataValueTypeNames[SourceTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".", new String[] {"InvalidIndexType", "IndexError"});
     }
     
     // error if data value is not indexable
@@ -283,7 +283,7 @@ class LooFInterpreter {
         CaseToUse += 2;
         break;
       default:
-        ThrowLooFException (Environment, CodeData, "cannot index value of type " + DataValueTypeNames_PlusA[SourceTable.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, "cannot index value of type " + DataValueTypeNames_PlusA[SourceTable.ValueType] + ".", new String[] {"InvalidTypeIndexed", "IndexError"});
     }
     
     // get index
@@ -292,8 +292,8 @@ class LooFInterpreter {
       case (0): // table[int]
         long IndexIntValue_table = IndexValue.IntValue;
         ArrayList <LooFDataValue> ArrayValue = SourceTable.ArrayValue;
-        if (IndexIntValue_table < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
-        if (IndexIntValue_table >= ArrayValue.size()) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
+        if (IndexIntValue_table < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
+        if (IndexIntValue_table >= ArrayValue.size()) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
         return ArrayValue.get((int)IndexIntValue_table);
       
       case (1): // table[string]
@@ -304,12 +304,12 @@ class LooFInterpreter {
       case (2): // byteArray[int]
         long IndexIntValue_byteArray = IndexValue.IntValue;
         byte[] ByteArrayValue = SourceTable.ByteArrayValue;
-        if (IndexIntValue_byteArray < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
-        if (IndexIntValue_byteArray >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
+        if (IndexIntValue_byteArray < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
+        if (IndexIntValue_byteArray >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
         return new LooFDataValue ((long) ByteArrayValue[(int)IndexIntValue_byteArray]);
       
       case (3): // byteArray[string]
-        ThrowLooFException (Environment, CodeData, "cannot index byteArray with a string.");
+        ThrowLooFException (Environment, CodeData, "cannot index byteArray with a string.", new String[] {"IndexError"});
       
       default:
         throw new AssertionError();
@@ -325,17 +325,7 @@ class LooFInterpreter {
   void SetDataValueIndex (LooFDataValue TargetTable, LooFDataValue IndexValue, LooFDataValue NewVarValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     int CaseToUse = 0;
     
-    if (GetLastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, CodeData, "cannot set the index of a locked data value.");
-    
-    switch (TargetTable.ValueType) {
-      case (DataValueType_Table):
-        break;
-      case (DataValueType_ByteArray):
-        CaseToUse += 1;
-        break;
-      default:
-        ThrowLooFException (Environment, CodeData, "cannot set the index of " + DataValueTypeNames_PlusA[TargetTable.ValueType] + ".");
-    }
+    if (GetLastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, CodeData, "cannot set the index of a locked data value.", new String[] {"LockedValueSetAttempted"});
     
     switch (IndexValue.ValueType) {
       case (DataValueType_Int):
@@ -344,7 +334,17 @@ class LooFInterpreter {
         CaseToUse += 2;
         break;
       default:
-        ThrowLooFException (Environment, CodeData, DataValueTypeNames[TargetTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".");
+        ThrowLooFException (Environment, CodeData, DataValueTypeNames[TargetTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".", new String[] {"InvalidIndexType", "IndexError"});
+    }
+    
+    switch (TargetTable.ValueType) {
+      case (DataValueType_Table):
+        break;
+      case (DataValueType_ByteArray):
+        CaseToUse += 1;
+        break;
+      default:
+        ThrowLooFException (Environment, CodeData, "cannot set the index of " + DataValueTypeNames_PlusA[TargetTable.ValueType] + ".", new String[] {"InvalidTypeIndexed", "IndexError"});
     }
     
     int IndexIntValue = (int) IndexValue.IntValue;
@@ -353,10 +353,10 @@ class LooFInterpreter {
     switch (CaseToUse) {
       
       case (0): // table[int]
-        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
         ArrayList <LooFDataValue> ArrayValue = TargetTable.ArrayValue;
         int TargetTableSize = ArrayValue.size();
-        if (IndexIntValue > TargetTableSize) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
+        if (IndexIntValue > TargetTableSize) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
         if (IndexIntValue == TargetTableSize) {
           ArrayValue.add(NewVarValue);
           return;
@@ -365,10 +365,10 @@ class LooFInterpreter {
         return;
       
       case (1): // byteArray[int]
-        if (NewVarValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "cannot set an index of a byteArray to " + DataValueTypeNames_PlusA[NewVarValue.ValueType] + " (index must be an int).");
-        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
+        if (NewVarValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "cannot set an index of a byteArray to " + DataValueTypeNames_PlusA[NewVarValue.ValueType] + " (index must be an int).", new String[] {"InvalidByteArrayValue", "IndexError"});
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
         byte[] ByteArrayValue = TargetTable.ByteArrayValue;
-        if (IndexIntValue >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
+        if (IndexIntValue >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
         ByteArrayValue[IndexIntValue] = (byte) NewVarValue.IntValue;
         return;
       
@@ -382,7 +382,7 @@ class LooFInterpreter {
         return;
       
       case (3):
-        ThrowLooFException (Environment, CodeData, "byteArrays cannot be indexes with strings.");
+        ThrowLooFException (Environment, CodeData, "byteArrays cannot be indexes with strings.", new String[] {"IndexError"});
       
       default:
         throw new AssertionError();
