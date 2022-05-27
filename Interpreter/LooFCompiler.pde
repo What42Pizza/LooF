@@ -92,14 +92,9 @@ class LooFCompiler {
     
     
     
-    // create environement
-    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas, AddonsData);
-    
-    
-    
     // finish statements
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      FinishStatements (CodeData, NewEnvironment);
+      FinishStatements (CodeData);
     }
     
     if (CompileSettings.FinalOutputPath != null) {
@@ -107,6 +102,11 @@ class LooFCompiler {
       PrintFinalOutput (AllCodeDatas, CompileSettings.FinalOutputPath, "FinalLOOF");
       StartTimer ("OnlyCompilation");
     }
+    
+    
+    
+    // create environement
+    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas, AddonsData);
     
     
     
@@ -2186,29 +2186,19 @@ class LooFCompiler {
   
   
   
-  void FinishStatements (LooFCodeData CodeData, LooFEnvironment Environment) {
-    
-    // change LooFEnvironment data for correct error messages
-    String Original_FileName = Environment.CurrentFileName;
-    LooFCodeData Original_CodeData = Environment.CurrentCodeData;
-    int Original_LineNumber = Environment.CurrentLineNumber;
-    Environment.CurrentFileName = CodeData.FullFileName;
-    Environment.CurrentCodeData = CodeData;
-    
-    // do FinishStatement() stuff
+  void FinishStatements (LooFCodeData CodeData) {
     LooFStatement[] Statements = CodeData.Statements;
     for (int i = 0; i < Statements.length; i ++) {
-      Environment.CurrentLineNumber = i;
       LooFStatement CurrentStatement = Statements[i];
       switch (CurrentStatement.StatementType) {
         
         case (StatementType_Assignment):
-          PreEvaluateStatementIndexQueries (CurrentStatement, Environment);
-          CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, Environment);
+          PreEvaluateStatementIndexQueries (CurrentStatement, CodeData, i);
+          CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, CodeData, i);
           continue;
         
         case (StatementType_Function):
-          PreEvaluateStatementArgs (CurrentStatement, Environment);
+          PreEvaluateStatementArgs (CurrentStatement, CodeData, i);
           CurrentStatement.Function.FinishStatement (CurrentStatement, CodeData, i);
           continue;
         
@@ -2217,31 +2207,25 @@ class LooFCompiler {
         
       }
     }
-    
-    // revert LooFEnvironment data
-    Environment.CurrentFileName = Original_FileName;
-    Environment.CurrentCodeData = Original_CodeData;
-    Environment.CurrentLineNumber = Original_LineNumber;
-    
   }
   
   
   
   
   
-  void PreEvaluateStatementIndexQueries (LooFStatement Statement, LooFEnvironment Environment) {
+  void PreEvaluateStatementIndexQueries (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch[] IndexQueries = Statement.IndexQueries;
     for (int i = 0; i < IndexQueries.length; i ++) {
-      IndexQueries[i] = PreEvaluateFormula (IndexQueries[i], Environment);
+      IndexQueries[i] = PreEvaluateFormula (IndexQueries[i], CodeData, LineNumber);
     }
   }
   
   
   
-  void PreEvaluateStatementArgs (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+  void PreEvaluateStatementArgs (LooFStatement CurrentStatement, LooFCodeData CodeData, int LineNumber) {
     LooFTokenBranch[] Args = CurrentStatement.Args;
     for (int i = 0; i < Args.length; i ++) {
-      Args[i] = PreEvaluateFormula (Args[i], Environment);
+      Args[i] = PreEvaluateFormula (Args[i], CodeData, LineNumber);
     }
   }
   
@@ -2249,17 +2233,18 @@ class LooFCompiler {
   
   
   
-  LooFTokenBranch PreEvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment) {
+  LooFTokenBranch PreEvaluateFormula (LooFTokenBranch Formula, LooFCodeData CodeData, int LineNumber) {
+    CodeData.CurrentLineNumber = LineNumber;
     
     if (Formula.CanBePreEvaluated) {
-      LooFDataValue Result = LooFInterpreter.EvaluateFormula (Formula, Environment);
+      LooFDataValue Result = LooFInterpreter.EvaluateFormula (Formula, null, CodeData);
       return new LooFTokenBranch (Formula.OriginalTokenIndex, Formula.OriginalString, Result);
     }
     
     LooFTokenBranch[] Children = Formula.Children;
     for (int i = 0; i < Children.length; i ++) {
       LooFTokenBranch CurrentChild = Children[i];
-      if (CurrentChild.TokenType == TokenBranchType_Formula) Children[i] = PreEvaluateFormula (CurrentChild, Environment);
+      if (CurrentChild.TokenType == TokenBranchType_Formula) Children[i] = PreEvaluateFormula (CurrentChild, CodeData, LineNumber);
     }
     return Formula;
     

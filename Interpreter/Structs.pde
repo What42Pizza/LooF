@@ -13,7 +13,7 @@ class LooFInterpreterModule {
 class LooFInterpreterAssignment {
   
   public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment does not have an overridden GetNewVarValue()."));
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment is a base class and it does not have an overridden GetNewVarValue()."));
   }
   
   public boolean AddToCombinedTokens() {
@@ -33,11 +33,11 @@ class LooFInterpreterAssignment {
 class LooFInterpreterFunction implements Cloneable {
   
   public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall()."));
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction is a base class and it does not have an overridden HandleFunctionCall()."));
   }
   
   public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
-    throw (new LooFCompileException (CodeData, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
+    throw (new LooFCompileException (CodeData, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
   }
   
   public int GetBlockLevelChange() {
@@ -64,8 +64,9 @@ class LooFInterpreterFunction implements Cloneable {
 
 class LooFEvaluatorOperation {
   
-  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorOperation does not have an overridden HandleOperation()."));
+  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
+    ThrowLooFException (Environment, CodeData, "this LooFEvaluatorOperation is a base class and it does not have an overridden HandleOperation().");
+    throw new AssertionError();
   }
   
   public float GetOrder() {
@@ -90,8 +91,9 @@ LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
 
 class LooFEvaluatorFunction {
   
-  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall()."));
+  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    ThrowLooFException (Environment, CodeData, "this LooFEvaluatorFunction is a base class and it does not have an overridden HandleFunctionCall().");
+    throw new AssertionError();
   }
   
   public boolean AddToCombinedTokens() {
@@ -183,6 +185,8 @@ class LooFCodeData {
   
   HashMap <String, Integer> FunctionLocations = new HashMap <String, Integer> ();
   HashMap <String, String> LinkedFiles = new HashMap <String, String> ();
+  
+  int CurrentLineNumber;
   
   public LooFCodeData (String[] Code, String FullFileName) {
     this.FullFileName = FullFileName;
@@ -365,7 +369,10 @@ class LooFInterpreterException extends RuntimeException {
 
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
-  String FileName = Environment.CurrentFileName;
+  String FileName;
+  try {
+  FileName = Environment.CurrentFileName;
+  } catch (Exception e) {e.printStackTrace(); throw new AssertionError();}
   LooFCodeData CodeData = Environment.CurrentCodeData;
   int LineNumber = Environment.CurrentLineNumber;
   
@@ -382,6 +389,34 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
   String LineOfCodeToShow = (LineOfCode.equals(OriginalLineOfCode)) ? ("\"" + LineOfCode + "\"") : ("\"" + OriginalLineOfCode + "\"  ->  \"" + LineOfCode + "\"");
   
   return "File " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":   " + Message + "\n\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
+}
+
+
+
+
+
+
+
+
+
+
+void ThrowLooFException (LooFEnvironment Environment, LooFCodeData CodeData, String Message) throws LooFInterpreterException, LooFCompileException, AssertionError {
+  
+  if (Environment != null) {
+    throw new LooFInterpreterException (Environment, Message);
+  }
+  
+  if (CodeData != null) {
+    throw new LooFCompileException (CodeData, CodeData.CurrentLineNumber, Message);
+  }
+  
+  try {
+  throw new AssertionError ("Both Environment and CodeData are null");
+  } catch (AssertionError e) {
+    e.printStackTrace();
+    throw new AssertionError();
+  }
+  
 }
 
 

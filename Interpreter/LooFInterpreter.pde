@@ -57,11 +57,11 @@ class LooFInterpreter {
       return;
     }
     
-    LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment);
-    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment);
-    LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, Environment);
+    LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment, null);
+    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment, null);
+    LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, Environment, null);
     LooFDataValue NewVarValue = StatementAssignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
-    SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
+    SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment, null);
     
   }
   
@@ -69,12 +69,12 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue GetTargetTableForStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+  LooFDataValue GetTargetTableForStatement (LooFStatement CurrentStatement, LooFEnvironment Environment, LooFCodeData CodeData) {
     LooFDataValue TargetTable = GetVariableValue (CurrentStatement.VarName, Environment, true);
     LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
     for (int i = 0; i < IndexQueries.length - 1; i ++) {
-      LooFDataValue ValueToIndexWith = EvaluateFormula (IndexQueries[i], Environment);
-      TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, Environment);
+      LooFDataValue ValueToIndexWith = EvaluateFormula (IndexQueries[i], Environment, CodeData);
+      TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, Environment, CodeData);
     }
     return TargetTable;
   }
@@ -132,11 +132,11 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue EvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment) {
+  LooFDataValue EvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment, LooFCodeData CodeData) {
     if (Formula.TokenType == TokenBranchType_PreEvaluatedFormula) return Formula.Result;
     ArrayList <LooFTokenBranch> FormulaTokens = ArrayToArrayList (Formula.Children);
     if (FormulaTokens.size() == 0) return new LooFDataValue();
-    ArrayList <LooFDataValue> FormulaValues = GetFormulaValuesFromTokens (FormulaTokens, Environment);
+    ArrayList <LooFDataValue> FormulaValues = GetFormulaValuesFromTokens (FormulaTokens, Environment, CodeData);
     
     int[] IndexQueryIndexes = Formula.IndexQueryIndexes;
     int[] FunctionIndexes = Formula.FunctionIndexes;
@@ -144,8 +144,8 @@ class LooFInterpreter {
     
     // evaluate indexes
     for (int CurrentTokenIndex : IndexQueryIndexes) {
-      LooFDataValue IndexValue = EvaluateFormula (FormulaTokens.get(CurrentTokenIndex), Environment);
-      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), IndexValue, Environment);
+      LooFDataValue IndexValue = EvaluateFormula (FormulaTokens.get(CurrentTokenIndex), Environment, CodeData);
+      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), IndexValue, Environment, CodeData);
       FormulaTokens.remove(CurrentTokenIndex);
       FormulaValues.remove(CurrentTokenIndex);
       FormulaValues.set(CurrentTokenIndex - 1, NewValue);
@@ -156,7 +156,7 @@ class LooFInterpreter {
       LooFTokenBranch FunctionToken = FormulaTokens.get(CurrentTokenIndex);
       LooFEvaluatorFunction FunctionToCall = FunctionToken.Function;
       LooFDataValue FunctionInput = FormulaValues.get(CurrentTokenIndex + 1);
-      LooFDataValue FunctionOutput = FunctionToCall.HandleFunctionCall (FunctionInput, Environment);
+      LooFDataValue FunctionOutput = FunctionToCall.HandleFunctionCall (FunctionInput, Environment, CodeData);
       FormulaTokens.remove(CurrentTokenIndex + 1);
       FormulaValues.remove(CurrentTokenIndex + 1);
       FormulaValues.set(CurrentTokenIndex, FunctionOutput);
@@ -169,7 +169,7 @@ class LooFInterpreter {
       LooFEvaluatorOperation OperationToCall = OperationToken.Operation;
       LooFDataValue LeftValue = FormulaValues.get(CurrentTokenIndex - 1);
       LooFDataValue RightValue = FormulaValues.get(CurrentTokenIndex + 1);
-      LooFDataValue OperationOutput = OperationToCall.HandleOperation (LeftValue, RightValue, Environment);
+      LooFDataValue OperationOutput = OperationToCall.HandleOperation (LeftValue, RightValue, Environment, CodeData);
       FormulaValues.set(CurrentTokenIndex - 1, OperationOutput);
       FormulaValues.remove(CurrentTokenIndex);
       FormulaValues.remove(CurrentTokenIndex);
@@ -186,10 +186,10 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue EvaluateTable (LooFTokenBranch Formula, LooFEnvironment Environment) {
+  LooFDataValue EvaluateTable (LooFTokenBranch Formula, LooFEnvironment Environment, LooFCodeData CodeData) {
     ArrayList <LooFDataValue> TableChildren = new ArrayList <LooFDataValue> ();
     for (LooFTokenBranch CurrentToken : Formula.Children) {
-      TableChildren.add(EvaluateFormula (CurrentToken, Environment));
+      TableChildren.add(EvaluateFormula (CurrentToken, Environment, CodeData));
     }
     return new LooFDataValue (TableChildren, new HashMap <String, LooFDataValue> ());
   }
@@ -198,17 +198,17 @@ class LooFInterpreter {
   
   
   
-  ArrayList <LooFDataValue> GetFormulaValuesFromTokens (ArrayList <LooFTokenBranch> FormulaTokens, LooFEnvironment Environment) {
+  ArrayList <LooFDataValue> GetFormulaValuesFromTokens (ArrayList <LooFTokenBranch> FormulaTokens, LooFEnvironment Environment, LooFCodeData CodeData) {
     ArrayList <LooFDataValue> FormulaValues = new ArrayList <LooFDataValue> ();
     for (LooFTokenBranch CurrentToken : FormulaTokens) {
-      FormulaValues.add (GetDataValueFromToken (CurrentToken, Environment));
+      FormulaValues.add (GetDataValueFromToken (CurrentToken, Environment, CodeData));
     }
     return FormulaValues;
   }
   
   
   
-  LooFDataValue GetDataValueFromToken (LooFTokenBranch CurrentToken, LooFEnvironment Environment) {
+  LooFDataValue GetDataValueFromToken (LooFTokenBranch CurrentToken, LooFEnvironment Environment, LooFCodeData CodeData) {
     switch (CurrentToken.TokenType) {
       
       default:
@@ -230,10 +230,10 @@ class LooFInterpreter {
         return new LooFDataValue (CurrentToken.BoolValue);
       
       case (TokenBranchType_Table):
-        return EvaluateTable (CurrentToken, Environment);
+        return EvaluateTable (CurrentToken, Environment, CodeData);
       
       case (TokenBranchType_Formula):
-        return EvaluateFormula (CurrentToken, Environment);
+        return EvaluateFormula (CurrentToken, Environment, CodeData);
       
       case (TokenBranchType_Index):
         return null;
@@ -260,7 +260,7 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue GetDataValueIndex (LooFDataValue SourceTable, LooFDataValue IndexValue, LooFEnvironment Environment) {
+  LooFDataValue GetDataValueIndex (LooFDataValue SourceTable, LooFDataValue IndexValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     int CaseToUse = 0;
     
@@ -272,7 +272,7 @@ class LooFInterpreter {
         CaseToUse += 1;
         break;
       default:
-        throw (new LooFInterpreterException (Environment, DataValueTypeNames[SourceTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + "."));
+        ThrowLooFException (Environment, CodeData, DataValueTypeNames[SourceTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".");
     }
     
     // error if data value is not indexable
@@ -283,7 +283,7 @@ class LooFInterpreter {
         CaseToUse += 2;
         break;
       default:
-        throw (new LooFInterpreterException (Environment, "cannot index value of type " + DataValueTypeNames_PlusA[SourceTable.ValueType] + "."));
+        ThrowLooFException (Environment, CodeData, "cannot index value of type " + DataValueTypeNames_PlusA[SourceTable.ValueType] + ".");
     }
     
     // get index
@@ -292,8 +292,8 @@ class LooFInterpreter {
       case (0): // table[int]
         long IndexIntValue_table = IndexValue.IntValue;
         ArrayList <LooFDataValue> ArrayValue = SourceTable.ArrayValue;
-        if (IndexIntValue_table < 0) throw (new LooFInterpreterException (Environment, "index is out of bounds (negative)."));
-        if (IndexIntValue_table >= ArrayValue.size()) throw (new LooFInterpreterException (Environment, "index is out of bounds (too large)."));
+        if (IndexIntValue_table < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
+        if (IndexIntValue_table >= ArrayValue.size()) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
         return ArrayValue.get((int)IndexIntValue_table);
       
       case (1): // table[string]
@@ -304,12 +304,12 @@ class LooFInterpreter {
       case (2): // byteArray[int]
         long IndexIntValue_byteArray = IndexValue.IntValue;
         byte[] ByteArrayValue = SourceTable.ByteArrayValue;
-        if (IndexIntValue_byteArray < 0) throw (new LooFInterpreterException (Environment, "index is out of bounds (negative)."));
-        if (IndexIntValue_byteArray >= ByteArrayValue.length) throw (new LooFInterpreterException (Environment, "index is out of bounds (too large)."));
+        if (IndexIntValue_byteArray < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
+        if (IndexIntValue_byteArray >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
         return new LooFDataValue ((long) ByteArrayValue[(int)IndexIntValue_byteArray]);
       
       case (3): // byteArray[string]
-        throw (new LooFInterpreterException (Environment, "cannot index byteArray with a string."));
+        ThrowLooFException (Environment, CodeData, "cannot index byteArray with a string.");
       
       default:
         throw new AssertionError();
@@ -322,10 +322,10 @@ class LooFInterpreter {
   
   
   
-  void SetDataValueIndex (LooFDataValue TargetTable, LooFDataValue IndexValue, LooFDataValue NewVarValue, LooFEnvironment Environment) {
+  void SetDataValueIndex (LooFDataValue TargetTable, LooFDataValue IndexValue, LooFDataValue NewVarValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     int CaseToUse = 0;
     
-    if (GetLastItemOf (TargetTable.LockLevels) > 0) throw (new LooFInterpreterException (Environment, "cannot set the index of a locked data value."));
+    if (GetLastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, CodeData, "cannot set the index of a locked data value.");
     
     switch (TargetTable.ValueType) {
       case (DataValueType_Table):
@@ -334,7 +334,7 @@ class LooFInterpreter {
         CaseToUse += 1;
         break;
       default:
-        throw (new LooFInterpreterException (Environment, "cannot set the index of " + DataValueTypeNames_PlusA[TargetTable.ValueType] + "."));
+        ThrowLooFException (Environment, CodeData, "cannot set the index of " + DataValueTypeNames_PlusA[TargetTable.ValueType] + ".");
     }
     
     switch (IndexValue.ValueType) {
@@ -344,7 +344,7 @@ class LooFInterpreter {
         CaseToUse += 2;
         break;
       default:
-        throw (new LooFInterpreterException (Environment, DataValueTypeNames[TargetTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + "."));
+        ThrowLooFException (Environment, CodeData, DataValueTypeNames[TargetTable.ValueType] + "s cannot be indexed with " + DataValueTypeNames_PlusA[IndexValue.ValueType] + ".");
     }
     
     int IndexIntValue = (int) IndexValue.IntValue;
@@ -353,10 +353,10 @@ class LooFInterpreter {
     switch (CaseToUse) {
       
       case (0): // table[int]
-        if (IndexIntValue < 0) throw (new LooFInterpreterException (Environment, "index is out of bounds (negative)."));
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
         ArrayList <LooFDataValue> ArrayValue = TargetTable.ArrayValue;
         int TargetTableSize = ArrayValue.size();
-        if (IndexIntValue > TargetTableSize) throw (new LooFInterpreterException (Environment, "index is out of bounds (too large)."));
+        if (IndexIntValue > TargetTableSize) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
         if (IndexIntValue == TargetTableSize) {
           ArrayValue.add(NewVarValue);
           return;
@@ -365,10 +365,10 @@ class LooFInterpreter {
         return;
       
       case (1): // byteArray[int]
-        if (NewVarValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, "cannot set an index of a byteArray to " + DataValueTypeNames_PlusA[NewVarValue.ValueType] + " (index must be an int)."));
-        if (IndexIntValue < 0) throw (new LooFInterpreterException (Environment, "index is out of bounds (negative)."));
+        if (NewVarValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "cannot set an index of a byteArray to " + DataValueTypeNames_PlusA[NewVarValue.ValueType] + " (index must be an int).");
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index is out of bounds (negative).");
         byte[] ByteArrayValue = TargetTable.ByteArrayValue;
-        if (IndexIntValue >= ByteArrayValue.length) throw (new LooFInterpreterException (Environment, "index is out of bounds (too large)."));
+        if (IndexIntValue >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index is out of bounds (too large).");
         ByteArrayValue[IndexIntValue] = (byte) NewVarValue.IntValue;
         return;
       
@@ -382,7 +382,7 @@ class LooFInterpreter {
         return;
       
       case (3):
-        throw (new LooFInterpreterException (Environment, "byteArrays cannot be indexes with strings."));
+        ThrowLooFException (Environment, CodeData, "byteArrays cannot be indexes with strings.");
       
       default:
         throw new AssertionError();
