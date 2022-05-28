@@ -3,6 +3,11 @@
 
 
 
+String FolderToCompile = "/InterpreterTesting";
+//String FolderToCompile = "/BallBlastClone";
+
+
+
 import java.util.*;
 import java.lang.reflect.Array;
 import java.nio.file.*;
@@ -24,7 +29,7 @@ void setup() {
   //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   
-  LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("")), CompileSettings);
+  LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
   
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);
   

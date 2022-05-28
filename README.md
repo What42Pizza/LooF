@@ -92,9 +92,9 @@ call Factorial, 10  -> FactorialResult
 #include Basics.LOOF
 
 function ConvertTableToString  -> TableIn, Seperator  throwsErrors {"InvalidArgType"}
-	errorIf typeOf TableIn != "table", "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
+	errorIf (typeOf TableIn != "table"), "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
 	Seperator defaultsTo ", "
-	errorIf typeOf Seperator != "string", "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}
+	errorIf (typeOf Seperator != "string"), "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}
 	
 	StringOut = toString TableIn[0]
 	loop i, 1, endOf TableIn

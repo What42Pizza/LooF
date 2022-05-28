@@ -15,7 +15,7 @@ class LooFInterpreter {
     if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     for (int i = 0; i < NumOfStatements; i ++) {
       LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
-      ExecuteStatement (CurrentStatement, Environment);
+      ExecuteNextStatement (CurrentStatement, Environment);
       if (Environment.Stopped) return;
     }
   }
@@ -24,26 +24,46 @@ class LooFInterpreter {
   
   
   
-  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) throws LooFInterpreterException {
+  void ExecuteNextStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) throws LooFInterpreterException {
     
-    // execute statement
     try {
-      if (CurrentStatement.StatementType == StatementType_Assignment)
-        ExecuteAssignmentStatement (CurrentStatement, Environment);
-      else
-        ExecuteFunctionStatement (CurrentStatement, Environment);
+      ExecuteStatement (CurrentStatement, Environment);
     } catch (LooFInterpreterException e) {
       HandleEnvironmentException (e);
     }
     
-    // inc line number
+    IncrementEnvironmentLineNumber (Environment);
+    
+  }
+  
+  
+  
+  
+  
+  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
+    
+    if (CurrentStatement.StatementType == StatementType_Assignment) {
+      ExecuteAssignmentStatement (CurrentStatement, Environment);
+      return;
+    }
+    
+    ExecuteFunctionStatement (CurrentStatement, Environment);
+    
+  }
+  
+  
+  
+  
+  
+  void IncrementEnvironmentLineNumber (LooFEnvironment Environment) {
+    
     Environment.CurrentLineNumber ++;
     if (Environment.Stopped) return;
+    
     int StatementsLength = Environment.CurrentCodeData.Statements.length;
-    if (Environment.CurrentLineNumber >= StatementsLength) {
-      Environment.CurrentLineNumber = StatementsLength - 1;
-      throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file. (maybe a function is missing a return statement?)", new String[] {"ReachedEndOfFile"}));
-    }
+    if (Environment.CurrentLineNumber < StatementsLength) return;
+    Environment.CurrentLineNumber = StatementsLength - 1; // this makes the exception work correctly
+    throw (new LooFInterpreterException (Environment, "execution cannot reach the end of the file. (maybe a function is missing a return statement?)", new String[] {"ReachedEndOfFile"}));
     
   }
   
