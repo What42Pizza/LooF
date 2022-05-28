@@ -187,6 +187,7 @@ String GetFileFullName (File CurrentFile, File CodeFolder) {
 
 void DeleteAllFilesOfType (String FolderPath, String TypeToRemove) {
   File FolderAsFile = new File (FolderPath);
+  if (!FolderAsFile.exists()) return;
   File[] FolderChildren = FolderAsFile.listFiles();
   for (File CurrentFile : FolderChildren) {
     if (CurrentFile.getName().endsWith(TypeToRemove)) CurrentFile.delete();
@@ -200,6 +201,23 @@ void DeleteAllFilesOfType (String FolderPath, String TypeToRemove) {
 String[] ReadFileAsStrings (File FileToRead) throws IOException {
   List <String> FileContents = Files.readAllLines(FileToRead.toPath());
   return ListToArray (FileContents, "");
+}
+
+
+
+
+String ReplaceFileExtention (String FileNameIn, String NewFileExtention) {
+  int PeriodIndex = FileNameIn.lastIndexOf('.');
+  if (PeriodIndex == -1) throw (new RuntimeException ("Could not replace the extention of the file name \"" + FileNameIn + "\"."));
+  return FileNameIn.substring(0, PeriodIndex) + '.' + NewFileExtention;
+}
+
+
+
+String RemoveFileExtention (String FileNameIn) {
+  int PeriodIndex = FileNameIn.lastIndexOf('.');
+  if (PeriodIndex == -1) throw (new RuntimeException ("Could not remove the extention of the file name \"" + FileNameIn + "\"."));
+  return FileNameIn.substring(0, PeriodIndex);
 }
 
 
@@ -322,24 +340,6 @@ boolean CharIsLetter (char CurrentChar) {
 
 
 
-String ReplaceFileExtention (String FileNameIn, String NewFileExtention) {
-  int PeriodIndex = FileNameIn.lastIndexOf('.');
-  if (PeriodIndex == -1) throw (new RuntimeException ("Could not replace the extention of the file name \"" + FileNameIn + "\"."));
-  return FileNameIn.substring(0, PeriodIndex) + '.' + NewFileExtention;
-}
-
-
-
-String RemoveFileExtention (String FileNameIn) {
-  int PeriodIndex = FileNameIn.lastIndexOf('.');
-  if (PeriodIndex == -1) throw (new RuntimeException ("Could not remove the extention of the file name \"" + FileNameIn + "\"."));
-  return FileNameIn.substring(0, PeriodIndex);
-  
-}
-
-
-
-
 
 String[] FormatBackslashes (String InputString) {
   char[] InputStringChars = InputString.toCharArray();
@@ -420,6 +420,7 @@ String CombineStringsWithSeperator (ArrayList <String> StringsIn, String Seperat
 
 
 String CombineStringsWithSeperator (String[] StringsIn, String Seperator) {
+  if (StringsIn == null) return "null";
   int StringsInSize = StringsIn.length;
   if (StringsInSize == 0) return "";
   String StringOut = StringsIn[0];
@@ -476,7 +477,7 @@ String ConvertLooFStatementToString (LooFStatement Statement) {
       for (LooFTokenBranch CurrentTokenBranch : Statement.Args) {
         ArgsAsStrings.add(ConvertLooFTokenBranchToString (CurrentTokenBranch));
       }
-      return "Function " + Statement.Function.toString() + " (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
+      return "Function " + Statement.Function.toString(Statement) + "   Args: (" + CombineStringsWithSeperator (ArgsAsStrings, ", ") + ")";
     
     default:
       throw new AssertionError();

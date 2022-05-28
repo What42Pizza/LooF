@@ -48,6 +48,10 @@ class LooFInterpreterFunction implements Cloneable {
     return false;
   }
   
+  public String toString (LooFStatement Statement) {
+    throw new AssertionError("this LooFInterpreterFunction is a base vlass and it does not have an overridden toString().");
+  }
+  
   public Object clone() {
     try {
       return super.clone();
@@ -139,6 +143,7 @@ class LooFEnvironment {
   
   
   
+  boolean Stopped = false;
   String CurrentFileName;
   LooFCodeData CurrentCodeData;
   int CurrentLineNumber;
@@ -148,8 +153,9 @@ class LooFEnvironment {
   
   ArrayList <String> CallStackFileNames = new ArrayList <String> ();
   ArrayList <Integer> CallStackLineNumbers = new ArrayList <Integer> ();
-  ArrayList <String[]> CallStackErrorsToCatch = new ArrayList <String[]> ();
-  ArrayList <String[]> CallStackErrorsToPass = new ArrayList <String[]> ();
+  ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
+  ArrayList <String[]> CallStackErrorTypesToCatch = new ArrayList <String[]> ();
+  ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
   ArrayList <LooFDataValue[]> CallStackLockedArguments = new ArrayList <LooFDataValue[]> ();
   
   
@@ -344,7 +350,7 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
   if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
   
-  if (LineHasChanged) return "Original line of code:        `" + OriginalLineOfCode + "`\nAfter pre-processor & linker: `" + LineOfCode + "`";
+  if (LineHasChanged) return "Original line of code:                    `" + OriginalLineOfCode + "`\nAfter (or during) pre-processor & linker: `" + LineOfCode + "`";
   return "Line of code:  `" + LineOfCode + "`";
   
 }
@@ -374,9 +380,7 @@ class LooFInterpreterException extends RuntimeException {
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
   String FileName;
-  try {
   FileName = Environment.CurrentFileName;
-  } catch (Exception e) {e.printStackTrace(); throw new AssertionError();}
   LooFCodeData CodeData = Environment.CurrentCodeData;
   int LineNumber = Environment.CurrentLineNumber;
   
@@ -757,6 +761,8 @@ class LooFStatement {
   LooFInterpreterFunction Function;
   LooFTokenBranch[] Args;
   
+  LooFAdditionalFunctionData AdditionalFunctionData;
+  
   public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterAssignment Assignment, LooFTokenBranch NewValueFormula) {
     this.StatementType = StatementType_Assignment;
     this.Name = Name;
@@ -779,3 +785,16 @@ class LooFStatement {
 
 final int StatementType_Assignment = 0;
 final int StatementType_Function = 1;
+
+
+
+
+
+
+
+
+
+
+class LooFAdditionalFunctionData {
+  
+}

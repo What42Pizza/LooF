@@ -65,7 +65,7 @@
 - **return**
   - Jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 - **return ReturnValue0, ReturnValue1, ...**
-  - Pushes all arguments to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
+  - Pushes all arguments to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 - **returnIf Condition**
   - If Condition is truthy, jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 - **returnIf Condition, ReturnValue0, ReturnValue1, ...**
@@ -140,15 +140,34 @@
 ## Error Handling
 
 - **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 - **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 - **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 - **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in the file FileName, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this
+  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in the file FileName, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 
-(this can be represented with `try (optional) FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), (optional) Arg1, (optional) Arg2, ...`)
+
+**Note:** Value pushed to the stack by 'try' statements:
+
+```
+{
+	Success (bool),
+	ErrorData (table {
+		ErrorTypeTags (table {string, ...})
+		CallStack (table {
+			table {string FileName, int LineNumber}
+			...
+		})
+	}),
+	ReturnValue1,
+	ReturnValue2,
+	...
+}
+```
+
+**Note:** (this can be represented with `try (optional) FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), (optional) Arg1, (optional) Arg2, ...`)
 
 <br>
 

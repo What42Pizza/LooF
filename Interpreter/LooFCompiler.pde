@@ -1216,11 +1216,11 @@ class LooFCompiler {
   
   
   
-  String ReplaceSingleFunctionCall (String CurrentLine, int CurrentFunctionCallStart, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    int CurrentFunctionCallEnd = GetFunctionCallEnd (CurrentLine, CurrentFunctionCallStart);
-    String BeforeFunctionCall = CurrentLine.substring(0, CurrentFunctionCallStart);
-    String FunctionCallData = CurrentLine.substring(CurrentFunctionCallStart + 1, CurrentFunctionCallEnd);
-    String AfterFunctionCall = CurrentLine.substring(CurrentFunctionCallEnd);
+  String ReplaceSingleFunctionCall (String CurrentLine, int FunctionCallStart, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    int FunctionCallEnd = GetFunctionCallEnd (CurrentLine, FunctionCallStart);
+    String BeforeFunctionCall = CurrentLine.substring(0, FunctionCallStart);
+    String FunctionCallData = CurrentLine.substring(FunctionCallStart + 1, FunctionCallEnd);
+    String AfterFunctionCall = CurrentLine.substring(FunctionCallEnd);
     
     String NewFunctionCallData = GetLinkedFunctionCall (FunctionCallData, CodeData, AllCodeDatas, LineNumber);
     
@@ -1229,12 +1229,12 @@ class LooFCompiler {
   
   
   
-  int GetFunctionCallEnd (String CurrentLine, int CurrentLinkIndex) {
+  int GetFunctionCallEnd (String CurrentLine, int FunctionCallStart) {
     int CurrentLineLength = CurrentLine.length();
-    for (int i = CurrentLinkIndex + 1; i < CurrentLineLength; i ++) {
+    for (int i = FunctionCallStart + 1; i < CurrentLineLength; i ++) {
       if (CharStartsNewToken (CurrentLine.charAt(i))) return i;
     }
-    return CurrentLineLength - 1;
+    return CurrentLineLength;
   }
   
   
@@ -2220,6 +2220,7 @@ class LooFCompiler {
         
         case (StatementType_Assignment):
           PreEvaluateStatementIndexQueries (CurrentStatement, CodeData, i);
+          if (CurrentStatement.NewValueFormula == null) continue;
           CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, CodeData, i);
           continue;
         
@@ -2274,6 +2275,50 @@ class LooFCompiler {
     }
     return Formula;
     
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  Long GetLongFromStatementArg (LooFTokenBranch InputArg, int ArgNumber, LooFCodeData CodeData, int LineNumber) {
+    if (InputArg.TokenType != TokenBranchType_PreEvaluatedFormula) return null;
+    LooFDataValue InputArgValue = InputArg.Result;
+    if (InputArgValue.ValueType != DataValueType_Int) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be an int, but the value given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
+    return InputArgValue.IntValue;
+  }
+  
+  
+  
+  String GetStringFromStatementArg (LooFTokenBranch InputArg, int ArgNumber, LooFCodeData CodeData, int LineNumber) {
+    if (InputArg.TokenType != TokenBranchType_PreEvaluatedFormula) return null;
+    LooFDataValue InputArgValue = InputArg.Result;
+    if (InputArgValue.ValueType != DataValueType_String) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be an string, but the value given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
+    return InputArgValue.StringValue;
+  }
+  
+  
+  
+  
+  
+  String[] GetStringArrayFromStatementArg (LooFTokenBranch InputArg, int ArgNumber, LooFCodeData CodeData, int LineNumber) {
+    if (InputArg.TokenType != TokenBranchType_PreEvaluatedFormula) return null;
+    LooFDataValue InputArgValue = InputArg.Result;
+    if (InputArgValue.ValueType != DataValueType_Table) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be a table, but the value given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
+    ArrayList <LooFDataValue> InputArgsAsValues = InputArgValue.ArrayValue;
+    String[] StringArrayOut = new String [InputArgsAsValues.size()];
+    for (int i = 0; i < StringArrayOut.length; i ++) {
+      LooFDataValue CurrentStringAsValue = InputArgsAsValues.get(i);
+      if (CurrentStringAsValue.ValueType != DataValueType_String) throw (new LooFCompileException (CodeData, LineNumber, "arg number " + ArgNumber + " was expected to be a table of strings, but the table given contained a value of type " + TokenBranchTypeNames[CurrentStringAsValue.ValueType] + "."));
+      String CurrentString = CurrentStringAsValue.StringValue;
+      StringArrayOut[i] = CurrentString;
+    }
+    return StringArrayOut;
   }
   
   
