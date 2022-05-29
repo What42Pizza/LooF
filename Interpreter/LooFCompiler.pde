@@ -26,6 +26,10 @@ class LooFCompiler {
     
     
     
+    ArrayList <LooFCompileException> AllExceptions = new ArrayList <LooFCompileException> ();
+    
+    
+    
     // get default addons
     LooFAddonsData AddonsData = GetAddonsDataForEnvironment (CompileSettings);
     
@@ -49,7 +53,11 @@ class LooFCompiler {
     
     // pre-process CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      PreProcessCodeData (CodeData, AllCodeDatas, HeaderFileContents);
+      PreProcessCodeData (CodeData, AllCodeDatas, HeaderFileContents, AllExceptions);
+    }
+    
+    if (AllExceptions.size() > 0) {
+      throw (new LooFCompileException (AllExceptions));
     }
     
     if (CompileSettings.PreProcessorOutputPath != null) {
@@ -61,7 +69,11 @@ class LooFCompiler {
     
     
     // link CodeData-s
-    LinkAllCodeDatas (AllCodeDatas);
+    LinkAllCodeDatas (AllCodeDatas, AllExceptions);
+    
+    if (AllExceptions.size() > 0) {
+      throw (new LooFCompileException (AllExceptions));
+    }
     
     if (CompileSettings.LinkerOutputPath != null) {
       StopTimer ("OnlyCompilation");
@@ -73,7 +85,11 @@ class LooFCompiler {
     
     // lex CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      LexCodeData (CodeData, CombinedTokens);
+      LexCodeData (CodeData, CombinedTokens, AllExceptions);
+    }
+    
+    if (AllExceptions.size() > 0) {
+      throw (new LooFCompileException (AllExceptions));
     }
     
     if (CompileSettings.LexerOutputPath != null) {
@@ -86,7 +102,11 @@ class LooFCompiler {
     
     // parse CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      ParseCodeData (CodeData, AddonsData);
+      ParseCodeData (CodeData, AddonsData, AllExceptions);
+    }
+    
+    if (AllExceptions.size() > 0) {
+      throw (new LooFCompileException (AllExceptions));
     }
     
     if (CompileSettings.ParserOutputPath != null) {
@@ -99,7 +119,11 @@ class LooFCompiler {
     
     // finish statements
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      FinishStatements (CodeData);
+      FinishStatements (CodeData, AddonsData, AllExceptions);
+    }
+    
+    if (AllExceptions.size() > 0) {
+      throw (new LooFCompileException (AllExceptions));
     }
     
     if (CompileSettings.FinalOutputPath != null) {
@@ -171,6 +195,11 @@ class LooFCompiler {
   HashMap <String, LooFInterpreterModule> GetInterpreterModulesForEnvironment (LooFCompileSettings CompileSettings) {
     HashMap <String, LooFInterpreterModule> InterpreterModules = new HashMap <String, LooFInterpreterModule> ();
     if (!CompileSettings.AddDefaultInterpreterModules) return InterpreterModules;
+    
+    InterpreterModules.put("Console", NullInterpreterModule);
+    InterpreterModules.put("Interpreter", NullInterpreterModule);
+    InterpreterModules.put("Files", NullInterpreterModule);
+    InterpreterModules.put("Graphics", NullInterpreterModule);
     
     return InterpreterModules;
   }
@@ -464,19 +493,19 @@ class LooFCompiler {
   
   
   
-  void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents) {
+  void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents, ArrayList <LooFCompileException> AllExceptions) {
     
     if (HeaderFileContents.length > 0) {
       InsertHeader (CodeData, HeaderFileContents);
     }
     RemoveComments (CodeData);
     RemoveInitialTrim (CodeData);
-    ProcessIfStatements (CodeData);
-    ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length);
-    ProcessReplaces (CodeData);
+    ProcessIfStatements (CodeData, AllExceptions);
+    ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length, AllExceptions);
+    ProcessReplaces (CodeData, AllExceptions);
     RemoveExcessWhitespace (CodeData);
-    CheckForIncorrectPreProcessorStatements (CodeData);
-    CombineSeperatedLists (CodeData);
+    CheckForIncorrectPreProcessorStatements (CodeData, AllExceptions);
+    CombineSeperatedLists (CodeData, AllExceptions);
     
   }
   
@@ -542,49 +571,53 @@ class LooFCompiler {
   
   
   
-  void ProcessReplaces (LooFCodeData CodeData) {
+  void ProcessReplaces (LooFCodeData CodeData, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     HashMap <String, Boolean[]> AllCharsInQuotes = new HashMap <String, Boolean[]> ();
     for (int i = 0; i < Code.size(); i ++) {
-      String CurrentLine = Code.get(i);
-      if (!CurrentLine.startsWith("#replace")) continue;
-      
-      if (CurrentLine.startsWith("#replace ")) {
-        ReturnValue ReplacementData = GetReplacementData (CodeData, i, 10);
-        String ReplaceBefore = ReplacementData.StringValue;
-        String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, false);
-        i --;
-        continue;
+      try {
+        String CurrentLine = Code.get(i);
+        if (!CurrentLine.startsWith("#replace")) continue;
+        
+        if (CurrentLine.startsWith("#replace ")) {
+          ReturnValue ReplacementData = GetReplacementData (CodeData, i, 10);
+          String ReplaceBefore = ReplacementData.StringValue;
+          String[] ReplaceAfter = ReplacementData.StringArrayValue;
+          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, false);
+          i --;
+          continue;
+        }
+        
+        if (CurrentLine.startsWith("#replaceIgnoreQuotes ")) {
+          ReturnValue ReplacementData = GetReplacementData (CodeData, i, 22);
+          String ReplaceBefore = ReplacementData.StringValue;
+          String[] ReplaceAfter = ReplacementData.StringArrayValue;
+          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, true);
+          i --;
+          continue;
+        }
+        
+        if (CurrentLine.startsWith("#replaceStart ")) {
+          ReturnValue ReplacementData = GetReplacementData (CodeData, i, 15);
+          String ReplaceBefore = ReplacementData.StringValue;
+          String[] ReplaceAfter = ReplacementData.StringArrayValue;
+          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, true, false, false);
+          i --;
+          continue;
+        }
+        
+        if (CurrentLine.startsWith("#replaceEnd ")) {
+          ReturnValue ReplacementData = GetReplacementData (CodeData, i, 13);
+          String ReplaceBefore = ReplacementData.StringValue;
+          String[] ReplaceAfter = ReplacementData.StringArrayValue;
+          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, true, false);
+          i --;
+          continue;
+        }
+        
+      } catch (LooFCompileException e) {
+        AllExceptions.add(e);
       }
-      
-      if (CurrentLine.startsWith("#replaceIgnoreQuotes ")) {
-        ReturnValue ReplacementData = GetReplacementData (CodeData, i, 22);
-        String ReplaceBefore = ReplacementData.StringValue;
-        String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, false, true);
-        i --;
-        continue;
-      }
-      
-      if (CurrentLine.startsWith("#replaceStart ")) {
-        ReturnValue ReplacementData = GetReplacementData (CodeData, i, 15);
-        String ReplaceBefore = ReplacementData.StringValue;
-        String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, true, false, false);
-        i --;
-        continue;
-      }
-      
-      if (CurrentLine.startsWith("#replaceEnd ")) {
-        ReturnValue ReplacementData = GetReplacementData (CodeData, i, 13);
-        String ReplaceBefore = ReplacementData.StringValue;
-        String[] ReplaceAfter = ReplacementData.StringArrayValue;
-        ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false, true, false);
-        i --;
-        continue;
-      }
-      
     }
   }
   
@@ -769,41 +802,45 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength) {
+  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     for (int i = 0; i < Code.size(); i ++) {
-      String CurrentLine = Code.get(i);
-      if (CurrentLine.startsWith("#include ")) {
-        Code.remove(i);
-        int LineNumber = LineNumbers.remove(i);
-        String LineFileOrigin = LineFileOrigins.remove(i);
-        String FileName = CurrentLine.substring(9);
-        
-        // get file to include
-        String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName);
-        if (FullFileName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName, "could not include the file " + FileName + " because the file could not be found."));
-        LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
-        
-        // get code to include and data about it
-        String[] FileToIncludeContents = FileToInclude.OriginalCode;
-        String FileToIncludeName = FileToInclude.FullFileName;
-        int LineNumberOffset = FileToInclude.IncludesHeader ? HeaderLength * -1 : 0;
-        int StartIndex = FileToInclude.IncludesHeader ? 0 : 1;
-        
-        // insert code
-        for (int j = StartIndex; j < FileToIncludeContents.length; j ++) {
-          String LineToInsert = FileToIncludeContents[j];
-          Code.add(i + j, LineToInsert);
-          LineNumbers.add(i + j, j + LineNumberOffset);
-          LineFileOrigins.add(i + j, FileToIncludeName);
+      try {
+        String CurrentLine = Code.get(i);
+        if (CurrentLine.startsWith("#include ")) {
+          Code.remove(i);
+          int LineNumber = LineNumbers.remove(i);
+          String LineFileOrigin = LineFileOrigins.remove(i);
+          String FileName = CurrentLine.substring(9);
+          
+          // get file to include
+          String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName);
+          if (FullFileName == null) throw (new LooFCompileException (CurrentLine, LineNumber, LineFileOrigin, CodeData.FullFileName, "could not include the file " + FileName + " because the file could not be found."));
+          LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
+          
+          // get code to include and data about it
+          String[] FileToIncludeContents = FileToInclude.OriginalCode;
+          String FileToIncludeName = FileToInclude.FullFileName;
+          int LineNumberOffset = FileToInclude.IncludesHeader ? HeaderLength * -1 : 0;
+          int StartIndex = FileToInclude.IncludesHeader ? 0 : 1;
+          
+          // insert code
+          for (int j = StartIndex; j < FileToIncludeContents.length; j ++) {
+            String LineToInsert = FileToIncludeContents[j];
+            Code.add(i + j, LineToInsert);
+            LineNumbers.add(i + j, j + LineNumberOffset);
+            LineFileOrigins.add(i + j, FileToIncludeName);
+          }
+          
+          // process new data
+          ProcessIfStatements (CodeData, i, i + FileToIncludeContents.length, AllExceptions);
+          
+          i --;  // for if the file being included starts with #include
         }
-        
-        // process new data
-        ProcessIfStatements (CodeData, i, i + FileToIncludeContents.length);
-        
-        i --;  // for if the file being included starts with #include
+      } catch (LooFCompileException e) {
+        AllExceptions.add(e);
       }
     }
   }
@@ -833,32 +870,36 @@ class LooFCompiler {
   
   
   
-  void ProcessIfStatements (LooFCodeData CodeData) {
-    ProcessIfStatements (CodeData, 0, CodeData.CodeArrayList.size());
+  void ProcessIfStatements (LooFCodeData CodeData, ArrayList <LooFCompileException> AllExceptions) {
+    ProcessIfStatements (CodeData, 0, CodeData.CodeArrayList.size(), AllExceptions);
   }
   
   
   
-  void ProcessIfStatements (LooFCodeData CodeData, int StartIndex, int EndIndex) {
+  void ProcessIfStatements (LooFCodeData CodeData, int StartIndex, int EndIndex, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = StartIndex; i < min (EndIndex, Code.size()); i ++) {
-      String CurrentLine = Code.get(i).trim();
-      if (!CurrentLine.startsWith("#if_")) continue;
-      
-      if (CurrentLine.startsWith("#if_equal ")) {
-        String IfStatementData = CurrentLine.substring (10);
-        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_equal", CodeData.FullFileName);
-        if (!IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
-        continue;
+      try {
+        String CurrentLine = Code.get(i).trim();
+        if (!CurrentLine.startsWith("#if_")) continue;
+        
+        if (CurrentLine.startsWith("#if_equal ")) {
+          String IfStatementData = CurrentLine.substring (10);
+          boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_equal", CodeData.FullFileName);
+          if (!IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
+          continue;
+        }
+        
+        if (CurrentLine.startsWith("#if_not_equal ")) {
+          String IfStatementData = CurrentLine.substring (14);
+          boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_not_equal", CodeData.FullFileName);
+          if (IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
+          continue;
+        }
+        
+      } catch (LooFCompileException e) {
+        AllExceptions.add(e);
       }
-      
-      if (CurrentLine.startsWith("#if_not_equal ")) {
-        String IfStatementData = CurrentLine.substring (14);
-        boolean IfStatementResult = CheckIfIfStatementArgumentsMatch (CodeData, IfStatementData, i, "#if_not_equal", CodeData.FullFileName);
-        if (IfStatementResult) RemoveCodeUntilEndIf (CodeData, i);
-        continue;
-      }
-      
     }
   }
   
@@ -1023,11 +1064,15 @@ class LooFCompiler {
   
   
   
-  void CheckForIncorrectPreProcessorStatements (LooFCodeData CodeData) {
+  void CheckForIncorrectPreProcessorStatements (LooFCodeData CodeData, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
-      if (Code.get(i).startsWith("#")) {
-        //throw (new LooFCompileException (CodeData, i, "unknown pre-processor statement."));
+      try {
+        if (Code.get(i).startsWith("#")) {
+          throw (new LooFCompileException (CodeData, i, "unknown pre-processor statement."));
+        }
+      } catch (LooFCompileException e) {
+        AllExceptions.add (e);
       }
     }
   }
@@ -1041,29 +1086,33 @@ class LooFCompiler {
   
   
   
-  void CombineSeperatedLists (LooFCodeData CodeData) {
+  void CombineSeperatedLists (LooFCodeData CodeData, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     for (int i = 0; i < Code.size(); i ++) {
-      String CurrentLine = Code.get(i);
-      String NewLine = CurrentLine;
-      if (CurrentLine.endsWith("{")) {
-        
-        boolean IsEnd = false;
-        while (!IsEnd) {
-          if (i + 1 == Code.size()) {
-            throw (new LooFCompileException (CodeData, i, "could not find end of seperated list."));
+      try {
+        String CurrentLine = Code.get(i);
+        String NewLine = CurrentLine;
+        if (CurrentLine.endsWith("{")) {
+          
+          boolean IsEnd = false;
+          while (!IsEnd) {
+            if (i + 1 == Code.size()) {
+              throw (new LooFCompileException (CodeData, i, "could not find end of seperated list."));
+            }
+            CurrentLine = Code.remove(i + 1);
+            LineNumbers.remove(i + 1);
+            LineFileOrigins.remove(i + 1);
+            IsEnd = CurrentLine.equals("}");
+            NewLine += CurrentLine + (IsEnd ? "" : " ");
           }
-          CurrentLine = Code.remove(i + 1);
-          LineNumbers.remove(i + 1);
-          LineFileOrigins.remove(i + 1);
-          IsEnd = CurrentLine.equals("}");
-          NewLine += CurrentLine + (IsEnd ? "" : " ");
+          
+          Code.set(i, NewLine);
+          
         }
-        
-        Code.set(i, NewLine);
-        
+      } catch (LooFCompileException e) {
+        AllExceptions.add(e);
       }
     }
   }
@@ -1076,7 +1125,7 @@ class LooFCompiler {
   
   
   
-  void LinkAllCodeDatas (HashMap <String, LooFCodeData> AllCodeDatas) {
+  void LinkAllCodeDatas (HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompileException> AllExceptions) {
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     
     // simplify linking statements
@@ -1290,7 +1339,7 @@ class LooFCompiler {
   
   
   
-  void LexCodeData (LooFCodeData CodeData, String[] CombinedTokens) {
+  void LexCodeData (LooFCodeData CodeData, String[] CombinedTokens, ArrayList <LooFCompileException> AllExceptions) {
     TokenizeCode (CodeData);
     CombineTokensForCode (CodeData, CombinedTokens);
   }
@@ -1497,7 +1546,7 @@ class LooFCompiler {
   
   
   
-  void ParseCodeData (LooFCodeData CodeData, LooFAddonsData AddonsData) {
+  void ParseCodeData (LooFCodeData CodeData, LooFAddonsData AddonsData, ArrayList <LooFCompileException> AllExceptions) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
     LooFStatement[] Statements = new LooFStatement [CodeTokens.size()];
     for (int i = 0; i < Statements.length; i ++) {
@@ -2212,26 +2261,30 @@ class LooFCompiler {
   
   
   
-  void FinishStatements (LooFCodeData CodeData) {
+  void FinishStatements (LooFCodeData CodeData, LooFAddonsData AddonsData, ArrayList <LooFCompileException> AllExceptions) throws LooFCompileException {
     LooFStatement[] Statements = CodeData.Statements;
     for (int i = 0; i < Statements.length; i ++) {
-      LooFStatement CurrentStatement = Statements[i];
-      switch (CurrentStatement.StatementType) {
-        
-        case (StatementType_Assignment):
-          PreEvaluateStatementIndexQueries (CurrentStatement, CodeData, i);
-          if (CurrentStatement.NewValueFormula == null) continue;
-          CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, CodeData, i);
-          continue;
-        
-        case (StatementType_Function):
-          PreEvaluateStatementArgs (CurrentStatement, CodeData, i);
-          CurrentStatement.Function.FinishStatement (CurrentStatement, CodeData, i);
-          continue;
-        
-        default:
-          throw new AssertionError();
-        
+      try {
+        LooFStatement CurrentStatement = Statements[i];
+        switch (CurrentStatement.StatementType) {
+          
+          case (StatementType_Assignment):
+            PreEvaluateStatementIndexQueries (CurrentStatement, CodeData, i);
+            if (CurrentStatement.NewValueFormula == null) continue;
+            CurrentStatement.NewValueFormula = PreEvaluateFormula (CurrentStatement.NewValueFormula, CodeData, i);
+            continue;
+          
+          case (StatementType_Function):
+            PreEvaluateStatementArgs (CurrentStatement, CodeData, i);
+            CurrentStatement.Function.FinishStatement (CurrentStatement, AddonsData, CodeData, i);
+            continue;
+          
+          default:
+            throw new AssertionError();
+          
+        }
+      } catch (LooFCompileException e) {
+        AllExceptions.add(e);
       }
     }
   }

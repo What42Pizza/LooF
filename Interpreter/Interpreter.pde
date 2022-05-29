@@ -3,8 +3,8 @@
 
 
 
-String FolderToCompile = "/InterpreterTesting";
-//String FolderToCompile = "/BallBlastClone";
+//String FolderToCompile = "/InterpreterTesting";
+String FolderToCompile = "/BallBlastClone";
 
 
 

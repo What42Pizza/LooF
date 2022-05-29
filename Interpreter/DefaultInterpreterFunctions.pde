@@ -3,7 +3,7 @@ LooFInterpreterFunction InterpreterFunction_Push = new LooFInterpreterFunction()
     LooFDataValue ValueToAdd = LooFInterpreter.EvaluateFormula (Args[0], Environment, null);
     Environment.GeneralStack.add(ValueToAdd);
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
   }
   @Override public String toString (LooFStatement Statement) {return "'push'";}
@@ -17,7 +17,7 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
     LooFCompiler.SimplifyAllOutputVars (Statement, CodeData, LineNumber);
   }
@@ -32,7 +32,7 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
     ReturnValue Return = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
     Statement.AdditionalFunctionData = new LooFAdditionalCallStatementData (Return.StringValue, Return.IntegerValue);
@@ -95,7 +95,7 @@ LooFInterpreterFunction InterpreterFunction_Return = new LooFInterpreterFunction
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 0, CodeData, LineNumber);
   }
   @Override public String toString (LooFStatement Statement) {return "'return'";}
@@ -109,7 +109,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFuncti
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
   }
   @Override public String toString (LooFStatement Statement) {return "'returnIf'";}
@@ -123,7 +123,7 @@ LooFInterpreterFunction InterpreterFunction_If = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, 2, CodeData, LineNumber);
   }
   @Override public String toString (LooFStatement Statement) {return "'if'";}
@@ -137,7 +137,7 @@ LooFInterpreterFunction InterpreterFunction_Skip = new LooFInterpreterFunction()
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     Integer MatchingEndStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"end"}, LineNumber, +1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalSkipStatementData (MatchingEndStatementIndex);
@@ -171,7 +171,7 @@ LooFInterpreterFunction InterpreterFunction_End = new LooFInterpreterFunction() 
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
   }
   @Override public int GetBlockLevelChange() {
@@ -188,7 +188,7 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, 4, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     if (Args.length > 0) LooFCompiler.SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
@@ -212,7 +212,7 @@ LooFInterpreterFunction InterpreterFunction_ForEach = new LooFInterpreterFunctio
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 2, 3, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     LooFCompiler.SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
@@ -237,7 +237,7 @@ LooFInterpreterFunction InterpreterFunction_While = new LooFInterpreterFunction(
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
@@ -271,7 +271,7 @@ LooFInterpreterFunction InterpreterFunction_Repeat = new LooFInterpreterFunction
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
@@ -293,7 +293,7 @@ LooFInterpreterFunction InterpreterFunction_RepeatIf = new LooFInterpreterFuncti
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
@@ -315,7 +315,7 @@ LooFInterpreterFunction InterpreterFunction_Continue = new LooFInterpreterFuncti
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
@@ -334,7 +334,7 @@ LooFInterpreterFunction InterpreterFunction_ContinueIf = new LooFInterpreterFunc
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
@@ -365,7 +365,7 @@ LooFInterpreterFunction InterpreterFunction_Break = new LooFInterpreterFunction(
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
@@ -384,7 +384,7 @@ LooFInterpreterFunction InterpreterFunction_BreakIf = new LooFInterpreterFunctio
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
     Statement.AdditionalFunctionData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
@@ -415,7 +415,7 @@ LooFInterpreterFunction InterpreterFunction_Error = new LooFInterpreterFunction(
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, 2, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     String ErrorMessage = LooFCompiler.GetStringFromStatementArg (Args[0], 1, CodeData, LineNumber);
@@ -436,7 +436,7 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 2, 3, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     String ErrorMessage = LooFCompiler.GetStringFromStatementArg (Args[1], 2, CodeData, LineNumber);
@@ -471,7 +471,7 @@ LooFInterpreterFunction InterpreterFunction_SetPassedErrors = new LooFInterprete
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     String[] ErrorTypesToPass = LooFCompiler.GetStringArrayFromStatementArg (Statement.Args[0], 1, CodeData, LineNumber);
     Statement.AdditionalFunctionData = new LooFAdditionalSetPassedErrorsStatementData (ErrorTypesToPass);
@@ -502,7 +502,7 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 2, CodeData, LineNumber);
     ReturnValue Return = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
     Statement.AdditionalFunctionData = new LooFAdditionalTryStatementData (Return.StringValue, Return.IntegerValue, Return.StringArrayValue);
@@ -537,11 +537,13 @@ LooFInterpreterFunction InterpreterFunction_CallOutside = new LooFInterpreterFun
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFCodeData CodeData, int LineNumber) {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) throws Interpreter.LooFCompileException {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     String ModuleName = LooFCompiler.GetStringFromStatementArg (Args[0], 1, CodeData, LineNumber);
-    Statement.AdditionalFunctionData = new LooFAdditionalCallOutsideStatementData (ModuleName);
+    LooFInterpreterModule ModuleToCall = AddonsData.InterpreterModules.getOrDefault (ModuleName, null);
+    if (ModuleToCall == null) throw (new LooFCompileException (CodeData, LineNumber, "could not find any module named \"" + ModuleName + "\"."));
+    Statement.AdditionalFunctionData = new LooFAdditionalCallOutsideStatementData (ModuleName, ModuleToCall);
   }
   @Override public String toString (LooFStatement Statement) {
     LooFAdditionalCallOutsideStatementData AdditionalData = (LooFAdditionalCallOutsideStatementData) Statement.AdditionalFunctionData;
@@ -554,9 +556,11 @@ LooFInterpreterFunction InterpreterFunction_CallOutside = new LooFInterpreterFun
 class LooFAdditionalCallOutsideStatementData extends LooFAdditionalFunctionData {
   
   String ModuleName;
+  LooFInterpreterModule ModuleToCall;
   
-  public LooFAdditionalCallOutsideStatementData (String ModuleName) {
+  public LooFAdditionalCallOutsideStatementData (String ModuleName, LooFInterpreterModule ModuleToCall) {
     this.ModuleName = ModuleName;
+    this.ModuleToCall = ModuleToCall;
   }
   
 }
