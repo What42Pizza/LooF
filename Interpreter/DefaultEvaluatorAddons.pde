@@ -708,13 +708,116 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_Clamp = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function clamp can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize != 3) ThrowLooFException (Environment, CodeData, "the evaluator function clamp can only take a table with three values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    LooFDataValue ThirdArg  = InputItems.get(2);
+    if (!ValueIsNumber (FirstArg )) ThrowLooFException (Environment, CodeData, "the evaluator function clamp can only take an int or a float as its first arg, but the first arg was of type "   + DataValueTypeNames[FirstArg .ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (SecondArg)) ThrowLooFException (Environment, CodeData, "the evaluator function clamp can only take an int or a float as its second arg, but the second arg was of type " + DataValueTypeNames[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (ThirdArg )) ThrowLooFException (Environment, CodeData, "the evaluator function clamp can only take an int or a float as its third arg, but the third arg was of type "   + DataValueTypeNames[ThirdArg .ValueType] + ".", new String[] {"InvalidArgType"});
     
-    double MaxValue = GetDataValueNumber (Input);
-    return new LooFDataValue (Math.random() * MaxValue);
+    if (FirstArg.ValueType == DataValueType_Int && SecondArg.ValueType == DataValueType_Int && ThirdArg.ValueType == DataValueType_Int) {
+      return new LooFDataValue (Math.min (Math.max (FirstArg.IntValue, SecondArg.IntValue), ThirdArg.IntValue));
+    }
+    
+    double FirstArgFloat  = GetDataValueNumber (FirstArg);
+    double SecondArgFloat = GetDataValueNumber (SecondArg);
+    double ThirdArgFloat  = GetDataValueNumber (ThirdArg);
+    
+    return new LooFDataValue (Math.min (Math.max (FirstArgFloat, SecondArgFloat), ThirdArgFloat));
     
   }
   @Override public boolean CanBePreEvaluated() {return false;}
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_Log = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function log can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize != 2) ThrowLooFException (Environment, CodeData, "the evaluator function log can only take a table with two values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    if (!ValueIsNumber (FirstArg )) ThrowLooFException (Environment, CodeData, "the evaluator function log can only take an int or a float as its first arg, but the first arg was of type "   + DataValueTypeNames[FirstArg .ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (SecondArg)) ThrowLooFException (Environment, CodeData, "the evaluator function log can only take an int or a float as its second arg, but the second arg was of type " + DataValueTypeNames[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    double FirstArgFloat  = GetDataValueNumber (FirstArg);
+    double SecondArgFloat = GetDataValueNumber (SecondArg);
+    
+    return new LooFDataValue (Math.log (FirstArgFloat) / Math.log (SecondArgFloat));
+    
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_Log10 = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function log10 can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    return new LooFDataValue (Math.log10 (GetDataValueNumber (Input)));
+    
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_ToDegrees = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function toDegrees can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    double InputFloat = GetDataValueNumber (Input);
+    
+    return new LooFDataValue (InputFloat / 180 * Math.PI);
+    
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_Ln = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function ln can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    return new LooFDataValue (Math.log (GetDataValueNumber (Input)));
+    
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_ToRadians = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function toRadians can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    double InputFloat = GetDataValueNumber (Input);
+    
+    return new LooFDataValue (InputFloat / Math.PI * 180);
+    
+  }
 };
 
 
@@ -742,6 +845,136 @@ LooFEvaluatorFunction Function_BitwiseNot = new LooFEvaluatorFunction() {
     
     return new LooFDataValue (Input.IntValue ^ 0xffffffffffffffffL);
     
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_IsNaN = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (Input.ValueType != DataValueType_Float) ThrowLooFException (Environment, CodeData, "the evaluator function isNaN can only take a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Double.isNaN (Input.FloatValue));
+  }
+};
+
+
+
+
+
+
+LooFEvaluatorFunction Function_IsInfinity = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (Input.ValueType != DataValueType_Float) ThrowLooFException (Environment, CodeData, "the evaluator function isInfinity can only take a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Double.isInfinite (Input.FloatValue));
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_Sin = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function sin can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.sin (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_Cos = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function cos can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.cos (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_Tan = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function tan can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.tan (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_ASin = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function asin can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.asin (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_ACos = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function acos can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.acos (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_ATan = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function atan can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.atan (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_ATan2 = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function atan2 can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize != 2) ThrowLooFException (Environment, CodeData, "the evaluator function atan2 can only take a table with two values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    if (!ValueIsNumber (FirstArg )) ThrowLooFException (Environment, CodeData, "the evaluator function atan2 can only take an int or a float as its first arg, but the first arg was of type "   + DataValueTypeNames[FirstArg .ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (SecondArg)) ThrowLooFException (Environment, CodeData, "the evaluator function atan2 can only take an int or a float as its second arg, but the second arg was of type " + DataValueTypeNames[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    double FirstArgFloat  = GetDataValueNumber (FirstArg);
+    double SecondArgFloat = GetDataValueNumber (SecondArg);
+    
+    return new LooFDataValue (Math.atan2 (FirstArgFloat, SecondArgFloat));
+    
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_SinH = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function sinh can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.sinh (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_CosH = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function cosh can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.cosh (GetDataValueNumber (Input)));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_TanH = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function tanh can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Math.tanh (GetDataValueNumber (Input)));
   }
 };
 

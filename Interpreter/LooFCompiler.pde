@@ -319,28 +319,28 @@ class LooFCompiler {
     EvaluatorFunctions.put("sign", Function_Sign);
     EvaluatorFunctions.put("min", Function_Min);
     EvaluatorFunctions.put("max", Function_Max);
-    EvaluatorFunctions.put("clamp", NullEvaluatorFunction);
-    EvaluatorFunctions.put("log", NullEvaluatorFunction);
-    EvaluatorFunctions.put("log10", NullEvaluatorFunction);
-    EvaluatorFunctions.put("ln", NullEvaluatorFunction);
-    EvaluatorFunctions.put("toDregees", NullEvaluatorFunction);
-    EvaluatorFunctions.put("toRadians", NullEvaluatorFunction);
+    EvaluatorFunctions.put("clamp", Function_Clamp);
+    EvaluatorFunctions.put("log", Function_Log);
+    EvaluatorFunctions.put("log10", Function_Log10);
+    EvaluatorFunctions.put("ln", Function_Ln);
+    EvaluatorFunctions.put("toDregees", Function_ToDegrees);
+    EvaluatorFunctions.put("toRadians", Function_ToRadians);
     
     EvaluatorFunctions.put("not", Function_Not);
     EvaluatorFunctions.put("!!", Function_BitwiseNot);
-    EvaluatorFunctions.put("isNaN", NullEvaluatorFunction);
-    EvaluatorFunctions.put("isInfinity", NullEvaluatorFunction);
+    EvaluatorFunctions.put("isNaN", Function_IsNaN);
+    EvaluatorFunctions.put("isInfinity", Function_IsInfinity);
     
-    EvaluatorFunctions.put("sin", NullEvaluatorFunction);
-    EvaluatorFunctions.put("cos", NullEvaluatorFunction);
-    EvaluatorFunctions.put("tan", NullEvaluatorFunction);
-    EvaluatorFunctions.put("asin", NullEvaluatorFunction);
-    EvaluatorFunctions.put("acos", NullEvaluatorFunction);
-    EvaluatorFunctions.put("atan", NullEvaluatorFunction);
-    EvaluatorFunctions.put("atan2", NullEvaluatorFunction);
-    EvaluatorFunctions.put("sinh", NullEvaluatorFunction);
-    EvaluatorFunctions.put("cosh", NullEvaluatorFunction);
-    EvaluatorFunctions.put("tanh", NullEvaluatorFunction);
+    EvaluatorFunctions.put("sin", Function_Sin);
+    EvaluatorFunctions.put("cos", Function_Cos);
+    EvaluatorFunctions.put("tan", Function_Tan);
+    EvaluatorFunctions.put("asin", Function_ASin);
+    EvaluatorFunctions.put("acos", Function_ACos);
+    EvaluatorFunctions.put("atan", Function_ATan);
+    EvaluatorFunctions.put("atan2", Function_ATan2);
+    EvaluatorFunctions.put("sinh", Function_SinH);
+    EvaluatorFunctions.put("cosh", Function_CosH);
+    EvaluatorFunctions.put("tanh", Function_TanH);
     
     EvaluatorFunctions.put("random", Function_Random);
     EvaluatorFunctions.put("randomInt", Function_RandomInt);
