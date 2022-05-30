@@ -6,7 +6,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) + GetDataValueNumber (RightValue));
     }
     
@@ -29,7 +29,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) - GetDataValueNumber (RightValue));
     }
     
@@ -52,7 +52,7 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) * GetDataValueNumber (RightValue));
     }
     
@@ -76,13 +76,13 @@ LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       double RightFloatValue = GetDataValueNumber (RightValue);
       if (RightFloatValue == 0) ThrowLooFException (Environment, CodeData, "cannot divide by 0.", new String[] {"DivideByZero"});
       return new LooFDataValue (GetDataValueNumber (LeftValue) / RightFloatValue);
     }
     
-    ThrowLooFException (Environment, CodeData, "the operation \"+\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, "the operation \"/\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -101,7 +101,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (Math.pow (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
@@ -124,7 +124,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewIntValue);
     }
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (CorrectModulo (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
@@ -225,7 +225,11 @@ LooFEvaluatorOperation Operation_StrictEquals = new LooFEvaluatorOperation() {
 LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
+      return new LooFDataValue (LeftValue.IntValue > RightValue.IntValue);
+    }
+    
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) > GetDataValueNumber (RightValue));
     }
     
@@ -243,7 +247,11 @@ LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
 LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
+      return new LooFDataValue (LeftValue.IntValue < RightValue.IntValue);
+    }
+    
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) < GetDataValueNumber (RightValue));
     }
     
@@ -315,7 +323,11 @@ LooFEvaluatorOperation Operation_StrictNotEquals = new LooFEvaluatorOperation() 
 LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
+      return new LooFDataValue (LeftValue.IntValue >= RightValue.IntValue);
+    }
+    
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) >= GetDataValueNumber (RightValue));
     }
     
@@ -334,7 +346,11 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
 LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if ((LeftValue.ValueType == DataValueType_Float || LeftValue.ValueType == DataValueType_Int) && (RightValue.ValueType == DataValueType_Float || RightValue.ValueType == DataValueType_Int)) {
+    if (LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int) {
+      return new LooFDataValue (LeftValue.IntValue <= RightValue.IntValue);
+    }
+    
+    if (ValueIsNumber (LeftValue) && ValueIsNumber (RightValue)) {
       return new LooFDataValue (GetDataValueNumber (LeftValue) <= GetDataValueNumber (RightValue));
     }
     
@@ -352,7 +368,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
 
 LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
-    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, CodeData);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (LeftValue, Environment, CodeData);
     return (LeftValueAsBool.BoolValue) ? RightValue : new LooFDataValue (false);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -364,7 +380,7 @@ LooFEvaluatorOperation Operation_And = new LooFEvaluatorOperation() {
 
 LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
-    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, CodeData);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (LeftValue, Environment, CodeData);
     return (LeftValueAsBool.BoolValue) ? LeftValue : RightValue;
   }
   @Override public float GetOrder() {return 1.0;}
@@ -376,8 +392,8 @@ LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
 
 LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
-    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {LeftValue}), Environment, CodeData);
-    LooFDataValue RightValueAsBool = Function_ToBool.HandleFunctionCall (new LooFDataValue (new LooFDataValue[] {RightValue}), Environment, CodeData);
+    LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (LeftValue, Environment, CodeData);
+    LooFDataValue RightValueAsBool = Function_ToBool.HandleFunctionCall (RightValue, Environment, CodeData);
     return new LooFDataValue (LeftValueAsBool.BoolValue ^ RightValueAsBool.BoolValue);
   }
   @Override public float GetOrder() {return 1.0;}
@@ -442,9 +458,9 @@ LooFEvaluatorOperation Operation_ShiftRight = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, "the operation \">>\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
-    return new LooFDataValue (LeftValue.IntValue << RightValue.IntValue);
+    return new LooFDataValue (LeftValue.IntValue >> RightValue.IntValue);
     
   }
   @Override public float GetOrder() {return 7.0;}
@@ -459,9 +475,9 @@ LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, "the operation \">>\" can only shift an int with an, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
-    return new LooFDataValue (LeftValue.IntValue >> RightValue.IntValue);
+    return new LooFDataValue (LeftValue.IntValue << RightValue.IntValue);
     
   }
   @Override public float GetOrder() {return 7.0;}
@@ -538,6 +554,28 @@ LooFEvaluatorFunction Function_Ceil = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_Abs = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    switch (Input.ValueType) {
+      
+      case (DataValueType_Int):
+         return new LooFDataValue (Math.abs (Input.IntValue));
+      
+      case (DataValueType_Float):
+         return new LooFDataValue (Math.abs (Input.FloatValue));
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function abs can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
@@ -557,26 +595,19 @@ LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_Sign = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
-    
-    double InputNumberValue = GetDataValueNumber (Input);
-    return new LooFDataValue (InputNumberValue >= 0 ? 1 : -1);
-    
-  }
-};
-
-
-
-
-
-LooFEvaluatorFunction Function_Not = new LooFEvaluatorFunction() {
-  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    
-    LooFDataValue InputAsBool = Function_ToBool.HandleFunctionCall (Input, Environment, CodeData);
-    InputAsBool.BoolValue = !InputAsBool.BoolValue;
-    
-    return InputAsBool;
-    
+    switch (Input.ValueType) {
+      
+      case (DataValueType_Int):
+         return new LooFDataValue (Input.IntValue >= 0 ? 1 : -1);
+      
+      case (DataValueType_Float):
+         return new LooFDataValue (Input.FloatValue >= 0 ? 1 : -1);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
   }
 };
 
@@ -674,10 +705,54 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_Clamp = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    double MaxValue = GetDataValueNumber (Input);
+    return new LooFDataValue (Math.random() * MaxValue);
+    
+  }
+  @Override public boolean CanBePreEvaluated() {return false;}
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_Not = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    LooFDataValue InputAsBool = Function_ToBool.HandleFunctionCall (Input, Environment, CodeData);
+    InputAsBool.BoolValue = !InputAsBool.BoolValue;
+    
+    return InputAsBool;
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_BitwiseNot = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (Input.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function !! can only take an int, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    return new LooFDataValue (Input.IntValue ^ 0xffffffffffffffffL);
+    
+  }
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_Random = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function random can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     double MaxValue = GetDataValueNumber (Input);
     return new LooFDataValue (Math.random() * MaxValue);
@@ -720,7 +795,7 @@ LooFEvaluatorFunction Function_RandomInt = new LooFEvaluatorFunction() {
 LooFEvaluatorFunction Function_Chance = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     
-    if (!(Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (!ValueIsNumber (Input)) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     double ChanceLimit = GetDataValueNumber (Input);
     if (ChanceLimit < 0 || ChanceLimit > 100) ThrowLooFException (Environment, CodeData, "the evaluator function chance can only take a number from 0 to 100 (inclusive).", new String[] {"InvalidArgType"});

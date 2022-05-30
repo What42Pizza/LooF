@@ -43,21 +43,52 @@ These use the value directly following the function. If the function takes in mu
 
 <br>
 
-#### Math:
+#### Basic Math:
 
-- **round Input (int or float)**
-- **floor Input (int or float)**
-- **ceiling Input (int or float)**
+- **round Input (int, float, or table {Input (int or float), RoundTo (int or float)})**
+- **floor Input (int, float, or table {Input (int or float), RoundTo (int or float)})**
+- **ceiling Input (int, float, or table {Input (int or float), RoundTo (int or float)})**
 - **abs Input (int or float)**
 - **sqrt Input (int or float)**
 - **sign Input (int or float)**
   - returns 1 if VALUE is >= 0 or -1 if VALUE is < 0
-- **not Input**
-- **!! Input (int)**
-  - returns bitwise not of Input
 - **min InputArgs (table {int or float, ...})**
 - **max InputArgs (table {int or float, ...})**
 - **clamp InputArgs (table {Input (float or int), Min (float or int), Max (float or int)})**
+- **log InputArgs (table {Input (int or float), Base (int or float)})**
+- **log10 Input (int or float)**
+  - should be slightly faster than `log {Input, 10}`
+- **ln Input (int or float)**
+  - returns `log {Input, E}`, but probably slightly faster
+- **toDegrees Input (int or float)**
+- **toRadians Input (int or float)**
+
+<br>
+
+#### Advanced Math:
+
+- **not Input**
+- **!! Input (int)**
+  - returns bitwise not of Input
+- **isNaN Input (float)**
+  - returns whether Input is in a NaN state
+- **isInfinity Input (float)**
+  - returns whether Input is infinity
+
+<br>
+
+#### Trig:
+
+- **sin Input (int or float)**
+- **cos Input (int or float)**
+- **tan Input (int or float)**
+- **asin Input (int or float)**
+- **acos Input (int or float)**
+- **atan Input (int or float)**
+- **atan2 InputArgs (table {y (int or float), x (int or float)})**
+- **sinh Input (int or float)**
+- **cosh Input (int or float)**
+- **tanh Input (int or float)**
 
 <br>
 

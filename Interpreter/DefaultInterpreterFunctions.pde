@@ -74,7 +74,7 @@ ReturnValue GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesTo
       return Return;
     
     case (DataValueType_String):
-      if (Args.length == 1) throw (new LooFCompileException (CodeData, LineNumber, FunctionName + "statements that take a string as its first arg must have an int as its second arg, but only one arg was found. (maybe you don't need quotation marks?)"));
+      if (Args.length == 1) throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + "statements that take a string as its first arg must have an int as its second arg, but only one arg was found. (maybe you don't need quotation marks?)"));
       Return.StringValue = FirstArgValue.StringValue;
       Long SecondArgAsLong = LooFCompiler.GetLongFromStatementArg (Args[1], 2, CodeData, LineNumber);
       Return.IntegerValue = SecondArgAsLong == null ? null : SecondArgAsLong.intValue(); // Long to Integer from stack overflow: https://stackoverflow.com/a/5804066/13325385
@@ -82,7 +82,7 @@ ReturnValue GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesTo
       return Return;
     
     default:
-      throw (new LooFCompileException (CodeData, LineNumber, FunctionName + "statements must take an int or a string as its first arg, but the first arg was of type " + TokenBranchTypeNames[FirstArgValue.ValueType] + "."));
+      throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + "statements must take an int or a string as its first arg, but the first arg was of type " + TokenBranchTypeNames[FirstArgValue.ValueType] + "."));
     
   }
 }
@@ -537,12 +537,12 @@ LooFInterpreterFunction InterpreterFunction_CallOutside = new LooFInterpreterFun
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
   }
-  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) throws Interpreter.LooFCompileException {
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
     LooFTokenBranch[] Args = Statement.Args;
     String ModuleName = LooFCompiler.GetStringFromStatementArg (Args[0], 1, CodeData, LineNumber);
     LooFInterpreterModule ModuleToCall = AddonsData.InterpreterModules.getOrDefault (ModuleName, null);
-    if (ModuleToCall == null) throw (new LooFCompileException (CodeData, LineNumber, "could not find any module named \"" + ModuleName + "\"."));
+    if (ModuleToCall == null) throw (new LooFCompilerException (CodeData, LineNumber, "could not find any module named \"" + ModuleName + "\"."));
     Statement.AdditionalFunctionData = new LooFAdditionalCallOutsideStatementData (ModuleName, ModuleToCall);
   }
   @Override public String toString (LooFStatement Statement) {

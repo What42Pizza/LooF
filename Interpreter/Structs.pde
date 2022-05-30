@@ -38,8 +38,8 @@ class LooFInterpreterFunction implements Cloneable {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
   }
   
-  public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) throws LooFCompileException {
-    throw (new LooFCompileException (CodeData, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
+  public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) throws LooFCompilerException {
+    throw (new LooFCompilerException (CodeData, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
   }
   
   public int GetBlockLevelChange() {
@@ -289,42 +289,42 @@ class LooFCompileSettings {
 
 
 
-class LooFCompileException extends RuntimeException {
+class LooFCompilerException extends RuntimeException {
   
   String Message;
   
-  public LooFCompileException (LooFCodeData CodeData, int LineNumber, String Message) {
+  public LooFCompilerException (LooFCodeData CodeData, int LineNumber, String Message) {
     super ("  " + GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message));
     this.Message = GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message);
   }
   
-  public LooFCompileException (LooFCodeData CodeData, int LineNumber, int TokenIndex, String Message) {
+  public LooFCompilerException (LooFCodeData CodeData, int LineNumber, int TokenIndex, String Message) {
     super ("  " + GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenIndex, Message));
     this.Message = GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenIndex, Message);
   }
   
-  public LooFCompileException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
+  public LooFCompilerException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
     super ("  " + GetCompilerErrorMessage (LineOfCode, LineNumber, LineFileOrigin, FileName, Message));
     this.Message = GetCompilerErrorMessage (LineOfCode, LineNumber, LineFileOrigin, FileName, Message);
   }
   
-  public LooFCompileException (String Message) {
+  public LooFCompilerException (String Message) {
     super ("  " + Message);
     this.Message = Message;
   }
   
-  public LooFCompileException (ArrayList <LooFCompileException> AllExceptions) {
+  public LooFCompilerException (ArrayList <LooFCompilerException> AllExceptions) {
     super ("  " + GetCompilerErrorMessage (AllExceptions));
     this.Message = GetCompilerErrorMessage (AllExceptions);
   }
   
-  public LooFCompileException (Exception e) {
+  public LooFCompilerException (Exception e) {
     super ("   An error occured while compiling:   " + e.toString());
   }
   
   /*
   String toString() {
-    return "LooFCompileException";
+    return "LooFCompilerException";
   }
   */
   
@@ -376,10 +376,10 @@ String GetCompilerErrorMessage (String LineOfCode, int LineNumber, String LineFi
 
 
 
-String GetCompilerErrorMessage (ArrayList <LooFCompileException> AllExceptions) {
+String GetCompilerErrorMessage (ArrayList <LooFCompilerException> AllExceptions) {
   if (AllExceptions.size() == 1) return AllExceptions.get(0).Message;
   String Message = "Multiple errors occurred during compilation:";
-  for (LooFCompileException CurrentException : AllExceptions) {
+  for (LooFCompilerException CurrentException : AllExceptions) {
     Message += "\n\n\n\n" + CurrentException.Message;
   }
   return Message;
@@ -433,14 +433,14 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
 
 
 
-void ThrowLooFException (LooFEnvironment Environment, LooFCodeData CodeData, String Message, String[] ErrorTypeTags) throws LooFInterpreterException, LooFCompileException, AssertionError {
+void ThrowLooFException (LooFEnvironment Environment, LooFCodeData CodeData, String Message, String[] ErrorTypeTags) throws LooFInterpreterException, LooFCompilerException, AssertionError {
   
   if (Environment != null) {
     throw (new LooFInterpreterException (Environment, Message, ErrorTypeTags));
   }
   
   if (CodeData != null) {
-    throw (new LooFCompileException (CodeData, CodeData.CurrentLineNumber, Message));
+    throw (new LooFCompilerException (CodeData, CodeData.CurrentLineNumber, Message));
   }
   
   throw new AssertionError ("Both Environment and CodeData are null");

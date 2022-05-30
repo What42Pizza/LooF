@@ -700,6 +700,12 @@ double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Env
 
 
 
+boolean ValueIsNumber (LooFDataValue Input) {
+  return Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float;
+}
+
+
+
 ArrayList <LooFDataValue> GetAllDataValueTableItems (LooFDataValue DataValueIn) {
   ArrayList <LooFDataValue> AllItems = new ArrayList <LooFDataValue> (DataValueIn.ArrayValue);
   HashMap <String, LooFDataValue> HashMapValue = DataValueIn.HashMapValue;

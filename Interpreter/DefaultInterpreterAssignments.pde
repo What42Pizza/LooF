@@ -20,7 +20,7 @@ LooFInterpreterAssignment Assignment_DefaultsTo = new LooFInterpreterAssignment(
 
 LooFInterpreterAssignment Assignment_PlusEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '+=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '+=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '+=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -37,7 +37,7 @@ LooFInterpreterAssignment Assignment_PlusEquals = new LooFInterpreterAssignment(
 
 LooFInterpreterAssignment Assignment_MinusEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '-=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '-=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '-=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -54,7 +54,7 @@ LooFInterpreterAssignment Assignment_MinusEquals = new LooFInterpreterAssignment
 
 LooFInterpreterAssignment Assignment_TimesEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '*=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '*=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '*=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -71,7 +71,7 @@ LooFInterpreterAssignment Assignment_TimesEquals = new LooFInterpreterAssignment
 
 LooFInterpreterAssignment Assignment_DivideEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '/=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '/=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '/=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -91,7 +91,7 @@ LooFInterpreterAssignment Assignment_DivideEquals = new LooFInterpreterAssignmen
 
 LooFInterpreterAssignment Assignment_PowerEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '^=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '^=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '^=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -108,7 +108,7 @@ LooFInterpreterAssignment Assignment_PowerEquals = new LooFInterpreterAssignment
 
 LooFInterpreterAssignment Assignment_ModuloEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '%=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '%=' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null);
     if (!(InputFormulaResult.ValueType == DataValueType_Int || InputFormulaResult.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '%=' only works with a value of type int or float, but the value was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int && InputFormulaResult.ValueType == DataValueType_Int) {
@@ -152,7 +152,7 @@ LooFInterpreterAssignment Assignment_ConcatEquals = new LooFInterpreterAssignmen
 
 LooFInterpreterAssignment Assignment_PlusPlus = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '++' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '++' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int)
       return new LooFDataValue (OldVarValue.IntValue + 1);
     return new LooFDataValue (OldVarValue.FloatValue + 1);
@@ -167,7 +167,7 @@ LooFInterpreterAssignment Assignment_PlusPlus = new LooFInterpreterAssignment() 
 
 LooFInterpreterAssignment Assignment_MinusMinus = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_Int || OldVarValue.ValueType == DataValueType_Float)) throw (new LooFInterpreterException (Environment, "the assignment '--' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (!ValueIsNumber (OldVarValue)) throw (new LooFInterpreterException (Environment, "the assignment '--' only works on a var with an int or float value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     if (OldVarValue.ValueType == DataValueType_Int)
       return new LooFDataValue (OldVarValue.IntValue - 1);
     return new LooFDataValue (OldVarValue.FloatValue - 1);
