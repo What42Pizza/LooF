@@ -49,6 +49,10 @@
   - Pops the first value of the general stack into VarName. Errors if the general stack is empty
 - **pop TableVarName (table), Item0, Item1, ...**
   - Pops the first value of the general stack into TableVarName, then sets the var Item0 to index 0 of TableVarName, sets the var Item0 to index 1 of TableVarName, etc. If the number of items in TableVarName runs out, all remaining arguments will be set to null. Errors if the general stack is empty
+- **conditionalPop VarName**
+  - If the general stack is larger than it was when the function was first called, pops the first value of the general stack into VarName. Errors if the general stack is empty
+- **conditionalPop TableVarName (table), Item0, Item1, ...**
+  - If the general stack is larger than it was when the function was first called, pops the first value of the general stack into TableVarName, then sets the var Item0 to index 0 of TableVarName, sets the var Item0 to index 1 of TableVarName, etc. If the number of items in TableVarName runs out, all remaining arguments will be set to null. Errors if the general stack is empty
 
 <br>
 
@@ -67,9 +71,13 @@
 - **return ReturnValue0, ReturnValue1, ...**
   - Pushes all arguments to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 - **returnIf Condition**
-  - If Condition is truthy, jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
+  - If Condition is truthy, jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 - **returnIf Condition, ReturnValue0, ReturnValue1, ...**
-  - If Condition is truthy, pushes all remaining arguments to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
+  - If Condition is truthy, pushes all remaining arguments to the general stack in a single table and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
+- **returnRaw ReturnValue**
+  - Pushes ReturnValue to the general stack and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
+- **returnRawIf Condition, ReturnValue**
+  - If Condition is truthy, pushes ReturnValue to the general stack and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 
 <br>
 

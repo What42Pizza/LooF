@@ -192,7 +192,7 @@ class LooFCodeData {
   ArrayList <Integer> LineNumbers;
   ArrayList <String> LineFileOrigins;
   
-  HashMap <String, Integer> FunctionLocations = new HashMap <String, Integer> ();
+  HashMap <String, Integer> FunctionLineNumbers = new HashMap <String, Integer> ();
   HashMap <String, String> LinkedFiles = new HashMap <String, String> ();
   
   int CurrentLineNumber;
@@ -469,6 +469,8 @@ class LooFDataValue implements Cloneable {
   ArrayList <LooFDataValue> ArrayValue;
   HashMap <String, LooFDataValue> HashMapValue;
   byte[] ByteArrayValue;
+  String FunctionFileValue;
+  int FunctionLineValue;
   
   ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
   
@@ -523,6 +525,11 @@ class LooFDataValue implements Cloneable {
     LockLevels.add(0);
   }
   
+  public LooFDataValue (String FunctionFileValue, int FunctionLineValue) {
+    this.FunctionFileValue = FunctionFileValue;
+    this.FunctionLineValue = FunctionLineValue;
+  }
+  
   
   
   public LooFDataValue clone() {
@@ -558,6 +565,9 @@ class LooFDataValue implements Cloneable {
       case (DataValueType_ByteArray):
         return new LooFDataValue (ByteArrayValue.clone());
       
+      case (DataValueType_Function):
+        return new LooFDataValue (FunctionFileValue, FunctionLineValue);
+      
       default:
         throw new AssertionError();
       
@@ -579,6 +589,7 @@ final int DataValueType_String = 3;
 final int DataValueType_Bool = 4;
 final int DataValueType_Table = 5;
 final int DataValueType_ByteArray = 6;
+final int DataValueType_Function = 7;
 
 final String[] DataValueTypeNames = {
   "null",
@@ -588,6 +599,7 @@ final String[] DataValueTypeNames = {
   "bool",
   "table",
   "byteArray",
+  "function",
 };
 
 final String[] DataValueTypeNames_PlusA = {
@@ -598,6 +610,7 @@ final String[] DataValueTypeNames_PlusA = {
   "a bool",
   "a table",
   "a byteArray",
+  "a function",
 };
 
 

@@ -570,9 +570,6 @@ String ConvertLooFTokenBranchChildrenToString (LooFTokenBranch TokenBranch) {
 String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
   switch (DataValueIn.ValueType) {
     
-    default:
-      throw new AssertionError();
-    
     case (DataValueType_Null):
       return "null";
     
@@ -593,6 +590,13 @@ String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
     
     case (DataValueType_ByteArray):
       return new String (DataValueIn.ByteArrayValue);
+    
+    case (DataValueType_Function):
+      String FileName = DataValueIn.FunctionFileValue;
+      return "Function at " + DataValueIn.FunctionLineValue + (FileName != null ? " in " + FileName : "");
+    
+    default:
+      throw new AssertionError();
     
   }
 }

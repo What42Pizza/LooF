@@ -334,10 +334,10 @@ class LooFInterpreter {
       
       case (0): // table[int]
         ArrayList <LooFDataValue> ArrayValue = SourceTable.ArrayValue;
-        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
-        if (IndexIntValue > ArrayValue.size()) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"IndexOutOfBounds", "NegativeIndex", "IndexError"});
+        if (IndexIntValue > ArrayValue.size()) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (too large). (remember that indexes start at 0)", new String[] {"IndexOutOfBounds", "TooLargeIndex", "IndexError"});
         if (IndexIntValue == ArrayValue.size()) {
-          if (!AllowIndexOfArrayLength) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (equal to table length). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
+          if (!AllowIndexOfArrayLength) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (equal to table length). (remember that indexes start at 0)", new String[] {"IndexOutOfBounds", "TooLargeIndex", "IndexError"});
           return new LooFDataValue();
         }
         return ArrayValue.get((int) IndexIntValue);
@@ -348,12 +348,12 @@ class LooFInterpreter {
       
       case (2): // byteArray[int]
         byte[] ByteArrayValue = SourceTable.ByteArrayValue;
-        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
-        if (IndexIntValue >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (too large). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
+        if (IndexIntValue < 0) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"IndexOutOfBounds", "NegativeIndex", "IndexError"});
+        if (IndexIntValue >= ByteArrayValue.length) ThrowLooFException (Environment, CodeData, "index (" + IndexIntValue + ") is out of bounds (too large). (remember that indexes start at 0)", new String[] {"IndexOutOfBounds", "TooLargeIndex", "IndexError"});
         return new LooFDataValue ((long) ByteArrayValue[(int) IndexIntValue]);
       
       case (3): // byteArray[string]
-        ThrowLooFException (Environment, CodeData, "cannot index byteArray with a string.", new String[] {"IndexError"});
+        ThrowLooFException (Environment, CodeData, "cannot index byteArray with a string.", new String[] {"IndexError", "InvalidArgType"});
       
       default:
         throw new AssertionError();

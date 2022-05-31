@@ -239,10 +239,13 @@ class LooFCompiler {
     
     InterpreterFunctions.put("push", InterpreterFunction_Push);
     InterpreterFunctions.put("pop", InterpreterFunction_Pop);
+    InterpreterFunctions.put("conditionalPop", InterpreterFunction_ConditionalPop);
     
     InterpreterFunctions.put("call", InterpreterFunction_Call);
     InterpreterFunctions.put("return", InterpreterFunction_Return);
+    InterpreterFunctions.put("returnRaw", InterpreterFunction_ReturnRaw);
     InterpreterFunctions.put("returnIf", InterpreterFunction_ReturnIf);
+    InterpreterFunctions.put("returnRawIf", InterpreterFunction_ReturnRawIf);
     
     InterpreterFunctions.put("if", InterpreterFunction_If);
     InterpreterFunctions.put("skip", InterpreterFunction_Skip);
@@ -349,17 +352,18 @@ class LooFCompiler {
     EvaluatorFunctions.put("lengthOf", Function_LengthOf);
     EvaluatorFunctions.put("totalItemsIn", Function_TotalItemsIn);
     EvaluatorFunctions.put("endOf", Function_EndOf);
-    EvaluatorFunctions.put("lastItemOf", NullEvaluatorFunction);
+    EvaluatorFunctions.put("lastItemOf", Function_LastItemOf);
     EvaluatorFunctions.put("keysOf", Function_KeysOf);
     EvaluatorFunctions.put("valuesOf", Function_ValuesOf);
     EvaluatorFunctions.put("randomItem", Function_RandomItem);
     EvaluatorFunctions.put("randomValue", Function_RandomValue);
-    EvaluatorFunctions.put("firstIndexOfItem", NullEvaluatorFunction);
-    EvaluatorFunctions.put("lastIndexOfItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("firstIndexOfItem", Function_FirstIndexOfItem);
+    EvaluatorFunctions.put("lastIndexOfItem", Function_LastIndexOfItem);
     EvaluatorFunctions.put("allIndexesOfItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("tableContainsItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("arrayContainsItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("hashmapContainsItem", NullEvaluatorFunction);
+    EvaluatorFunctions.put("byteArrayContainsItems", NullEvaluatorFunction);
     EvaluatorFunctions.put("splitTable", NullEvaluatorFunction);
     EvaluatorFunctions.put("removeDuplicateItems", NullEvaluatorFunction);
     EvaluatorFunctions.put("cloneTable", NullEvaluatorFunction);
@@ -384,6 +388,10 @@ class LooFCompiler {
     EvaluatorFunctions.put("toFloat", Function_ToFloat);
     EvaluatorFunctions.put("toString", Function_ToString);
     EvaluatorFunctions.put("toBool", Function_ToBool);
+    
+    EvaluatorFunctions.put("newFunction", NullEvaluatorFunction);
+    EvaluatorFunctions.put("getFunctionLine", NullEvaluatorFunction);
+    EvaluatorFunctions.put("getFunctionFile", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("typeOf", Function_TypeOf);
     EvaluatorFunctions.put("newByteArray", NullEvaluatorFunction);
@@ -1149,13 +1157,21 @@ class LooFCompiler {
     
     // simplify linking statements
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      FindLinkedFiles (CodeData, AllCodeDatas);
-      FindFunctionLocations (CodeData);
+      try {
+        FindLinkedFiles (CodeData, AllCodeDatas);
+        FindFunctionLocations (CodeData);
+      } catch (LooFCompilerException e) {
+        AllExceptions.add(e);
+      }
     }
     
     // replace function references
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      ReplaceFunctionCalls (CodeData, AllCodeDatas);
+      try {
+        ReplaceFunctionCalls (CodeData, AllCodeDatas);
+      } catch (LooFCompilerException e) {
+        AllExceptions.add(e);
+      }
     }
     
   }
@@ -1229,19 +1245,19 @@ class LooFCompiler {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-    HashMap <String, Integer> FunctionLocations = CodeData.FunctionLocations;
+    HashMap <String, Integer> FunctionLineNumbers = CodeData.FunctionLineNumbers;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
       if (CurrentLine.startsWith("$function ")) {
         
         String FunctionName = CurrentLine.substring(10);
-        if (FunctionLocations.get(FunctionName) != null) throw (new LooFCompilerException (CodeData, i, "function \"" + FunctionName + "\" already exists."));
+        if (FunctionLineNumbers.get(FunctionName) != null) throw (new LooFCompilerException (CodeData, i, "function \"" + FunctionName + "\" already exists."));
         
         Code.remove(i);
         LineNumbers.remove(i);
         LineFileOrigins.remove(i);
         
-        FunctionLocations.put(FunctionName, i);
+        FunctionLineNumbers.put(FunctionName, i);
         
         i --;
       }
@@ -1320,9 +1336,9 @@ class LooFCompiler {
   
   
   String GetLinkedFunctionCall_WithinFile (String FunctionCallData, LooFCodeData CodeData, int LineNumber) {
-    Integer FunctionLocation = CodeData.FunctionLocations.get(FunctionCallData);
+    Integer FunctionLocation = CodeData.FunctionLineNumbers.get(FunctionCallData);
     if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "the function \"" + FunctionCallData + "\" is not defined or could not be found."));
-    return FunctionLocation.toString();
+    return "newFunction {" + FunctionLocation.toString() + "}";
   }
   
   
@@ -1342,11 +1358,11 @@ class LooFCompiler {
     if (LinkedCodeData == null) throw new AssertionError();
     
     // get location of function
-    Integer FunctionLocation = LinkedCodeData.FunctionLocations.get(FunctionName);
+    Integer FunctionLocation = LinkedCodeData.FunctionLineNumbers.get(FunctionName);
     if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "no function named \"" + FunctionName + "\" was found in the file \"" + FullFileName + "\"."));
     
     // assemble and return new function data
-    return "\"" + FullFileName + "\", " + FunctionLocation;
+    return "newFunction {" + FunctionLocation + ", \"" + FullFileName + "\"}";
   }
   
   
@@ -2485,7 +2501,7 @@ class LooFCompiler {
       FileOutput.println();
       for (int j = 0; j < 100; j ++) FileOutput.print('-');
       FileOutput.println();
-      HashMap <String, Integer> FunctionLocations = CodeData.FunctionLocations;
+      HashMap <String, Integer> FunctionLocations = CodeData.FunctionLineNumbers;
       Set <String> AllFunctionNames = FunctionLocations.keySet();
       for (String CurrFunctionName : AllFunctionNames) {
         int CurrFunctionLocation = FunctionLocations.get(CurrFunctionName);

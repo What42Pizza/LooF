@@ -192,11 +192,14 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
       case (DataValueType_Bool):
         return new LooFDataValue (RightValue.ValueType == DataValueType_Bool && LeftValue.BoolValue == RightValue.BoolValue);
       
+      case (DataValueType_Table):
+        return new LooFDataValue (RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue));
+      
       case (DataValueType_ByteArray):
         return new LooFDataValue (RightValue.ValueType == DataValueType_ByteArray && Arrays.equals(LeftValue.ByteArrayValue, RightValue.ByteArrayValue));
       
-      case (DataValueType_Table):
-         return new LooFDataValue (RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue));
+      case (DataValueType_Function):
+        return new LooFDataValue (RightValue.equals(LeftValue));
       
       default:
         throw new AssertionError();
@@ -289,11 +292,14 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
       case (DataValueType_Bool):
         return new LooFDataValue (!(RightValue.ValueType == DataValueType_Bool && LeftValue.BoolValue == RightValue.BoolValue));
       
+      case (DataValueType_Table):
+         return new LooFDataValue (!(RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue)));
+      
       case (DataValueType_ByteArray):
         return new LooFDataValue (!(RightValue.ValueType == DataValueType_ByteArray && Arrays.equals(LeftValue.ByteArrayValue, RightValue.ByteArrayValue)));
       
-      case (DataValueType_Table):
-         return new LooFDataValue (!(RightValue.ValueType == DataValueType_Table && LeftValue.ArrayValue.equals(RightValue.ArrayValue) && LeftValue.HashMapValue.equals(RightValue.HashMapValue)));
+      case (DataValueType_Function):
+        return new LooFDataValue (!RightValue.equals(LeftValue));
       
       default:
         throw new AssertionError();
@@ -1093,7 +1099,35 @@ LooFEvaluatorFunction Function_EndOf = new LooFEvaluatorFunction() {
         return new LooFDataValue (Input.ByteArrayValue.length - 1);
       
       default:
-        ThrowLooFException (Environment, CodeData, "the evaluator function endOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+        ThrowLooFException (Environment, CodeData, "the evaluator function endOf can only take a table or a byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_LastItemOf = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    switch (Input.ValueType) {
+      
+      case (DataValueType_Table):
+        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        int ArrayValueSize = ArrayValue.size();
+        if (ArrayValueSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function lastItemOf cannot take an empty table.", new String[] {"TableIsEmpty"});
+        return ArrayValue.get(ArrayValueSize - 1);
+      
+      case (DataValueType_ByteArray):
+        byte[] ByteArrayValue = Input.ByteArrayValue;
+        int ByteArrayValueSize = ByteArrayValue.length;
+        if (ByteArrayValueSize == 0) ThrowLooFException (Environment, CodeData, "the evaluator function lastItemOf cannot take an empty byteArray.", new String[] {"TableIsEmpty"});
+        return new LooFDataValue ((long) ByteArrayValue[ByteArrayValueSize - 1]);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function lastItemOf can only take a table or a byteArray, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
         throw new AssertionError();
       
     }
@@ -1174,6 +1208,167 @@ LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
   }
   @Override public boolean CanBePreEvaluated() {return false;}
 };
+
+
+
+
+
+LooFEvaluatorFunction Function_FirstIndexOfItem = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize < 2 || InputItemsSize > 3) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table with 2 or 3 values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    
+    int StartIndex = 0;
+    if (InputItemsSize == 3) {
+      LooFDataValue ThirdArg = InputItems.get(2);
+      if (ThirdArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take an int as its third arg, but the third arg was of type " + DataValueTypeNames_PlusA[ThirdArg.ValueType] + ".", new String[] {"InvalidArgType"});
+      StartIndex = (int) ThirdArg.IntValue;
+    }
+    if (StartIndex < 0) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem cannot have a negative starting index.", new String[] {"InvalidArgType"});
+    
+    switch (FirstArg.ValueType) {
+      
+      case (DataValueType_Table):
+        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        int ArrayEndIndex = ArrayValue.size() - 1;
+        for (int i = StartIndex; i < ArrayEndIndex; i ++) {
+          if (ArrayValue.get(i).equals(SecondArg)) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      case (DataValueType_ByteArray):
+        if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        byte SecondArgByte = (byte) SecondArg.IntValue;
+        byte[] ByteArrayValue = Input.ByteArrayValue;
+        int ByteArrayEndIndex = ByteArrayValue.length - 1;
+        for (int i = StartIndex; i < ByteArrayEndIndex; i ++) {
+          if (ByteArrayValue[i] == SecondArgByte) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table or a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames_PlusA[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_LastIndexOfItem = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize < 2 || InputItemsSize > 3) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem can only take a table with 2 or 3 values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    
+    int StartIndex = 0;
+    if (InputItemsSize == 3) {
+      LooFDataValue ThirdArg = InputItems.get(2);
+      if (ThirdArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem can only take an int as its third arg, but the third arg was of type " + DataValueTypeNames_PlusA[ThirdArg.ValueType] + ".", new String[] {"InvalidArgType"});
+      StartIndex = (int) ThirdArg.IntValue;
+    }
+    
+    switch (FirstArg.ValueType) {
+      
+      case (DataValueType_Table):
+        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        int ArraySize = ArrayValue.size() - 1;
+        if (ArraySize == 0) return new LooFDataValue (-1L);
+        if (StartIndex >= ArraySize) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem cannot have a starting index greater than or equal to the given table.", new String[] {"InvalidArgType"});
+        for (int i = StartIndex; i >= 0; i --) {
+          if (ArrayValue.get(i).equals(SecondArg)) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      case (DataValueType_ByteArray):
+        if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        byte SecondArgByte = (byte) SecondArg.IntValue;
+        byte[] ByteArrayValue = Input.ByteArrayValue;
+        int ByteArraySize = ByteArrayValue.length - 1;
+        if (ByteArraySize == 0) return new LooFDataValue (-1L);
+        if (StartIndex >= ByteArraySize) ThrowLooFException (Environment, CodeData, "the evaluator function lastIndexOfItem cannot have a starting index greater than or equal to the given table.", new String[] {"InvalidArgType"});
+        for (int i = StartIndex; i >= 0; i --) {
+          if (ByteArrayValue[i] == SecondArgByte) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table or a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames_PlusA[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_AllIndexesOfItem = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    
+    // ensure input is valid
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
+    int InputItemsSize = InputItems.size();
+    if (InputItemsSize < 2 || InputItemsSize > 3) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take a table with 2 or 3 values, but the table given contains " + InputItemsSize + " items.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    LooFDataValue FirstArg  = InputItems.get(0);
+    LooFDataValue SecondArg = InputItems.get(1);
+    
+    int StartIndex = 0;
+    if (InputItemsSize == 3) {
+      LooFDataValue ThirdArg = InputItems.get(2);
+      if (ThirdArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take an int as its third arg, but the third arg was of type " + DataValueTypeNames_PlusA[ThirdArg.ValueType] + ".", new String[] {"InvalidArgType"});
+      StartIndex = (int) ThirdArg.IntValue;
+    }
+    if (StartIndex < 0) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem cannot have a negative starting index.", new String[] {"InvalidArgType"});
+    
+    switch (FirstArg.ValueType) {
+      
+      case (DataValueType_Table):
+        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        int ArrayEndIndex = ArrayValue.size() - 1;
+        for (int i = StartIndex; i < ArrayEndIndex; i ++) {
+          if (ArrayValue.get(i).equals(SecondArg)) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      case (DataValueType_ByteArray):
+        if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        byte SecondArgByte = (byte) SecondArg.IntValue;
+        byte[] ByteArrayValue = Input.ByteArrayValue;
+        int ByteArrayEndIndex = ByteArrayValue.length - 1;
+        for (int i = StartIndex; i < ByteArrayEndIndex; i ++) {
+          if (ByteArrayValue[i] == SecondArgByte) return new LooFDataValue ((long) i);
+        }
+        return new LooFDataValue (-1L);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table or a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames_PlusA[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+  }
+};
+
+
+
+
+
 
 
 
@@ -1306,6 +1501,9 @@ LooFEvaluatorFunction Function_ToInt = new LooFEvaluatorFunction() {
       case (DataValueType_ByteArray):
         ThrowLooFException (Environment, CodeData, "cannot cast byteArray to int.", new String[] {"InvalidCast", "InalidArgType"});
       
+      case (DataValueType_Function):
+        ThrowLooFException (Environment, CodeData, "cannot cast function to int", new String[] {"InvalidCast", "InvalidArgType"});
+      
       default:
         throw new AssertionError();
       
@@ -1346,6 +1544,9 @@ LooFEvaluatorFunction Function_ToFloat = new LooFEvaluatorFunction() {
       case (DataValueType_ByteArray):
         ThrowLooFException (Environment, CodeData, "cannot cast byteArray to float.", new String[] {"InvalidCast", "InalidArgType"});
       
+      case (DataValueType_Function):
+        ThrowLooFException (Environment, CodeData, "cannot cast function to float", new String[] {"InvalidCast", "InvalidArgType"});
+      
       default:
         throw new AssertionError();
       
@@ -1381,6 +1582,10 @@ LooFEvaluatorFunction Function_ToString = new LooFEvaluatorFunction() {
       
       case (DataValueType_ByteArray):
         return new LooFDataValue (new String (Input.ByteArrayValue));
+    
+      case (DataValueType_Function):
+        String FileName = Input.FunctionFileValue;
+        return new LooFDataValue ("Function at " + Input.FunctionLineValue + (FileName != null ? " in " + FileName : ""));
       
       default:
         throw new AssertionError();
@@ -1417,6 +1622,9 @@ LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
       
       case (DataValueType_ByteArray):
         ThrowLooFException (Environment, CodeData, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
+      
+      case (DataValueType_Function):
+        ThrowLooFException (Environment, CodeData, "cannot cast function to bool", new String[] {"InvalidCast", "InvalidArgType"});
       
       default:
         throw new AssertionError();

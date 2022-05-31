@@ -1,0 +1,48 @@
+$link GeneralFunctions.LOOF as F
+$link Main.LOOF as this
+
+
+
+// do you like pizza?
+UserLikesPizzaResponse = "yes"
+
+
+
+
+
+function Case_Yes
+	:print "Yay!"
+	return
+end
+
+
+
+function Case_No
+	:print "Boo!"
+	return
+end
+
+
+
+function Case_Maybe
+	:print "I'll take that as a yes!"
+	return
+end
+
+
+
+function Case_Default
+	:print "I have no clue what you're saying."
+	return
+end
+
+
+
+
+
+Cases = {}
+Cases["yes"]   = $this.Case_Yes
+Cases["no"]    = $this.Case_No
+Cases["maybe"] = $this.Case_Maybe
+
+call F:Switch, UserLikesPizzaResponse, Cases, $Case_Default

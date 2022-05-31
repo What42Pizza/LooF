@@ -1,0 +1,18 @@
+function Switch  -> Input, Cases, Default, RunFunctions, FunctionArgs  throwsErrors {"InvalidArgType"}
+	RunFunctions defaultsTo true
+	errorIf (typeOf Input != "string"), "First arg (Input) must be of type string.", {"InvalidArgType"}
+	errorIf (typeOf Cases != "table"), "Second arg (Cases) must be of type table.", {"InvalidArgType"}
+	
+	SwitchResult = Cases[Input] or Default
+	
+	if RunFunctions and typeOf SwitchResult == "function" then
+		errorIf (getFunctionFile SwitchResult == null), "Cannot call function with null file name.", {"NullFunctionFile"}
+		if FunctionArgs != null; push FunctionArgs
+		call SwitchResult
+		conditionalPop FunctionResults
+		returnRawIf (FunctionResults != null), FunctionResults
+		return
+	end
+	
+	return Result
+end

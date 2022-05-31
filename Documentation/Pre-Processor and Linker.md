@@ -25,3 +25,5 @@
   - gives the current file access to all the functions in FileName. Calls to functions in FileName have to be proceeded by the name of the linked file, with only a period instead of ".LOOF" (example: `call ExampleFileName.ExampleFunctionName`)
 - **$link FileName as ShortenedFileName**
   - gives the current file access to all the functions in FileName. Calls to functions in FileName have to be proceeded by ShortenedFileName and a period (example: `call ExampleShortendName.ExampleFunctionName`)
+- **(anywhere in line) $FunctionName**
+  - replaces $FunctionName with the values required to call FunctionName

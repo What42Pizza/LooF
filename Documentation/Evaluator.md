@@ -131,15 +131,15 @@ These use the value directly following the function. If the function takes in mu
   - returns a random item from the array part of Table
 - **randomValue Table**
   - returns a random value from the hashmap part of Table
-- **firstIndexOfItem InputArgs (table {TableIn, Item})**
+- **firstIndexOfItem InputArgs (table {TableIn (table or byteArray), Item})**
   - returns the index of the first found occurrence of Item in TableIn
-- **firstIndexOfItem InputArgs (table {TableIn, Item, StartIndex (int)})**
+- **firstIndexOfItem InputArgs (table {TableIn (table or byteArray), Item, StartIndex (int)})**
   - returns the index of the first found occurrence of Item in TableIn starting at StartIndex
-- **lastIndexOfItem InputArgs (table {TableIn, Item})**
+- **lastIndexOfItem InputArgs (table {TableIn (table or byteArray), Item})**
   - returns the index of the last found occurrence of Item in TableIn
-- **lastIndexOfItem InputArgs (table {TableIn, Item, StartIndex (int)})**
+- **lastIndexOfItem InputArgs (table {TableIn (table or byteArray), Item, StartIndex (int)})**
   - returns the index of the last found occurrence of Item in TableIn starting at StartIndex
-- **allIndexesOfItem InputArgs (table {TableIn, Item)}**
+- **allIndexesOfItem InputArgs (table {TableIn (table or byteArray), Item)}**
   - returns an array of all the indexes for the found occurrences of Item in TableIn
 - **tableContainsItem InputArgs (table {TableIn, Item})**
   - returns true if the array part of TableIn contains Item or if the hashmap part of TableIn contains Item
@@ -147,6 +147,8 @@ These use the value directly following the function. If the function takes in mu
   - returns true if the array part of TableIn contains Item
 - **hashmapContainsItem InputArgs (table {TableIn, Item})**
   - returns true if the hashmap part of TableIn contains Item
+- **byteArrayContainsItems InputArgs (table {ByteArrayIn, Byte (int)})**
+  - returns true if ByteArrayIn contains the Byte 
 - **splitTable InputArgs (table {TableIn, Position (int)})**
   - returns a table containing two more tables which are TableIn split at Position. (`splitTable {{0, 1, 2}, 1}` would evaluate to {{0}, {1, 2}})
 - **removeDuplicateItems TableIn**
@@ -180,15 +182,15 @@ These use the value directly following the function. If the function takes in mu
 - **allIndexesOfString InputArgs (table {MainString, StringToFind)}**
   - returns an array of all the indexes for the found occurrences of StringToFind in MainString
 - **splitString InputArgs (table {StringIn, Position (int)})**
-  - returns a table containing two strings which are StringIn split at Position. (splitString {"abc", 1} would evaluate to {"a", "bc"})
+  - returns a table containing two strings which are StringIn split at Position. (`splitString {"abc", 1}` would evaluate to {"a", "bc"})
 - **splitString InputArgs (table {StringIn, StringToFind})**
-  - returns a table containing all the sections in StringIn between the found occurrences of StringToFind. (splitString ("a b c", " ") would evaluate to {"a", "b", "c"})
+  - returns a table containing all the sections in StringIn between the found occurrences of StringToFind. (`splitString ("a b c", " ")` would evaluate to {"a", "b", "c"})
 - **stringStartsWith InputArgs (table {StringIn, StringToFind})**
   - returns true if StringIn starts with StringToFind
 - **stringEndsWith InputArgs (table {StringIn, StringToFind})**
   - returns true if StringIn ends with StringToFind
 - **replaceStrings InputArgs (table {StringIn, StringToFind, ReplacementString})**
-  - returns a string which is StringIn but with all occurrences of StringToFind replaced with ReplacementString. (replaceStrings {"a b c", " ", ", "} would evaluate to "a, b, c")
+  - returns a string which is StringIn but with all occurrences of StringToFind replaced with ReplacementString. (`replaceStrings {"a b c", " ", ", "}` would evaluate to "a, b, c")
 - **toLowerCase String**
 - **toUpperCase String**
 - **trimString String**
@@ -202,6 +204,26 @@ These use the value directly following the function. If the function takes in mu
 - **toFloat Input**
 - **toString Input**
 - **toBool Input**
+
+<br>
+
+#### Functions:
+
+- **newFunction InputArgs {LineNumber (int)}**
+  - returns a new value of type 'function' with LineNumber as the line to jump to and the current file as the file to jump to
+- **newFunction InputArgs {LineNumber (int), FileName (string)}**
+  - returns a new value of type 'function' with LineNumber as the line to jump to and FileName as the file to jump to
+- **getFunctionLine Function**
+  - returns the line number of Function
+- **getFunctionFile Function**
+  - returns the file name of Function (returns null if the file name was not defined because it is assumed to jump to a function in the current file)
+
+**NOTE:** Function values created with `newFunction InputArgs {LineNumber (int)}` (which includes `call FunctionName` / `call $FunctionName`) **should not be shared between files** since the file name will not be changed when calling functions created like that. Instead, you can do the following when you want to share a function value that points to a function in the current file:
+
+```
+$link TheCurrentFileName as this
+FunctionValueToPass = $this.ExampleFunction
+```
 
 <br>
 

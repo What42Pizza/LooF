@@ -28,6 +28,21 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
 
 
 
+LooFInterpreterFunction InterpreterFunction_ConditionalPop = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
+    
+  }
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+    LooFCompiler.SimplifyAllOutputVars (Statement, CodeData, LineNumber);
+  }
+  @Override public String toString (LooFStatement Statement) {return "'conditionalPop'";}
+};
+
+
+
+
+
 LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
@@ -105,6 +120,20 @@ LooFInterpreterFunction InterpreterFunction_Return = new LooFInterpreterFunction
 
 
 
+LooFInterpreterFunction InterpreterFunction_ReturnRaw = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
+    
+  }
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 0, CodeData, LineNumber);
+  }
+  @Override public String toString (LooFStatement Statement) {return "'returnRaw'";}
+};
+
+
+
+
+
 LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     
@@ -113,6 +142,20 @@ LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFuncti
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
   }
   @Override public String toString (LooFStatement Statement) {return "'returnIf'";}
+};
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_ReturnRawIf = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
+    
+  }
+  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
+  }
+  @Override public String toString (LooFStatement Statement) {return "'returnRawIf'";}
 };
 
 
