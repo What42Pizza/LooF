@@ -54,7 +54,7 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
   }
   @Override public String toString (LooFStatement Statement) {
     LooFAdditionalCallStatementData AdditionalData = (LooFAdditionalCallStatementData) Statement.AdditionalFunctionData;
-    return "'call' (File: " + AdditionalData.NewIPFileName + "; line: " + AdditionalData.NewIPLineNumber + ")";
+    return "'call' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + ")";
   }
 };
 
@@ -80,26 +80,12 @@ ReturnValue GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesTo
   LooFTokenBranch FirstArg = Args[0];
   if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new ReturnValue(); // if we don't know the type of the first value, we can't figure out anything else
   LooFDataValue FirstArgValue = FirstArg.Result;
+  if (FirstArgValue.ValueType != DataValueType_Function) throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + " statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FirstArgValue.ValueType] + "."));
   ReturnValue Return = new ReturnValue ();
-  switch (FirstArgValue.ValueType) {
-    
-    case (DataValueType_Int):
-      Return.IntValue = (int) FirstArgValue.IntValue;
-      if (GetErrorTypesToCatch) Return.StringArrayValue = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
-      return Return;
-    
-    case (DataValueType_String):
-      if (Args.length == 1) throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + "statements that take a string as its first arg must have an int as its second arg, but only one arg was found. (maybe you don't need quotation marks?)"));
-      Return.StringValue = FirstArgValue.StringValue;
-      Long SecondArgAsLong = LooFCompiler.GetLongFromStatementArg (Args[1], 2, CodeData, LineNumber);
-      Return.IntegerValue = SecondArgAsLong == null ? null : SecondArgAsLong.intValue(); // Long to Integer from stack overflow: https://stackoverflow.com/a/5804066/13325385
-      if (GetErrorTypesToCatch) Return.StringArrayValue = LooFCompiler.GetStringArrayFromStatementArg (Args[2], 3, CodeData, LineNumber);
-      return Return;
-    
-    default:
-      throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + "statements must take an int or a string as its first arg, but the first arg was of type " + TokenBranchTypeNames[FirstArgValue.ValueType] + "."));
-    
-  }
+  Return.IntegerValue = FirstArgValue.FunctionLineValue;
+  Return.StringValue = FirstArgValue.FunctionFileValue;
+  if (GetErrorTypesToCatch) Return.StringArrayValue = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
+  return Return;
 }
 
 
@@ -552,7 +538,7 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
   }
   @Override public String toString (LooFStatement Statement) {
     LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalFunctionData;
-    return "'call' (File: " + AdditionalData.NewIPFileName + "; line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
+    return "'call' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
   }
 };
 

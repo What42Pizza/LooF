@@ -396,6 +396,17 @@ LooFEvaluatorOperation Operation_Or = new LooFEvaluatorOperation() {
 
 
 
+LooFEvaluatorOperation Operation_OrDefault = new LooFEvaluatorOperation() {
+  @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
+    return (LeftValue.ValueType != DataValueType_Null) ? LeftValue : RightValue;
+  }
+  @Override public float GetOrder() {return 1.0;}
+};
+
+
+
+
+
 LooFEvaluatorOperation Operation_Xor = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     LooFDataValue LeftValueAsBool = Function_ToBool.HandleFunctionCall (LeftValue, Environment, CodeData);
@@ -1329,36 +1340,30 @@ LooFEvaluatorFunction Function_AllIndexesOfItem = new LooFEvaluatorFunction() {
     LooFDataValue FirstArg  = InputItems.get(0);
     LooFDataValue SecondArg = InputItems.get(1);
     
-    int StartIndex = 0;
-    if (InputItemsSize == 3) {
-      LooFDataValue ThirdArg = InputItems.get(2);
-      if (ThirdArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take an int as its third arg, but the third arg was of type " + DataValueTypeNames_PlusA[ThirdArg.ValueType] + ".", new String[] {"InvalidArgType"});
-      StartIndex = (int) ThirdArg.IntValue;
-    }
-    if (StartIndex < 0) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem cannot have a negative starting index.", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> AllIndexesList = new ArrayList <LooFDataValue> ();
     
     switch (FirstArg.ValueType) {
       
       case (DataValueType_Table):
         ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
         int ArrayEndIndex = ArrayValue.size() - 1;
-        for (int i = StartIndex; i < ArrayEndIndex; i ++) {
-          if (ArrayValue.get(i).equals(SecondArg)) return new LooFDataValue ((long) i);
+        for (int i = 0; i < ArrayEndIndex; i ++) {
+          if (ArrayValue.get(i).equals(SecondArg)) AllIndexesList.add(new LooFDataValue ((long) i));
         }
-        return new LooFDataValue (-1L);
+        return new LooFDataValue (AllIndexesList, new HashMap <String, LooFDataValue> ());
       
       case (DataValueType_ByteArray):
-        if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
         byte SecondArgByte = (byte) SecondArg.IntValue;
         byte[] ByteArrayValue = Input.ByteArrayValue;
         int ByteArrayEndIndex = ByteArrayValue.length - 1;
-        for (int i = StartIndex; i < ByteArrayEndIndex; i ++) {
-          if (ByteArrayValue[i] == SecondArgByte) return new LooFDataValue ((long) i);
+        for (int i = 0; i < ByteArrayEndIndex; i ++) {
+          if (ByteArrayValue[i] == SecondArgByte) AllIndexesList.add(new LooFDataValue ((long) i));
         }
-        return new LooFDataValue (-1L);
+        return new LooFDataValue (AllIndexesList, new HashMap <String, LooFDataValue> ());
       
       default:
-        ThrowLooFException (Environment, CodeData, "the evaluator function firstIndexOfItem can only take a table or a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames_PlusA[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"});
+        ThrowLooFException (Environment, CodeData, "the evaluator function allIndexesOfItem can only take a table or a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames_PlusA[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"});
         throw new AssertionError();
       
     }
@@ -1379,11 +1384,11 @@ LooFEvaluatorFunction Function_GetChar = new LooFEvaluatorFunction() {
     
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take two arguments (in the given table), but " + Args.size() + " were found.", new String[] {"InvalidNumOfArgs"});
+    if (Args.size() != 2) ThrowLooFException (Environment, CodeData, "the evaluator function getChar can only take a table with 2 values, but the table given contains " + Args.size() + " items.", new String[] {"InvalidNumOfArgs"});
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue IndexDataValue = Args.get(1);
-    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes a string as its first argument (in the given table), not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
-    if (IndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes an int as its second argument (in the given table), not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (IndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getChar takes an int as its second argument, not " + DataValueTypeNames_PlusA[IndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = StringDataValue.StringValue;
     long Index = IndexDataValue.IntValue;
@@ -1447,13 +1452,13 @@ LooFEvaluatorFunction Function_GetSubString = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> Args = Input.ArrayValue;
-    if (Args.size() != 3) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take three arguments (in the given table), but " + Args.size() + " were found.", new String[] {"InvalidArgType"});
+    if (Args.size() != 3) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString can only take a table with 3 values, but the table given contains " + Args.size() + " items.", new String[] {"InvalidArgType"});
     LooFDataValue StringDataValue = Args.get(0);
     LooFDataValue StartIndexDataValue = Args.get(1);
     LooFDataValue EndIndexDataValue = Args.get(2);
-    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes a string as its first argument (in the given table), not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
-    if (StartIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its second argument (in the given table), not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
-    if (EndIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its third argument (in the given table), not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (StringDataValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes a string as its first argument, not " + DataValueTypeNames_PlusA[StringDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (StartIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its second argument, not " + DataValueTypeNames_PlusA[StartIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (EndIndexDataValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function getSubString takes an int as its third argument, not " + DataValueTypeNames_PlusA[EndIndexDataValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     String StringIn = StringDataValue.StringValue;
     long StartIndex = StartIndexDataValue.IntValue;
@@ -1630,6 +1635,40 @@ LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
         throw new AssertionError();
       
     }
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_NewFunction = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, "the evaluator function newFunction can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> Args = Input.ArrayValue;
+    int ArgsSize = Args.size();
+    
+    LooFDataValue LineNumberValue;
+    switch (ArgsSize) {
+      
+      case (1):
+        LineNumberValue = Args.get(0);
+        if (LineNumberValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function newFunction can only take an int as its first arg when there is 1 arg, but the first arg was of type  " + DataValueTypeNames[LineNumberValue.ValueType] + " items.", new String[] {"InvalidArgType"});
+        return new LooFDataValue (null, (int) LineNumberValue.IntValue);
+      
+      case (2):
+        LineNumberValue = Args.get(0);
+        LooFDataValue FileNameValue = Args.get(1);
+        if (LineNumberValue.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, "the evaluator function newFunction can only take an int as its first arg when there are 2 args, but the first arg was of type  " + DataValueTypeNames[LineNumberValue.ValueType] + ".", new String[] {"InvalidArgType"});
+        if (FileNameValue.ValueType != DataValueType_String) ThrowLooFException (Environment, CodeData, "the evaluator function newFunction can only take a string as its second arg when there are 2 args, but the second arg was of type  " + DataValueTypeNames[FileNameValue.ValueType] + ".", new String[] {"InvalidArgType"});
+        return new LooFDataValue (FileNameValue.StringValue, (int) LineNumberValue.IntValue);
+      
+      default:
+        ThrowLooFException (Environment, CodeData, "the evaluator function newFunction can only take a table with 1 or 2 values, but the table given contains " + Args.size() + " items.", new String[] {"InvalidArgType"});
+        throw new AssertionError();
+      
+    }
+    
   }
 };
 

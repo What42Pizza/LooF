@@ -21,6 +21,8 @@ These use values from both sides of the operator.
 - **<=**
 - **and**
 - **or**
+- **orDefault**
+  - if the left argument if it is not null, return the left argument, else return the right argument
 - **xor**
 - **&&**
   - bitwise and
@@ -32,6 +34,8 @@ These use values from both sides of the operator.
   - bitwise shift right
 - **>>**
   - bitwise shift left
+
+**NOTE:** You can create a ternary operator (`A ? B : C`) by doing `A and B or C` (just like Lua)
 
 <br>
 <br>

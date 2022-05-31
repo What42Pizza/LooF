@@ -296,6 +296,7 @@ class LooFCompiler {
     EvaluatorOperations.put("<=", Operation_LessThanOrEqual);
     EvaluatorOperations.put("and", Operation_And);
     EvaluatorOperations.put("or", Operation_Or);
+    EvaluatorOperations.put("orDefault", Operation_OrDefault);
     EvaluatorOperations.put("xor", Operation_Xor);
     EvaluatorOperations.put("&&", Operation_BitwiseAnd);
     EvaluatorOperations.put("||", Operation_BitwiseOr);
@@ -389,7 +390,7 @@ class LooFCompiler {
     EvaluatorFunctions.put("toString", Function_ToString);
     EvaluatorFunctions.put("toBool", Function_ToBool);
     
-    EvaluatorFunctions.put("newFunction", NullEvaluatorFunction);
+    EvaluatorFunctions.put("newFunction", Function_NewFunction);
     EvaluatorFunctions.put("getFunctionLine", NullEvaluatorFunction);
     EvaluatorFunctions.put("getFunctionFile", NullEvaluatorFunction);
     
@@ -1693,7 +1694,7 @@ class LooFCompiler {
     LooFTokenBranch[] FunctionStatementArgs = GetFunctionStatementArgs (CurrentLineTokens, BlockLevels, BlockEnds, AddonsData, CodeData, LineNumber);
     
     // assemble final statement
-    LooFStatement Output = new LooFStatement (CurrentLineTokens.get(0), (LooFInterpreterFunction) InterpreterFunction.clone(), FunctionStatementArgs);
+    LooFStatement Output = new LooFStatement (CurrentLineTokens.get(0), (LooFInterpreterFunction) InterpreterFunction, FunctionStatementArgs);
     
     return Output;
   }

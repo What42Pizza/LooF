@@ -32,7 +32,7 @@ class LooFInterpreterAssignment {
 
 
 
-class LooFInterpreterFunction implements Cloneable {
+class LooFInterpreterFunction {
   
   public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
@@ -52,14 +52,6 @@ class LooFInterpreterFunction implements Cloneable {
   
   public String toString (LooFStatement Statement) {
     throw new AssertionError("this LooFInterpreterFunction is a base vlass and it does not have an overridden toString().");
-  }
-  
-  public Object clone() {
-    try {
-      return super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new AssertionError();
-    }
   }
   
 }
@@ -360,8 +352,8 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int
   
   boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
   
-  if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
-  if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
+  if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
+  if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
   if (LineHasChanged) return "Original line of code:                    `" + OriginalLineOfCode + "`\nAfter (or during) pre-processor & linker: `" + LineOfCode + "`";
   return "Line of code:  `" + LineOfCode + "`";
@@ -418,8 +410,8 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
   
-  if (OriginalLineOfCode.length() > 100) OriginalLineOfCode = OriginalLineOfCode.substring(0, 100) + " ...";
-  if (LineOfCode.length() > 100) LineOfCode = LineOfCode.substring(0, 100) + " ...";
+  if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
+  if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
   return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
 }
@@ -513,6 +505,7 @@ class LooFDataValue implements Cloneable {
   }
   
   public LooFDataValue (LooFDataValue[] ArrayValue) {
+    ValueType = DataValueType_Table;
     ArrayList <LooFDataValue> ArrayValueAsList = ArrayToArrayList (ArrayValue);
     this.ArrayValue = ArrayValueAsList;
     this.HashMapValue = new HashMap <String, LooFDataValue> ();
@@ -520,12 +513,14 @@ class LooFDataValue implements Cloneable {
   }
   
   public LooFDataValue (byte[] ByteArrayValue) {
+    ValueType = DataValueType_ByteArray;
     this.ByteArrayValue = ByteArrayValue;
     this.HashMapValue = new HashMap <String, LooFDataValue> ();
     LockLevels.add(0);
   }
   
   public LooFDataValue (String FunctionFileValue, int FunctionLineValue) {
+    ValueType = DataValueType_Function;
     this.FunctionFileValue = FunctionFileValue;
     this.FunctionLineValue = FunctionLineValue;
   }
@@ -580,7 +575,7 @@ class LooFDataValue implements Cloneable {
 
 
 
-final int NumOfDataValueTypes = 7;
+final int NumOfDataValueTypes = 8;
 
 final int DataValueType_Null = 0;
 final int DataValueType_Int = 1;
