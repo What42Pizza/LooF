@@ -19,6 +19,7 @@
   - Pauses until timeSince 0 >= EndTime.
 - **"stop"**
   - Stops execution.
+- **"add file", FilePath (string or table {string, ...})**
 
 <br>
 
@@ -44,6 +45,9 @@
 - **"delete file", FilePath (string or table {string, ...})**
   - Deletes the file at FilePath.
   - Errors if the file at FilePath cannot be found.
+- **"restrict file access", FolderPath (string or table {string, ...})**
+  - Makes this module only able to work with files inside FolderPath.
+  - Errors if the folder at FolderPath cannot be found.
 
 <br>
 

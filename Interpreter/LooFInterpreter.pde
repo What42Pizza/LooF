@@ -126,6 +126,38 @@ class LooFInterpreter {
   
   
   void HandleEnvironmentException (LooFInterpreterException e) throws LooFInterpreterException  {
+    ArrayList <String> StackTraceFiles = new ArrayList <String> ();
+    ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
+    
+    
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void JumpToFunction (LooFEnvironment Environment, String FileName, int LineNumber, String[] ErrorTypesToCatch) {
+    
+    if (FileName != null) {
+      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(FileName, null);
+      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "could not find file named \"" + FileName + "\".", new String[] {"InvalidArgType"}));
+      Environment.CurrentCodeData = NewCodeData;
+      Environment.CurrentFileName = FileName;
+    }
+    Environment.CallStackFileNames.add(Environment.CurrentFileName);
+    
+    Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
+    Environment.CurrentLineNumber = LineNumber;
+    
+    Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
+    
+    Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
     
   }
   

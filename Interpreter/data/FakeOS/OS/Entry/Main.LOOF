@@ -1,0 +1,92 @@
+call $GetMainExecutableFolder
+pop _, MainExecutableFolder
+
+
+
+// add basics
+call $AddFile, _, MainExecutablePath, {"OS", "Basics", "Basics.LOOF"}
+call $AddFile, _, MainExecutablePath, {"OS", "Basics", "BasicFunctions.LOOF"}
+
+// add header
+call $GetFileStrings, _, MainExecutablePath, "MainHeader.LOOF"
+pop _, MainHeaderContents
+callOutside "Interpreter", "set header", MainHeaderContents
+
+// load kernal
+call $AddFile, _, MainExecutablePath, "Kernal.LOOF"
+
+
+
+
+
+skip
+$function GetMainExecutableFolder
+	callOutside "Files", "get executable path"
+	pop _, MainExecutableFolder
+	
+	MainExecutableFolder[endOf MainExecutableFolder] = null
+	MainExecutableFolder[endOf MainExecutableFolder] = null
+	
+	return MainExecutableFolder
+end
+
+
+
+skip
+$function AddFile
+	pop _, _, MainExecutableFolder, FileName
+	
+	FileToAddPath = cloneValue MainExecutableFolder
+	FileToAddPath[lengthOf FileToAddPath] = FileName
+	
+	try $AddFile_Unsafe, {"FileNotFound"}, _, FileToAddPath
+	pop _, Success, ErrorData
+	
+	returnIf Success
+	
+	callOutside "Console", "println", "Error while booting: could not find file \"" .. FileName .. "\".\n\nError data: " .. toString ErrorData
+	callOutside "Interpreter", "stop"
+	
+	return
+end
+
+
+
+skip
+$function AddFile_Unsafe
+	pop _, _, FileToAddPath
+	callOutside "Interpreter", "add file", FileToAddPath
+	return
+end
+
+
+
+
+
+skip
+$function GetFileStrings
+	pop _, _, MainExecutableFolder, FileName
+	
+	FileToReadPath = cloneValue MainExecutableFolder
+	FileToReadPath[lengthOf FileToReadPath] = FileName
+	
+	try $GetFileStrings_Unsafe, {"FileNotFound"}, _, FileToReadPath
+	pop _, Success, ErrorData, FileContents
+	
+	returnIf Success, FileContents
+	
+	callOutside "Console", "println", "Error while booting: could not find file \"" .. FileName .. "\".\n\nError data: " .. toString ErrorData
+	callOutside "Interpreter", "stop"
+	
+	return
+end
+
+
+
+skip
+$function GetFileStrings_Unsafe
+	pop _, _, FileToReadPath
+	callOutside "Files", "read file as strings", FileToReadPath
+	pop _, FileContents
+	return FileContents
+end

@@ -1681,3 +1681,13 @@ LooFEvaluatorFunction Function_TypeOf = new LooFEvaluatorFunction() {
     return new LooFDataValue (DataValueTypeNames[Input.ValueType]);
   }
 };
+
+
+
+
+
+LooFEvaluatorFunction Function_CloneValue = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
+    return Input.clone();
+  }
+};

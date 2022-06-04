@@ -30,6 +30,8 @@
   - Decrements VarName
 - **VarName !!**
   - Toggles VarName
+- **VarName getClone**
+  - Sets VarName to `clone VarName`
 
 <br>
 <br>
@@ -58,14 +60,10 @@
 
 ## Functions
 
-- **call FunctionLineNumber (int)**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber
-- **call FileName (string), FunctionLineNumber (int)**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName
-- **call FunctionLineNumber (int), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments to the general stack in a single table
-- **call FileName (string), FunctionLineNumber (int), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in file FileName, and pushes all remaining arguments to the general stack in a single table
+- **call Function**
+  - Pushes the instruction pointer and file name to the IP stack and jumps execution to Function
+- **call Function, Arg1, Arg2, ...**
+  - Pushes the instruction pointer and file name to the IP stack, jumps execution to Function, and pushes all remaining arguments to the general stack in a single table
 - **return**
   - Jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty
 - **return ReturnValue0, ReturnValue1, ...**
@@ -78,6 +76,8 @@
   - Pushes ReturnValue to the general stack and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 - **returnRawIf Condition, ReturnValue**
   - If Condition is truthy, pushes ReturnValue to the general stack and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
+
+**NOTE:** remember that functions have to take in values of type 'function', which can only be created with the 'createFunction' evaluator function. (more info in 'Language Basics.md')
 
 <br>
 
@@ -147,14 +147,10 @@
 
 ## Error Handling
 
-- **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
-- **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer to the IP stack and jumps execution to FunctionLineNumber in the file FileName. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
-- **try FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
-- **try FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer to the IP stack, jumps execution to FunctionLineNumber in the file FileName, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
+- **try Function, ErrorTypesToCatch (table {string, ...})**
+  - Pushes the instruction pointer and file name to the IP stack and jumps execution to Function. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
+- **try Function, ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
+  - Pushes the instruction pointer and file name to the IP stack, jumps execution to Function, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 
 
 **Note:** Value pushed to the stack by 'try' statements:
@@ -174,8 +170,6 @@
 	...
 }
 ```
-
-**Note:** (this can be represented with `try (optional) FileName (string), FunctionLineNumber (int), ErrorTypesToCatch (table {string, ...}), (optional) Arg1, (optional) Arg2, ...`)
 
 <br>
 

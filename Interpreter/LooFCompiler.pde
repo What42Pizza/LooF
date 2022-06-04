@@ -225,6 +225,7 @@ class LooFCompiler {
     InterpreterAssignments.put("++", Assignment_PlusPlus);
     InterpreterAssignments.put("--", Assignment_MinusMinus);
     InterpreterAssignments.put("!!", Assignment_NotNot);
+    InterpreterAssignments.put("getClone", Assignment_GetClone);
     
     return InterpreterAssignments;
   }
@@ -351,6 +352,7 @@ class LooFCompiler {
     EvaluatorFunctions.put("chance", Function_Chance);
     
     EvaluatorFunctions.put("lengthOf", Function_LengthOf);
+    EvaluatorFunctions.put("isEmpty", NullEvaluatorFunction);
     EvaluatorFunctions.put("totalItemsIn", Function_TotalItemsIn);
     EvaluatorFunctions.put("endOf", Function_EndOf);
     EvaluatorFunctions.put("lastItemOf", Function_LastItemOf);
@@ -367,20 +369,20 @@ class LooFCompiler {
     EvaluatorFunctions.put("byteArrayContainsItems", NullEvaluatorFunction);
     EvaluatorFunctions.put("splitTable", NullEvaluatorFunction);
     EvaluatorFunctions.put("removeDuplicateItems", NullEvaluatorFunction);
-    EvaluatorFunctions.put("cloneTable", NullEvaluatorFunction);
     EvaluatorFunctions.put("deepCloneTable", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("getChar", Function_GetChar);
     EvaluatorFunctions.put("getCharInts", Function_GetCharInts);
     EvaluatorFunctions.put("getCharByes", Function_GetCharBytes);
     EvaluatorFunctions.put("getSubString", Function_GetSubString);
+    EvaluatorFunctions.put("replaceSubString", NullEvaluatorFunction);
+    EvaluatorFunctions.put("replaceStrings", NullEvaluatorFunction);
     EvaluatorFunctions.put("firstIndexOfString", NullEvaluatorFunction);
     EvaluatorFunctions.put("lastIndexOfString", NullEvaluatorFunction);
     EvaluatorFunctions.put("allIndexesOfString", NullEvaluatorFunction);
     EvaluatorFunctions.put("splitString", NullEvaluatorFunction);
     EvaluatorFunctions.put("stringStartsWith", NullEvaluatorFunction);
     EvaluatorFunctions.put("stringEndsWith", NullEvaluatorFunction);
-    EvaluatorFunctions.put("replaceStrings", NullEvaluatorFunction);
     EvaluatorFunctions.put("toLowerCase", NullEvaluatorFunction);
     EvaluatorFunctions.put("toUpperCase", NullEvaluatorFunction);
     EvaluatorFunctions.put("trimString", NullEvaluatorFunction);
@@ -395,8 +397,10 @@ class LooFCompiler {
     EvaluatorFunctions.put("getFunctionFile", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("typeOf", Function_TypeOf);
+    EvaluatorFunctions.put("cloneValue", Function_CloneValue);
     EvaluatorFunctions.put("newByteArray", NullEvaluatorFunction);
     EvaluatorFunctions.put("timeSince", NullEvaluatorFunction);
+    EvaluatorFunctions.put("switch", NullEvaluatorFunction);
     
     return EvaluatorFunctions;
   }

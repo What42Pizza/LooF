@@ -188,3 +188,15 @@ LooFInterpreterAssignment Assignment_NotNot = new LooFInterpreterAssignment() {
   @Override public boolean AddToCombinedTokens() {return true;}
   @Override public boolean TakesArgs() {return false;}
 };
+
+
+
+
+
+LooFInterpreterAssignment Assignment_GetClone = new LooFInterpreterAssignment() {
+  @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
+    return OldVarValue.clone();
+  }
+  @Override public boolean AddToCombinedTokens() {return true;}
+  @Override public boolean TakesArgs() {return false;}
+};

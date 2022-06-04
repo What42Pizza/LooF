@@ -1,0 +1,34 @@
+#ignore_header
+
+$link BasicFunctions.LOOF as Basics
+
+
+
+
+
+#replaceStart "function " "skip\n$function "
+
+#replaceStart "call " "call $"
+#replaceStart "call $$" "call $" // for if the other replace was already preformed
+
+#replaceEnd " then" ", true\nskip"
+
+#replace "  -> " "\npop ARGS, "
+#replace "  throwsErrors " "\nsetPassedErrors "
+
+#replace ";" "\n"
+
+#replaceStart ":" "call $Basics."
+
+#replaceIgnoreQuotes ":{" "\" .. toString ("
+#replaceIgnoreQuotes "}:\"" ")"
+#replaceIgnoreQuotes "}:" ") .. \""
+
+
+
+#replace "Basics.print " "Basics.print, "
+#replace "Basics.exit " "Basics.exit, "
+#replace "Basics.addItem " "Basics.addItem, "
+#replace "Basics.removeIndex " "Basics.removeIndex, "
+#replace "Basics.addAll " "Basics.addAll, "
+#replace "Basics.ensureArgTypesAreCorrect " "Basics.ensureArgTypesAreCorrect, "

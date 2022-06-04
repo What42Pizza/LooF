@@ -56,10 +56,10 @@ These use the value directly following the function. If the function takes in mu
 - **sqrt Input (int or float)**
 - **sign Input (int or float)**
   - returns 1 if VALUE is >= 0 or -1 if VALUE is < 0
-- **min InputArgs (table {int or float, ...})**
-- **max InputArgs (table {int or float, ...})**
-- **clamp InputArgs (table {Input (float or int), Min (float or int), Max (float or int)})**
-- **log InputArgs (table {Input (int or float), Base (int or float)})**
+- **min {int or float, ...}**
+- **max {int or float, ...}**
+- **clamp {Input (float or int), Min (float or int), Max (float or int)}**
+- **log {Input (int or float), Base (int or float)}**
 - **log10 Input (int or float)**
   - should be slightly faster than `log {Input, 10}`
 - **ln Input (int or float)**
@@ -89,7 +89,7 @@ These use the value directly following the function. If the function takes in mu
 - **asin Input (int or float)**
 - **acos Input (int or float)**
 - **atan Input (int or float)**
-- **atan2 InputArgs (table {y (int or float), x (int or float)})**
+- **atan2 {y (int or float), x (int or float)}**
 - **sinh Input (int or float)**
 - **cosh Input (int or float)**
 - **tanh Input (int or float)**
@@ -102,7 +102,7 @@ These use the value directly following the function. If the function takes in mu
   - returns a random number in the range [0, Input)
 - **randomInt Input (int)**
   - returns a random integer in the range [0, Input]
-- **randomInt InputArgs (table {min (int), max (int)})**
+- **randomInt {min (int), max (int)}**
   - returns a random integer in the range [min, max]
 - **chance Input (int or float)**
   - returns true Input % of the time (chance 50 would return true half of the time)
@@ -111,54 +111,55 @@ These use the value directly following the function. If the function takes in mu
 
 #### Tables:
 
-- **lengthOf Table**
-  - returns the number of items in the array part of Table 
-- **lengthOf String**
-  - returns the number of characters in String
-- **lengthOf ByteArray**
-  - returns the number of bytes in ByteArray
-- **totalItemsIn Table**
-  - returns the number of items in the array part of Table plus the number of items in the hashmap part of Table
-- **endOf Table**
-  - returns lengthOf Table - 1
-- **endOf ByteArray**
-  - returns lengthOf ByteArray - 1
-- **lastItemOf Table**
-  - returns the last item in the array part of Table
-- **lastItemOf ByteArray**
-  - returns the last item in the array part of ByteArray
-- **keysOf Table**
-  - returns a table containing all of the keys of the hashmap part of Table
-- **valuesOf Table**
-  - returns a table containing all of the values of the hashmap part of Table
-- **randomItem Table**
-  - returns a random item from the array part of Table
-- **randomValue Table**
-  - returns a random value from the hashmap part of Table
-- **firstIndexOfItem InputArgs (table {TableIn (table or byteArray), Item})**
+- **lengthOf TableIn**
+  - returns the number of items in the array part of TableIn
+- **lengthOf ByteArrayIn**
+  - returns the number of bytes in ByteArrayIn
+- **isEmpty TableIn**
+  - returns whether or not TableIn is empty
+- **isEmpty ByteArrayIn**
+  - returns whether or not ByteArrayIn is empty
+- **totalItemsIn TableIn**
+  - returns the number of items in the array part of TableIn plus the number of items in the hashmap part of Table
+- **endOf TableIn**
+  - returns lengthOf TableIn - 1
+- **endOf ByteArrayIn**
+  - returns lengthOf ByteArrayIn - 1
+- **lastItemOf TableIn**
+  - returns the last item in the array part of TableIn
+- **lastItemOf ByteArrayIn**
+  - returns the last item in the array part of ByteArrayIn
+- **keysOf TableIn**
+  - returns a table containing all of the keys of the hashmap part of TableIn
+- **valuesOf TableIn**
+  - returns a table containing all of the values of the hashmap part of TableIn
+- **randomItem TableIn**
+  - returns a random item from the array part of TableIn
+- **randomValue TableIn**
+  - returns a random value from the hashmap part of TableIn
+- **firstIndexOfItem {TableIn (table or byteArray), Item (any)}**
   - returns the index of the first found occurrence of Item in TableIn
-- **firstIndexOfItem InputArgs (table {TableIn (table or byteArray), Item, StartIndex (int)})**
+- **firstIndexOfItem {TableIn (table or byteArray), Item (any), StartIndex (int)}**
   - returns the index of the first found occurrence of Item in TableIn starting at StartIndex
-- **lastIndexOfItem InputArgs (table {TableIn (table or byteArray), Item})**
+- **lastIndexOfItem {TableIn (table or byteArray), Item (any)}**
   - returns the index of the last found occurrence of Item in TableIn
-- **lastIndexOfItem InputArgs (table {TableIn (table or byteArray), Item, StartIndex (int)})**
+- **lastIndexOfItem  {TableIn (table or byteArray), Item (any), StartIndex (int)}**
   - returns the index of the last found occurrence of Item in TableIn starting at StartIndex
-- **allIndexesOfItem InputArgs (table {TableIn (table or byteArray), Item)}**
+- **allIndexesOfItem {TableIn (table or byteArray), Item (any)}**
   - returns an array of all the indexes for the found occurrences of Item in TableIn
-- **tableContainsItem InputArgs (table {TableIn, Item})**
-  - returns true if the array part of TableIn contains Item or if the hashmap part of TableIn contains Item
-- **arrayContainsItem InputArgs (table {TableIn, Item})**
-  - returns true if the array part of TableIn contains Item
-- **hashmapContainsItem InputArgs (table {TableIn, Item})**
-  - returns true if the hashmap part of TableIn contains Item
-- **byteArrayContainsItems InputArgs (table {ByteArrayIn, Byte (int)})**
-  - returns true if ByteArrayIn contains the Byte 
-- **splitTable InputArgs (table {TableIn, Position (int)})**
+- **tableContainsItem {TableIn, ItemToFind (any)}**
+  - returns true if the array part of TableIn contains ItemToFind or if the hashmap part of TableIn contains ItemToFind
+- **arrayContainsItem {TableIn, ItemToFind (any)}**
+  - returns true if the array part of TableIn contains ItemToFind
+- **hashmapContainsItem {TableIn, ItemToFind (any)}**
+  - returns true if the hashmap part of TableIn contains ItemToFind
+- **byteArrayContainsItems {ByteArrayIn, ByteToFind (int)}**
+  - returns true if ByteArrayIn contains ByteToFind 
+- **splitTable {TableIn, Position (int)}**
   - returns a table containing two more tables which are TableIn split at Position. (`splitTable {{0, 1, 2}, 1}` would evaluate to {{0}, {1, 2}})
+  - Position is modulo-ed by the length of TableIn (with -1 mapping correctly to endOf TableIn)
 - **removeDuplicateItems TableIn**
   - returns a new table which contains a single instance of each item in TableIn
-- **cloneTable TableIn**
-  - returns a new table which contains all the items of TableIn
 - **deepCloneTable TableIn**
   - returns a new table which contains deep cloned versions of all the items in TableIn
 
@@ -166,56 +167,66 @@ These use the value directly following the function. If the function takes in mu
 
 #### Strings:
 
-- **getChar InputArgs (table {StringIn, Position (int)})**
+- **lengthOf String**
+  - returns the number of characters in String
+- **isEmpty StringIn**
+  - returns whether or not StringIn is empty
+- **getChar {StringIn, Position (int)}**
   - returns the character at Position of StringIn. Position is modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
-- **getCharInts String**
-  - returns an array of the characters in String as ints
-- **getCharBytes String**
-  - returns a byteArray with the characters in String as bytes
-- **getSubString InputArgs (table {StringIn, StartIndex (int), EndIndex (int)})**
+- **getCharInts StringIn**
+  - returns an array of the characters in StringIn as ints
+- **getCharBytes StringIn**
+  - returns a byteArray with the characters in StringIn as bytes
+- **getSubString {StringIn, StartIndex (int), EndIndex (int)}**
   - returns a new string which is part of StringIn
-  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to lengthOf StringIn - 1)
-- **firstIndexOfString InputArgs (table {MainString, StringToFind})**
-  - returns the index of the first found occurrence of StringToFind in MainString
-- **firstIndexOfString InputArgs (table {MainString, StringToFind, StartIndex (int)})**
-  - returns the index of the first found occurrence of StringToFind in MainString starting at StartIndex
-- **lastIndexOfString InputArgs (table {MainString, StringToFind})**
-  - returns the index of the last found occurrence of StringToFind in MainString
-- **lastIndexOfString InputArgs (table {MainString, StringToFind, StartIndex (int)})**
-  - returns the index of the last found occurrence of StringToFind in MainString starting at StartIndex
-- **allIndexesOfString InputArgs (table {MainString, StringToFind)}**
-  - returns an array of all the indexes for the found occurrences of StringToFind in MainString
-- **splitString InputArgs (table {StringIn, Position (int)})**
-  - returns a table containing two strings which are StringIn split at Position. (`splitString {"abc", 1}` would evaluate to {"a", "bc"})
-- **splitString InputArgs (table {StringIn, StringToFind})**
-  - returns a table containing all the sections in StringIn between the found occurrences of StringToFind. (`splitString ("a b c", " ")` would evaluate to {"a", "b", "c"})
-- **stringStartsWith InputArgs (table {StringIn, StringToFind})**
-  - returns true if StringIn starts with StringToFind
-- **stringEndsWith InputArgs (table {StringIn, StringToFind})**
-  - returns true if StringIn ends with StringToFind
-- **replaceStrings InputArgs (table {StringIn, StringToFind, ReplacementString})**
+  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
+- **replaceSubString {StringIn, StartIndex (int), EndIndex (int), NewString}**
+  - returns a new string which is StringIn with the sub-string between StartIndex and EndIndex replaced with NewString
+  - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
+- **replaceStrings {StringIn, StringToFind, ReplacementString}**
   - returns a string which is StringIn but with all occurrences of StringToFind replaced with ReplacementString. (`replaceStrings {"a b c", " ", ", "}` would evaluate to "a, b, c")
-- **toLowerCase String**
-- **toUpperCase String**
-- **trimString String**
-  - returns String without any leading or trailing whitespace
+- **firstIndexOfString {StringIn, StringToFind}**
+  - returns the index of the first found occurrence of StringToFind in StringIn
+- **firstIndexOfString {StringIn, StringToFind, StartIndex (int)}**
+  - returns the index of the first found occurrence of StringToFind in StringIn starting at StartIndex
+  - StartIndex is modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
+- **lastIndexOfString {StringIn, StringToFind})**
+  - returns the index of the last found occurrence of StringToFind in StringIn
+- **lastIndexOfString {StringIn, StringToFind, StartIndex (int)}**
+  - returns the index of the last found occurrence of StringToFind in StringIn starting at StartIndex
+  - StartIndex is modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
+- **allIndexesOfString {StringIn, StringToFind)**
+  - returns an array of all the indexes for the found occurrences of StringToFind in StringIn
+- **splitString {StringIn, Position (int)}**
+  - returns a table containing two strings which are StringIn split at Position. (`splitString {"abc", 1}` would evaluate to {"a", "bc"})
+  - Position is modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
+- **splitString {StringIn, StringToFind}**
+  - returns a table containing all the sections in StringIn between the found occurrences of StringToFind. (`splitString ("a b c", " ")` would evaluate to {"a", "b", "c"})
+- **stringStartsWith {StringIn, StringToFind}**
+  - returns true if StringIn starts with StringToFind
+- **stringEndsWith {StringIn, StringToFind}**
+  - returns true if StringIn ends with StringToFind
+- **toLowerCase StringIn**
+- **toUpperCase StringIn**
+- **trimString StringIn**
+  - returns StringIn without any leading or trailing whitespace
 
 <br>
 
 #### Casting:
 
-- **toInt Input**
-- **toFloat Input**
-- **toString Input**
-- **toBool Input**
+- **toInt Input (int, float, string, or bool)**
+- **toFloat Input (int, float, string, or bool)**
+- **toString Input (any)**
+- **toBool Input (any)**
 
 <br>
 
 #### Functions:
 
-- **newFunction InputArgs {LineNumber (int)}**
+- **newFunction {LineNumber (int)}**
   - returns a new value of type 'function' with LineNumber as the line to jump to and the current file as the file to jump to
-- **newFunction InputArgs {LineNumber (int), FileName (string)}**
+- **newFunction {LineNumber (int), FileName (string)}**
   - returns a new value of type 'function' with LineNumber as the line to jump to and FileName as the file to jump to
 - **getFunctionLine Function**
   - returns the line number of Function
@@ -233,12 +244,16 @@ FunctionValueToPass = $this.ExampleFunction
 
 #### Misc:
 
-- **typeOf Input**
+- **typeOf Input (any)**
   - returns a string representing the data type of Input
+- **cloneValue Input (any)**
+  - returns a clone of Input
+  - useful for having a local mutable copy of a locked value 
 - **newByteArray Size (int)**
   - returns a new byte array with length of Size
 - **timeSince StartTime (int or float)**
   - returns the number of seconds since StartTime
+- **switch {SwitchValue (any), Cases (table), Default (any)}**
 
 <br>
 <br>
