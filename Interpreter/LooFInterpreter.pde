@@ -142,18 +142,18 @@ class LooFInterpreter {
   
   
   
-  void JumpToFunction (LooFEnvironment Environment, String FileName, int LineNumber, String[] ErrorTypesToCatch) {
+  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, String[] ErrorTypesToCatch) {
     
-    if (FileName != null) {
-      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(FileName, null);
-      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "could not find file named \"" + FileName + "\".", new String[] {"InvalidArgType"}));
+    if (NewPageName != null) {
+      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(NewPageName, null);
+      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "could not find page named \"" + NewPageName + "\".", new String[] {"InvalidArgType"}));
       Environment.CurrentCodeData = NewCodeData;
-      Environment.CurrentFileName = FileName;
+      Environment.CurrentPageName = NewPageName;
     }
-    Environment.CallStackFileNames.add(Environment.CurrentFileName);
+    Environment.CallStackFileNames.add(Environment.CurrentPageName);
     
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
-    Environment.CurrentLineNumber = LineNumber;
+    Environment.CurrentLineNumber = NewLineNumber;
     
     Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
     
@@ -171,6 +171,7 @@ class LooFInterpreter {
   
   
   void SetVariableValue (String VariableName, LooFDataValue NewValue, LooFEnvironment Environment) {
+    if (VariableName.equals("_")) return;
     ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
     HashMap <String, LooFDataValue> CurrentVariableList = GetLastItemOf (VariableListsStack);
     if (NewValue.ValueType == DataValueType_Null) {
@@ -185,6 +186,7 @@ class LooFInterpreter {
   
   
   LooFDataValue GetVariableValue (String VariableName, LooFEnvironment Environment, boolean CreateNullVar) {
+    if (VariableName.equals("_")) return new LooFDataValue();
     ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
     HashMap <String, LooFDataValue> CurrentVariableList = GetLastItemOf (VariableListsStack);
     LooFDataValue FoundVariableValue = CurrentVariableList.get(VariableName);

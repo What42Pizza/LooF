@@ -275,6 +275,7 @@ boolean CharStartsNewToken (char CharIn) {
     (CharIn >= 'a' && CharIn <= 'z') ||
     (CharIn >= 'A' && CharIn <= 'Z') ||
     (CharIn >= '0' && CharIn <= '9') ||
+    CharIn == '_' ||
     CharIn == '.'
   );
 }
@@ -592,8 +593,8 @@ String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
       return new String (DataValueIn.ByteArrayValue);
     
     case (DataValueType_Function):
-      String FileName = DataValueIn.FunctionFileValue;
-      return "Function at " + DataValueIn.FunctionLineValue + (FileName != null ? " in " + FileName : "");
+      String PageName = DataValueIn.FunctionPageValue;
+      return "Function at " + DataValueIn.FunctionLineValue + (PageName != null ? " in " + PageName : "");
     
     default:
       throw new AssertionError();

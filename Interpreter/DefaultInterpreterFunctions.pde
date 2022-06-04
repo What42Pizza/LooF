@@ -49,25 +49,25 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-    ReturnValue Return = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
-    Statement.AdditionalFunctionData = new LooFAdditionalCallStatementData (Return.StringValue, Return.IntegerValue);
+    ReturnValue3 <Integer, String, String[]> Return = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
+    Statement.AdditionalStatementData = new LooFAdditionalCallStatementData (Return.Value1, Return.Value2);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalCallStatementData AdditionalData = (LooFAdditionalCallStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalCallStatementData AdditionalData = (LooFAdditionalCallStatementData) Statement.AdditionalStatementData;
     return "'call' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + ")";
   }
 };
 
 
 
-class LooFAdditionalCallStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalCallStatementData extends LooFAdditionalStatementData {
   
-  String NewIPFileName;
   Integer NewIPLineNumber;
+  String NewIPFileName;
   
-  public LooFAdditionalCallStatementData (String NewIPFileName, Integer NewIPLineNumber) {
-    this.NewIPFileName = NewIPFileName;
+  public LooFAdditionalCallStatementData (Integer NewIPLineNumber, String NewIPFileName) {
     this.NewIPLineNumber = NewIPLineNumber;
+    this.NewIPFileName = NewIPFileName;
   }
   
 }
@@ -76,15 +76,15 @@ class LooFAdditionalCallStatementData extends LooFAdditionalFunctionData {
 
 
 
-ReturnValue GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesToCatch, LooFCodeData CodeData, int LineNumber, String FunctionName) {
+ReturnValue3 <Integer, String, String[]> GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesToCatch, LooFCodeData CodeData, int LineNumber, String FunctionName) {
   LooFTokenBranch FirstArg = Args[0];
-  if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new ReturnValue(); // if we don't know the type of the first value, we can't figure out anything else
+  if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new ReturnValue3 <Integer, String, String[]> (); // if we don't know the type of the first value, we can't figure out anything else
   LooFDataValue FirstArgValue = FirstArg.Result;
   if (FirstArgValue.ValueType != DataValueType_Function) throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + " statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FirstArgValue.ValueType] + "."));
-  ReturnValue Return = new ReturnValue ();
-  Return.IntegerValue = FirstArgValue.FunctionLineValue;
-  Return.StringValue = FirstArgValue.FunctionFileValue;
-  if (GetErrorTypesToCatch) Return.StringArrayValue = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
+  ReturnValue3 <Integer, String, String[]> Return = new ReturnValue3 <Integer, String, String[]> ();
+  Return.Value1 = FirstArgValue.FunctionLineValue;
+  Return.Value2 = FirstArgValue.FunctionPageValue;
+  if (GetErrorTypesToCatch) Return.Value3 = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
   return Return;
 }
 
@@ -169,20 +169,20 @@ LooFInterpreterFunction InterpreterFunction_Skip = new LooFInterpreterFunction()
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     Integer MatchingEndStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"end"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalSkipStatementData (MatchingEndStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalSkipStatementData (MatchingEndStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return 1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalSkipStatementData AdditionalData = (LooFAdditionalSkipStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalSkipStatementData AdditionalData = (LooFAdditionalSkipStatementData) Statement.AdditionalStatementData;
     return "'skip' ('end' at: " + AdditionalData.MatchingEndStatementIndex + ")";
   }
 };
 
 
 
-class LooFAdditionalSkipStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalSkipStatementData extends LooFAdditionalStatementData {
   
   Integer MatchingEndStatementIndex;
   
@@ -222,13 +222,13 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
     LooFTokenBranch[] Args = Statement.Args;
     if (Args.length > 0) LooFCompiler.SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return 1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalStatementData;
     return "'loop' ('repeat' at: " + AdditionalData.MatchingRepeatStatementIndex + ")";
   }
 };
@@ -247,13 +247,13 @@ LooFInterpreterFunction InterpreterFunction_ForEach = new LooFInterpreterFunctio
     LooFCompiler.SimplifySingleOutputVar (Statement, 0, CodeData, LineNumber);
     if (Args.length == 3) LooFCompiler.SimplifySingleOutputVar (Statement, 2, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return 1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalStatementData;
     return "'forEach' ('repeat' at: " + AdditionalData.MatchingRepeatStatementIndex + ")";
   }
 };
@@ -269,20 +269,20 @@ LooFInterpreterFunction InterpreterFunction_While = new LooFInterpreterFunction(
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return 1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalStatementData;
     return "'while' ('repeat' at: " + AdditionalData.MatchingRepeatStatementIndex + ")";
   }
 };
 
 
 
-class LooFAdditionalLoopingStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalLoopingStatementData extends LooFAdditionalStatementData {
   
   int MatchingRepeatStatementIndex;
   
@@ -303,13 +303,13 @@ LooFInterpreterFunction InterpreterFunction_Repeat = new LooFInterpreterFunction
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return -1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalStatementData;
     return "'repeat' (loop at " + AdditionalData.MatchingLoopingStatementIndex + ")";
   }
 };
@@ -325,13 +325,13 @@ LooFInterpreterFunction InterpreterFunction_RepeatIf = new LooFInterpreterFuncti
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
   }
   @Override public int GetBlockLevelChange() {
     return -1;
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalStatementData;
     return "'repeatIf' (loop at " + AdditionalData.MatchingLoopingStatementIndex + ")";
   }
 };
@@ -347,10 +347,10 @@ LooFInterpreterFunction InterpreterFunction_Continue = new LooFInterpreterFuncti
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalStatementData;
     return "'continue' (loop at " + AdditionalData.MatchingLoopingStatementIndex + ")";
   }
 };
@@ -366,17 +366,17 @@ LooFInterpreterFunction InterpreterFunction_ContinueIf = new LooFInterpreterFunc
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingLoopingStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"loop", "forEach", "while"}, LineNumber, -1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalRepeatingStatementData (MatchingLoopingStatementIndex);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalStatementData;
     return "'continueIf' (loop at " + AdditionalData.MatchingLoopingStatementIndex + ")";
   }
 };
 
 
 
-class LooFAdditionalRepeatingStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalRepeatingStatementData extends LooFAdditionalStatementData {
   
   Integer MatchingLoopingStatementIndex;
   
@@ -397,10 +397,10 @@ LooFInterpreterFunction InterpreterFunction_Break = new LooFInterpreterFunction(
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 0, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalStatementData;
     return "'break' (repeat at " + AdditionalData.MatchingRepeatStatementIndex + ")";
   }
 };
@@ -416,17 +416,17 @@ LooFInterpreterFunction InterpreterFunction_BreakIf = new LooFInterpreterFunctio
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData);
-    Statement.AdditionalFunctionData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
+    Statement.AdditionalStatementData = new LooFAdditionalBreakStatementData (MatchingRepeatStatementIndex);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalStatementData;
     return "'breakIf' (repeat at " + AdditionalData.MatchingRepeatStatementIndex + ")";
   }
 };
 
 
 
-class LooFAdditionalBreakStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalBreakStatementData extends LooFAdditionalStatementData {
   
   Integer MatchingRepeatStatementIndex;
   
@@ -449,10 +449,10 @@ LooFInterpreterFunction InterpreterFunction_Error = new LooFInterpreterFunction(
     LooFTokenBranch[] Args = Statement.Args;
     String ErrorMessage = LooFCompiler.GetStringFromStatementArg (Args[0], 1, CodeData, LineNumber);
     String[] ErrorTypeTags = (Args.length == 2) ? LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber) : null;
-    Statement.AdditionalFunctionData = new LooFAdditionalErrorStatementData (ErrorMessage, ErrorTypeTags);
+    Statement.AdditionalStatementData = new LooFAdditionalErrorStatementData (ErrorMessage, ErrorTypeTags);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalErrorStatementData AdditionalData = (LooFAdditionalErrorStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalErrorStatementData AdditionalData = (LooFAdditionalErrorStatementData) Statement.AdditionalStatementData;
     return "'error' (Message: " + AdditionalData.ErrorMessage + "; error type tags: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypeTags, ", ") + "})";
   }
 };
@@ -470,17 +470,17 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
     LooFTokenBranch[] Args = Statement.Args;
     String ErrorMessage = LooFCompiler.GetStringFromStatementArg (Args[1], 2, CodeData, LineNumber);
     String[] ErrorTypeTags = (Args.length == 2) ? LooFCompiler.GetStringArrayFromStatementArg (Args[2], 3, CodeData, LineNumber) : null;
-    Statement.AdditionalFunctionData = new LooFAdditionalErrorStatementData (ErrorMessage, ErrorTypeTags);
+    Statement.AdditionalStatementData = new LooFAdditionalErrorStatementData (ErrorMessage, ErrorTypeTags);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalErrorStatementData AdditionalData = (LooFAdditionalErrorStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalErrorStatementData AdditionalData = (LooFAdditionalErrorStatementData) Statement.AdditionalStatementData;
     return "'errorIf' (Message: " + AdditionalData.ErrorMessage + "; error type tags: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypeTags, ", ") + "})";
   }
 };
 
 
 
-class LooFAdditionalErrorStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalErrorStatementData extends LooFAdditionalStatementData {
   
   String ErrorMessage;
   String[] ErrorTypeTags;
@@ -503,17 +503,17 @@ LooFInterpreterFunction InterpreterFunction_SetPassedErrors = new LooFInterprete
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (Statement, 1, CodeData, LineNumber);
     String[] ErrorTypesToPass = LooFCompiler.GetStringArrayFromStatementArg (Statement.Args[0], 1, CodeData, LineNumber);
-    Statement.AdditionalFunctionData = new LooFAdditionalSetPassedErrorsStatementData (ErrorTypesToPass);
+    Statement.AdditionalStatementData = new LooFAdditionalSetPassedErrorsStatementData (ErrorTypesToPass);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalSetPassedErrorsStatementData AdditionalData = (LooFAdditionalSetPassedErrorsStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalSetPassedErrorsStatementData AdditionalData = (LooFAdditionalSetPassedErrorsStatementData) Statement.AdditionalStatementData;
     return "'setPassedErrors' (Error type tags: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToPass, ", ") + "})";
   }
 };
 
 
 
-class LooFAdditionalSetPassedErrorsStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalSetPassedErrorsStatementData extends LooFAdditionalStatementData {
   
   String[] ErrorTypesToPass;
   
@@ -533,26 +533,26 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 2, CodeData, LineNumber);
-    ReturnValue Return = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
-    Statement.AdditionalFunctionData = new LooFAdditionalTryStatementData (Return.StringValue, Return.IntegerValue, Return.StringArrayValue);
+    ReturnValue3 <Integer, String, String[]> Return = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
+    Statement.AdditionalStatementData = new LooFAdditionalTryStatementData (Return.Value1, Return.Value2, Return.Value3);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalFunctionData;
-    return "'call' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
+    LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalStatementData;
+    return "'try' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
   }
 };
 
 
 
-class LooFAdditionalTryStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalTryStatementData extends LooFAdditionalStatementData {
   
-  String NewIPFileName;
   Integer NewIPLineNumber;
+  String NewIPFileName;
   String[] ErrorTypesToCatch;
   
-  public LooFAdditionalTryStatementData (String NewIPFileName, Integer NewIPLineNumber, String[] ErrorTypesToCatch) {
-    this.NewIPFileName = NewIPFileName;
+  public LooFAdditionalTryStatementData (Integer NewIPLineNumber, String NewIPFileName, String[] ErrorTypesToCatch) {
     this.NewIPLineNumber = NewIPLineNumber;
+    this.NewIPFileName = NewIPFileName;
     this.ErrorTypesToCatch = ErrorTypesToCatch;
   }
   
@@ -572,17 +572,17 @@ LooFInterpreterFunction InterpreterFunction_CallOutside = new LooFInterpreterFun
     String ModuleName = LooFCompiler.GetStringFromStatementArg (Args[0], 1, CodeData, LineNumber);
     LooFInterpreterModule ModuleToCall = AddonsData.InterpreterModules.getOrDefault (ModuleName, null);
     if (ModuleToCall == null) throw (new LooFCompilerException (CodeData, LineNumber, "could not find any module named \"" + ModuleName + "\"."));
-    Statement.AdditionalFunctionData = new LooFAdditionalCallOutsideStatementData (ModuleName, ModuleToCall);
+    Statement.AdditionalStatementData = new LooFAdditionalCallOutsideStatementData (ModuleName, ModuleToCall);
   }
   @Override public String toString (LooFStatement Statement) {
-    LooFAdditionalCallOutsideStatementData AdditionalData = (LooFAdditionalCallOutsideStatementData) Statement.AdditionalFunctionData;
+    LooFAdditionalCallOutsideStatementData AdditionalData = (LooFAdditionalCallOutsideStatementData) Statement.AdditionalStatementData;
     return "'callOutside' (Module name: " + AdditionalData.ModuleName + ")";
   }
 };
 
 
 
-class LooFAdditionalCallOutsideStatementData extends LooFAdditionalFunctionData {
+class LooFAdditionalCallOutsideStatementData extends LooFAdditionalStatementData {
   
   String ModuleName;
   LooFInterpreterModule ModuleToCall;

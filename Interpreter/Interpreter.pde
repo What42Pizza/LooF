@@ -1,10 +1,11 @@
 // Started 04/02/22
-// Last updated 05/31/22
+// Last updated 06/04/22
 
 
 
 //String FolderToCompile = "/InterpreterTesting";
-String FolderToCompile = "/BallBlastClone";
+//String FolderToCompile = "/BallBlastClone";
+String FolderToCompile = "/FakeOS/Entry";
 
 
 
@@ -31,6 +32,7 @@ void setup() {
   
   LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
   
+  /*
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);
   
   HashMap <String, LooFDataValue> AllVars = TestEnvironment.VariableListsStack.get(0);
@@ -42,6 +44,7 @@ void setup() {
       e.printStackTrace();
     }
   }
+  */
   
   exit();
   

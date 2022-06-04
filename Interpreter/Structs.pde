@@ -2,9 +2,15 @@ LooFInterpreterModule NullInterpreterModule = new LooFInterpreterModule();
 
 class LooFInterpreterModule {
   
-  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment) {
+  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment, LooFModuleData ModuleData) {
     
   }
+  
+}
+
+
+
+class LooFModuleData {
   
 }
 
@@ -51,7 +57,7 @@ class LooFInterpreterFunction {
   }
   
   public String toString (LooFStatement Statement) {
-    throw new AssertionError("this LooFInterpreterFunction is a base vlass and it does not have an overridden toString().");
+    throw new AssertionError("this LooFInterpreterFunction is a base class and it does not have an overridden toString().");
   }
   
 }
@@ -135,10 +141,12 @@ class LooFEnvironment {
   
   LooFAddonsData AddonsData;
   
+  HashMap <LooFInterpreterModule, LooFModuleData> AllModuleDatas;
+  
   
   
   boolean Stopped = false;
-  String CurrentFileName;
+  String CurrentPageName;
   LooFCodeData CurrentCodeData;
   int CurrentLineNumber;
   
@@ -157,8 +165,8 @@ class LooFEnvironment {
   public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas, LooFAddonsData AddonsData) {
     this.AllCodeDatas = AllCodeDatas;
     this.AddonsData = AddonsData;
-    this.CurrentFileName = "Main.LOOF";
-    this.CurrentCodeData = AllCodeDatas.get(CurrentFileName);
+    this.CurrentPageName = "Main.LOOF";
+    this.CurrentCodeData = AllCodeDatas.get(CurrentPageName);
     this.CurrentLineNumber = 0;
     this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
   }
@@ -173,7 +181,7 @@ class LooFEnvironment {
 
 class LooFCodeData {
   
-  String FullFileName;
+  String OriginalFileName;
   boolean IncludesHeader;
   
   String[] OriginalCode;
@@ -189,60 +197,12 @@ class LooFCodeData {
   
   int CurrentLineNumber;
   
-  public LooFCodeData (String[] Code, String FullFileName) {
-    this.FullFileName = FullFileName;
+  public LooFCodeData (String[] Code, String OriginalFileName) {
+    this.OriginalFileName = OriginalFileName;
     this.OriginalCode = Code;
     this.CodeArrayList = new ArrayList <String> (Arrays.asList (Code));
     this.LineNumbers = CreateNumberedIntegerList (Code.length);
-    this.LineFileOrigins = CreateFilledArrayList (Code.length, FullFileName);
-  }
-  
-}
-
-
-
-
-
-class ReturnValue {
-  
-  int IntValue;
-  Integer IntegerValue;
-  String StringValue;
-  String[] StringArrayValue;
-  ArrayList <Integer> IntegerArrayListValue;
-  ArrayList <Integer> SecondIntegerArrayListValue;
-  ArrayList <String> StringArrayListValue;
-  ArrayList <Boolean> BooleanArrayListValue;
-  HashMap <String, LooFCodeData> AllCodeDatas;
-  
-}
-
-
-
-class FloatIntPair {
-  
-  float FloatValue;
-  int IntValue;
-  
-  public FloatIntPair (float FloatValue, int IntValue) {
-    this.FloatValue = FloatValue;
-    this.IntValue = IntValue;
-  }
-  
-  public String toString() {
-    return IntValue + ",   " + FloatValue;
-  }
-  
-}
-
-
-
-class FloatIntPairComparator implements Comparator <FloatIntPair> {
-  
-  public int compare (FloatIntPair Pair1, FloatIntPair Pair2) {
-    float FloatDifference = Pair2.FloatValue - Pair1.FloatValue;
-    if (FloatDifference == 0) return 0;
-    return (int) (FloatDifference / Math.abs(FloatDifference));
+    this.LineFileOrigins = CreateFilledArrayList (Code.length, OriginalFileName);
   }
   
 }
@@ -286,18 +246,13 @@ class LooFCompilerException extends RuntimeException {
   String Message;
   
   public LooFCompilerException (LooFCodeData CodeData, int LineNumber, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message));
-    this.Message = GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, null, Message);
+    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, null, Message));
+    this.Message = GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, null, Message);
   }
   
   public LooFCompilerException (LooFCodeData CodeData, int LineNumber, int TokenIndex, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenIndex, Message));
-    this.Message = GetCompilerErrorMessage (CodeData, CodeData.FullFileName, LineNumber, TokenIndex, Message);
-  }
-  
-  public LooFCompilerException (String LineOfCode, int LineNumber, String LineFileOrigin, String FileName, String Message) {
-    super ("  " + GetCompilerErrorMessage (LineOfCode, LineNumber, LineFileOrigin, FileName, Message));
-    this.Message = GetCompilerErrorMessage (LineOfCode, LineNumber, LineFileOrigin, FileName, Message);
+    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, TokenIndex, Message));
+    this.Message = GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, TokenIndex, Message);
   }
   
   public LooFCompilerException (String Message) {
@@ -401,7 +356,7 @@ class LooFInterpreterException extends RuntimeException {
 
 String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
   String FileName;
-  FileName = Environment.CurrentFileName;
+  FileName = Environment.CurrentPageName;
   LooFCodeData CodeData = Environment.CurrentCodeData;
   int LineNumber = Environment.CurrentLineNumber;
   
@@ -461,7 +416,7 @@ class LooFDataValue implements Cloneable {
   ArrayList <LooFDataValue> ArrayValue;
   HashMap <String, LooFDataValue> HashMapValue;
   byte[] ByteArrayValue;
-  String FunctionFileValue;
+  String FunctionPageValue;
   int FunctionLineValue;
   
   ArrayList <Integer> LockLevels = new ArrayList <Integer> ();
@@ -521,7 +476,7 @@ class LooFDataValue implements Cloneable {
   
   public LooFDataValue (String FunctionFileValue, int FunctionLineValue) {
     ValueType = DataValueType_Function;
-    this.FunctionFileValue = FunctionFileValue;
+    this.FunctionPageValue = FunctionFileValue;
     this.FunctionLineValue = FunctionLineValue;
   }
   
@@ -561,7 +516,7 @@ class LooFDataValue implements Cloneable {
         return new LooFDataValue (ByteArrayValue.clone());
       
       case (DataValueType_Function):
-        return new LooFDataValue (FunctionFileValue, FunctionLineValue);
+        return new LooFDataValue (FunctionPageValue, FunctionLineValue);
       
       default:
         throw new AssertionError();
@@ -793,7 +748,7 @@ class LooFStatement {
   LooFInterpreterFunction Function;
   LooFTokenBranch[] Args;
   
-  LooFAdditionalFunctionData AdditionalFunctionData;
+  LooFAdditionalStatementData AdditionalStatementData;
   
   public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterAssignment Assignment, LooFTokenBranch NewValueFormula) {
     this.StatementType = StatementType_Assignment;
@@ -822,11 +777,60 @@ final int StatementType_Function = 1;
 
 
 
+class LooFAdditionalStatementData {
+  
+}
 
 
 
 
 
-class LooFAdditionalFunctionData {
+
+
+
+
+
+class ReturnValue1 <T> {
+  T Value1;
+}
+
+class ReturnValue2 <T1, T2> {
+  T1 Value1;
+  T2 Value2;
+}
+
+class ReturnValue3 <T1, T2, T3> {
+  T1 Value1;
+  T2 Value2;
+  T3 Value3;
+}
+
+
+
+class FloatIntPair {
+  
+  float FloatValue;
+  int IntValue;
+  
+  public FloatIntPair (float FloatValue, int IntValue) {
+    this.FloatValue = FloatValue;
+    this.IntValue = IntValue;
+  }
+  
+  public String toString() {
+    return IntValue + ",   " + FloatValue;
+  }
+  
+}
+
+
+
+class FloatIntPairComparator implements Comparator <FloatIntPair> {
+  
+  public int compare (FloatIntPair Pair1, FloatIntPair Pair2) {
+    float FloatDifference = Pair2.FloatValue - Pair1.FloatValue;
+    if (FloatDifference == 0) return 0;
+    return (int) (FloatDifference / Math.abs(FloatDifference));
+  }
   
 }

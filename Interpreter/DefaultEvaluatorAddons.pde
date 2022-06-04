@@ -1589,8 +1589,8 @@ LooFEvaluatorFunction Function_ToString = new LooFEvaluatorFunction() {
         return new LooFDataValue (new String (Input.ByteArrayValue));
     
       case (DataValueType_Function):
-        String FileName = Input.FunctionFileValue;
-        return new LooFDataValue ("Function at " + Input.FunctionLineValue + (FileName != null ? " in " + FileName : ""));
+        String PageName = Input.FunctionPageValue;
+        return new LooFDataValue ("Function at " + Input.FunctionLineValue + (PageName != null ? " in " + PageName : ""));
       
       default:
         throw new AssertionError();
