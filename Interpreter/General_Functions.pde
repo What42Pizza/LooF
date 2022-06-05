@@ -698,8 +698,8 @@ double GetDataValueNumber (LooFDataValue DataValueIn) {
   return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 
-double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Environment, LooFCodeData CodeData, String FunctionName) {
-  if (!(DataValueIn.ValueType == DataValueType_Int || DataValueIn.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, "the evaluator function " + FunctionName + " cannot be called with a table containing a non-number value.", new String[] {"InvalidArgType"});
+double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String FunctionName) {
+  if (!(DataValueIn.ValueType == DataValueType_Int || DataValueIn.ValueType == DataValueType_Float)) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function " + FunctionName + " cannot be called with a table containing a non-number value.", new String[] {"InvalidArgType"});
   return (DataValueIn.ValueType == DataValueType_Float) ? DataValueIn.FloatValue : (double) DataValueIn.IntValue;
 }
 

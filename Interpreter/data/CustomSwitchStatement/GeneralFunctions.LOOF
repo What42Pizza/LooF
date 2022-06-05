@@ -8,7 +8,7 @@ function Switch  -> Input, Cases, Default, RunFunctions, FunctionArgs  throwsErr
 	if RunFunctions and typeOf SwitchResult == "function" then
 		errorIf (getFunctionFile SwitchResult == null), "Cannot call a function with a null file name.", {"NullFunctionFile"}
 		if FunctionArgs != null; push FunctionArgs
-		call SwitchResult
+		call_ SwitchResult
 		conditionalPop FunctionResults
 		returnRawIf (FunctionResults != null), FunctionResults
 		return

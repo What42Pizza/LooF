@@ -40,9 +40,8 @@ end
 
 
 
-Cases = {}
-Cases["yes"]   = $this.Case_Yes
-Cases["no"]    = $this.Case_No
-Cases["maybe"] = $this.Case_Maybe
-
-call F:Switch, UserLikesPizzaResponse, Cases, $Case_Default
+call F.Switch, UserLikesPizzaResponse, {
+`	yes: $Case_Yes
+`	no: $Case_No
+`	maybe: $Case_Maybe
+`}, $Case_Default

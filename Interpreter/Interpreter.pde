@@ -1,11 +1,12 @@
 // Started 04/02/22
-// Last updated 06/04/22
+// Last updated 06/05/22
 
 
 
+String FolderToCompile = "/BallBlastClone";
 //String FolderToCompile = "/InterpreterTesting";
-//String FolderToCompile = "/BallBlastClone";
-String FolderToCompile = "/FakeOS/Entry";
+//String FolderToCompile = "/FakeOS/Entry";
+//String FolderToCompile = "/CustomSwitchStatement";
 
 
 
@@ -30,14 +31,16 @@ void setup() {
   //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   
+  LooFEnvironment TestEnvironment = null;
   try {
-    LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
+    TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
   } catch (Exception e) {
+    //e.printStackTrace();
     throw e;
   }
   
-  /*
-  LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);
+  ///*
+  LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 1);//TestEnvironment.CurrentCodeData.Statements.length - 1);
   
   HashMap <String, LooFDataValue> AllVars = TestEnvironment.VariableListsStack.get(0);
   Set <String> AllVarKeys = AllVars.keySet();
@@ -48,7 +51,7 @@ void setup() {
       e.printStackTrace();
     }
   }
-  */
+  //*/
   
   exit();
   

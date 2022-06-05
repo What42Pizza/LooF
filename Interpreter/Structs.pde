@@ -44,8 +44,8 @@ class LooFInterpreterFunction {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
   }
   
-  public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) throws LooFCompilerException {
-    throw (new LooFCompilerException (CodeData, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
+  public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) throws LooFCompilerException {
+    throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
   }
   
   public int GetBlockLevelChange() {
@@ -68,8 +68,8 @@ class LooFInterpreterFunction {
 
 class LooFEvaluatorOperation {
   
-  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData) {
-    ThrowLooFException (Environment, CodeData, "this LooFEvaluatorOperation is a base class and it does not have an overridden HandleOperation().", new String[] {"InvalidEvaluatorOperation"});
+  public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorOperation is a base class and it does not have an overridden HandleOperation().", new String[] {"InvalidEvaluatorOperation"});
     throw new AssertionError();
   }
   
@@ -95,8 +95,8 @@ LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
 
 class LooFEvaluatorFunction {
   
-  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData) {
-    ThrowLooFException (Environment, CodeData, "this LooFEvaluatorFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidEvaluatorFunction"});
+  public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidEvaluatorFunction"});
     throw new AssertionError();
   }
   
@@ -245,14 +245,14 @@ class LooFCompilerException extends RuntimeException {
   
   String Message;
   
-  public LooFCompilerException (LooFCodeData CodeData, int LineNumber, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, null, Message));
-    this.Message = GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, null, Message);
+  public LooFCompilerException (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, String Message) {
+    super ("  " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, null, Message));
+    this.Message = GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, null, Message);
   }
   
-  public LooFCompilerException (LooFCodeData CodeData, int LineNumber, int TokenIndex, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, TokenIndex, Message));
-    this.Message = GetCompilerErrorMessage (CodeData, CodeData.OriginalFileName, LineNumber, TokenIndex, Message);
+  public LooFCompilerException (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, int TokenIndex, String Message) {
+    super ("  " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, TokenIndex, Message));
+    this.Message = GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, TokenIndex, Message);
   }
   
   public LooFCompilerException (String Message) {
@@ -279,10 +279,10 @@ class LooFCompilerException extends RuntimeException {
 
 
 
-String GetCompilerErrorMessage (LooFCodeData CodeData, String FileName, int LineNumber, Integer TokenIndex, String Message) {
+String GetCompilerErrorMessage (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String FileName, int LineNumber, Integer TokenIndex, String Message) {
   int OriginalLineNumber = CodeData.LineNumbers.get(LineNumber);
   String OriginalFileName = CodeData.LineFileOrigins.get(LineNumber);
-  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, LineNumber, TokenIndex);
+  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, AllCodeDatas, LineNumber, TokenIndex);
 }
 
 
@@ -294,16 +294,18 @@ String ErrorMessage_GetFileNameToShow (String FileName, String OriginalFileName)
 
 
 
-String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, int LineNumber, Integer TokenIndex) {
-  String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
+String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, Integer TokenIndex) {
+  String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, AllCodeDatas, LineNumber);
   LineOfCodeToShow += (TokenIndex == null) ? "" : "\nToken number " + TokenIndex + " `" + CodeData.CodeTokens.get(LineNumber).get(TokenIndex) + "`";
   return LineOfCodeToShow;
 }
 
-String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, int LineNumber) {
+String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
-  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
+  String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
+  LooFCodeData LineCodeDataOrigin = AllCodeDatas.get(LineFileOrigin);
+  String OriginalLineOfCode = LineCodeDataOrigin.OriginalCode[OriginalLineNumber].trim();
   
   boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
   
@@ -368,7 +370,7 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
   if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
   if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
-  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, LineNumber);
+  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
 }
 
 
@@ -380,14 +382,14 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
 
 
 
-void ThrowLooFException (LooFEnvironment Environment, LooFCodeData CodeData, String Message, String[] ErrorTypeTags) throws LooFInterpreterException, LooFCompilerException, AssertionError {
+void ThrowLooFException (LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String Message, String[] ErrorTypeTags) throws LooFInterpreterException, LooFCompilerException, AssertionError {
   
   if (Environment != null) {
     throw (new LooFInterpreterException (Environment, Message, ErrorTypeTags));
   }
   
   if (CodeData != null) {
-    throw (new LooFCompilerException (CodeData, CodeData.CurrentLineNumber, Message));
+    throw (new LooFCompilerException (CodeData, AllCodeDatas, CodeData.CurrentLineNumber, Message));
   }
   
   throw new AssertionError ("Both Environment and CodeData are null");
@@ -586,6 +588,7 @@ class LooFTokenBranch {
   String StringValue;
   boolean BoolValue;
   LooFTokenBranch[] Children;
+  HashMap <String, LooFTokenBranch> HashMapChildren;
   LooFEvaluatorOperation Operation;
   LooFEvaluatorFunction Function;
   LooFDataValue Result;
@@ -638,13 +641,14 @@ class LooFTokenBranch {
     this.IsAction = false;
   }
   
-  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, int TokenType, LooFTokenBranch[] Children, boolean IsAction) {
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFTokenBranch[] Children, HashMap <String, LooFTokenBranch> HashMapChildren) {
     this.OriginalTokenIndex = OriginalTokenIndex;
     this.OriginalString = OriginalString;
-    this.TokenType = TokenType;
     this.Children = Children;
+    this.HashMapChildren = HashMapChildren;
+    this.TokenType = TokenBranchType_Table;
     this.ConvertsToDataValue = true;
-    this.IsAction = IsAction;
+    this.IsAction = false;
   }
   
   public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFEvaluatorOperation Operation) {
@@ -790,19 +794,24 @@ class LooFAdditionalStatementData {
 
 
 
-class Tuple1 <T> {
-  T Value1;
-}
-
 class Tuple2 <T1, T2> {
   T1 Value1;
   T2 Value2;
+  public Tuple2 (T1 Value1, T2 Value2) {
+    this.Value1 = Value1;
+    this.Value2 = Value2;
+  }
 }
 
 class Tuple3 <T1, T2, T3> {
   T1 Value1;
   T2 Value2;
   T3 Value3;
+  public Tuple3 (T1 Value1, T2 Value2, T3 Value3) {
+    this.Value1 = Value1;
+    this.Value2 = Value2;
+    this.Value3 = Value3;
+  }
 }
 
 
