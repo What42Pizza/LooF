@@ -24,13 +24,17 @@ LooFCodeData TestCodeData = new LooFCodeData (new String[] {"not actual code"}, 
 void setup() {
   
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
-  //CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.LinkerOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
   //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   
-  LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
+  try {
+    LooFEnvironment TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
+  } catch (Exception e) {
+    throw e;
+  }
   
   /*
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);

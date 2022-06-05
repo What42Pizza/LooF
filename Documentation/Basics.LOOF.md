@@ -87,7 +87,7 @@ end
 ExampleValue1 = 1
 ExampleValue2 = 2.5
 
-ExampleString = "First value: :{ExampleValue1}:, second value: :{ExampleValue2}:, combined: :{ExampleValue1 + ExampleValue2}:."
+ExampleString = "First value: {\`ExampleValue1\`}, second value: {\`ExampleValue2\`}, combined: {\`ExampleValue1 + ExampleValue2\`}."
 ```
 
 <br>

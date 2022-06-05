@@ -790,16 +790,16 @@ class LooFAdditionalStatementData {
 
 
 
-class ReturnValue1 <T> {
+class Tuple1 <T> {
   T Value1;
 }
 
-class ReturnValue2 <T1, T2> {
+class Tuple2 <T1, T2> {
   T1 Value1;
   T2 Value2;
 }
 
-class ReturnValue3 <T1, T2, T3> {
+class Tuple3 <T1, T2, T3> {
   T1 Value1;
   T2 Value2;
   T3 Value3;

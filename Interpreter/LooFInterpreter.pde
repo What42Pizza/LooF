@@ -85,7 +85,7 @@ class LooFInterpreter {
     }
     
     LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment, null);
-    LooFDataValue IndexValue = EvaluateFormula (GetLastItemOf (IndexQueries), Environment, null);
+    LooFDataValue IndexValue = EvaluateFormula (LastItemOf (IndexQueries), Environment, null);
     LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, true, Environment, null);
     LooFDataValue NewVarValue = StatementAssignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
     SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment, null);
@@ -173,7 +173,7 @@ class LooFInterpreter {
   void SetVariableValue (String VariableName, LooFDataValue NewValue, LooFEnvironment Environment) {
     if (VariableName.equals("_")) return;
     ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
-    HashMap <String, LooFDataValue> CurrentVariableList = GetLastItemOf (VariableListsStack);
+    HashMap <String, LooFDataValue> CurrentVariableList = LastItemOf (VariableListsStack);
     if (NewValue.ValueType == DataValueType_Null) {
       CurrentVariableList.remove(VariableName);
       return;
@@ -188,7 +188,7 @@ class LooFInterpreter {
   LooFDataValue GetVariableValue (String VariableName, LooFEnvironment Environment, boolean CreateNullVar) {
     if (VariableName.equals("_")) return new LooFDataValue();
     ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
-    HashMap <String, LooFDataValue> CurrentVariableList = GetLastItemOf (VariableListsStack);
+    HashMap <String, LooFDataValue> CurrentVariableList = LastItemOf (VariableListsStack);
     LooFDataValue FoundVariableValue = CurrentVariableList.get(VariableName);
     if (FoundVariableValue != null) return CurrentVariableList.get(VariableName);
     if (!CreateNullVar) throw (new LooFInterpreterException (Environment, "could not find any variable named \"" + VariableName + "\".", new String[] {"VariableNotFound"}));
@@ -403,7 +403,7 @@ class LooFInterpreter {
   void SetDataValueIndex (LooFDataValue TargetTable, LooFDataValue IndexValue, LooFDataValue NewVarValue, LooFEnvironment Environment, LooFCodeData CodeData) {
     int CaseToUse = 0;
     
-    if (GetLastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, CodeData, "cannot set the index of a locked data value.", new String[] {"LockedValueSetAttempted"});
+    if (LastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, CodeData, "cannot set the index of a locked data value.", new String[] {"LockedValueSetAttempted"});
     
     switch (IndexValue.ValueType) {
       case (DataValueType_Int):

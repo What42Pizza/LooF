@@ -38,7 +38,7 @@ class LooFCompiler {
     
     
     // start CodeData-s
-    ReturnValue2 <HashMap <String, LooFCodeData>, String[]> LoadedPagesData;
+    Tuple2 <HashMap <String, LooFCodeData>, String[]> LoadedPagesData;
     try {
       LoadedPagesData = LoadFilesIntoNewCodeDatas (CodeFolder);
     } catch (IOException e) {
@@ -455,7 +455,7 @@ class LooFCompiler {
   
   
   
-  ReturnValue2 <HashMap <String, LooFCodeData>, String[]> LoadFilesIntoNewCodeDatas (File CodeFolder) throws IOException {
+  Tuple2 <HashMap <String, LooFCodeData>, String[]> LoadFilesIntoNewCodeDatas (File CodeFolder) throws IOException {
     
     
     
@@ -510,10 +510,10 @@ class LooFCompiler {
     
     
     
-    ReturnValue2 Return = new ReturnValue2 <HashMap <String, LooFCodeData>, String[]> ();
-    Return.Value1 = AllCodeDatas;
-    Return.Value2 = HeaderFileContents;
-    return Return;
+    Tuple2 ReturnValue = new Tuple2 <HashMap <String, LooFCodeData>, String[]> ();
+    ReturnValue.Value1 = AllCodeDatas;
+    ReturnValue.Value2 = HeaderFileContents;
+    return ReturnValue;
   }
   
   
@@ -530,6 +530,7 @@ class LooFCompiler {
     if (HeaderFileContents.length > 0) {
       InsertHeader (CodeData, HeaderFileContents);
     }
+    AddPaddingLines (CodeData);
     RemoveComments (CodeData);
     RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData, AllExceptions);
@@ -585,6 +586,91 @@ class LooFCompiler {
   
   
   
+  void AddPaddingLines (LooFCodeData CodeData) {
+    ArrayList <String> Code = CodeData.CodeArrayList;
+    ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+    ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+    
+    // start padding
+    Code.add(0, "");
+    LineNumbers.add(0, LineNumbers.get(0));
+    LineFileOrigins.add(0, LineFileOrigins.get(0));
+    
+    // end padding
+    Code.add("");
+    LineNumbers.add(LineNumbers.get(LineNumbers.size() - 1));
+    LineFileOrigins.add(LineFileOrigins.get(LineFileOrigins.size() - 1));
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  void RemoveComments (LooFCodeData CodeData) {
+    ArrayList <String> Code = CodeData.CodeArrayList;
+    int CodeSize = Code.size();
+    for (int i = 0; i < CodeSize; i ++) {
+      String CurrentLine = Code.get(i);
+      String NewLine = RemoveCommentForLine (CurrentLine);
+      if (NewLine != null) {
+        Code.set(i, NewLine);
+      }
+    }
+  }
+  
+  
+  
+  String RemoveCommentForLine (String CurrentLine) {
+    
+    // find index of comment
+    int FoundCommentIndex = -1;
+    int CurrentLineLength = CurrentLine.length() - 1;
+    for (int i = 0; i < CurrentLineLength; i ++) {
+      char CurrentChar = CurrentLine.charAt(i);
+      
+      // break if comment found
+      if (CurrentChar == '/' && CurrentLine.charAt(i + 1) == '/') {
+        FoundCommentIndex = i;
+        break;
+      }
+      
+      // skip strings
+      if (CurrentChar == '"') {
+        char PrevChar = CurrentChar;
+        i ++;
+        CurrentChar = CurrentLine.charAt(i);
+        while (!(CurrentChar == '"' && PrevChar != '\\')) {
+          PrevChar = CurrentChar;
+          i ++;
+          CurrentChar = CurrentLine.charAt(i);
+        }
+      }
+      
+    }
+    
+    // return if no comment found
+    if (FoundCommentIndex == -1) return null;
+    
+    // remove comment
+    return CurrentLine.substring(0, FoundCommentIndex);
+    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   void RemoveInitialTrim (LooFCodeData CodeData) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
@@ -615,7 +701,8 @@ class LooFCompiler {
           String[][] ReplacementData = GetReplacementData (CodeData, i, 10);
           String[] ReplaceBefore = ReplacementData[0];
           String[] ReplaceAfter = ReplacementData[1];
-          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, false);
+          if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, i, "'#replace' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
+          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, AllCharsInQuotes, false);
           i --;
           continue;
         }
@@ -624,7 +711,17 @@ class LooFCompiler {
           String[][] ReplacementData = GetReplacementData (CodeData, i, 22);
           String[] ReplaceBefore = ReplacementData[0];
           String[] ReplaceAfter = ReplacementData[1];
-          ReplaceAllStringOccurancesInCode (CodeData, ReplaceBefore, ReplaceAfter, AllCharsInQuotes, true);
+          if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, i, "'#replaceIgnoreQuotes' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
+          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, AllCharsInQuotes, true);
+          i --;
+          continue;
+        }
+        
+        if (CurrentLine.startsWith("#replaceMultiLine ")) {
+          String[][] ReplacementData = GetReplacementData (CodeData, i, 19);
+          String[] ReplaceBefore = ReplacementData[0];
+          String[] ReplaceAfter = ReplacementData[1];
+          ReplaceAllStringOccurances_MultiLine (CodeData, ReplaceBefore, ReplaceAfter);
           i --;
           continue;
         }
@@ -682,8 +779,9 @@ class LooFCompiler {
   
   
   
-  void ReplaceAllStringOccurancesInCode (LooFCodeData CodeData, String[] ReplaceBeforeIn, String[] ReplaceAfter, HashMap <String, Boolean[]> AllCharsInQuotes, boolean IgnoreQuotes) {
-    String ReplaceBefore = ReplaceBeforeIn[0];
+  
+  
+  void ReplaceAllStringOccurances (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, HashMap <String, Boolean[]> AllCharsInQuotes, boolean IgnoreQuotes) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     int LinesToJumpPerReplace = ReplaceAfter.length - 1;
     for (int i = 0; i < Code.size(); i ++) {
@@ -770,6 +868,77 @@ class LooFCompiler {
     NewLine[0] = CurrentLineStart + NewLine[0];
     NewLine[NewLine.length - 1] += CurrentLineEnd;
     return NewLine;
+  }
+  
+  
+  
+  
+  
+  void ReplaceAllStringOccurances_MultiLine (LooFCodeData CodeData, String[] ReplaceBefore, String[] ReplaceAfter) {
+    ArrayList <String> Code = CodeData.CodeArrayList;
+    int LinesToJump = ReplaceAfter.length - ReplaceBefore.length;
+    for (int i = 0; i < Code.size() - ReplaceBefore.length + 1; i ++) {
+      String CurrentLine = Code.get(i);
+      if (!MultiLineReplaceMatchesLine (Code, i, ReplaceBefore)) {
+        if (ReplaceBefore[1].equals("function") && Code.get(i + 1).startsWith("function")) throw new AssertionError();
+        continue;
+      }
+      ReplaceMultiLineString (CodeData, i, ReplaceBefore, ReplaceAfter);
+      i += LinesToJump;
+    }
+  }
+  
+  
+  
+  boolean MultiLineReplaceMatchesLine (ArrayList <String> Code, int LineNumber, String[] ReplaceBefore) {
+    int StartIndex = LineNumber;
+    int EndIndex = LineNumber + ReplaceBefore.length - 1;
+    
+    if (!Code.get(StartIndex).endsWith(ReplaceBefore[0])) return false;
+    if (!Code.get(EndIndex).startsWith(LastItemOf (ReplaceBefore))) return false;
+    
+    for (int i = 1; i < ReplaceBefore.length - 2; i ++) {
+      String CurrentLineToMatch = ReplaceBefore[i];
+      if (!Code.get(i + StartIndex).equals(CurrentLineToMatch)) return false;
+    }
+    
+    return true;
+    
+  }
+  
+  
+  
+  void ReplaceMultiLineString (LooFCodeData CodeData, int LineNumber, String[] ReplaceBefore, String[] ReplaceAfter) {
+    ArrayList <String> Code = CodeData.CodeArrayList;
+    ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+    ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+    
+    int CurrentLineNumber = LineNumbers.get(LineNumber);
+    String CurrentLineFileOrigin = LineFileOrigins.get(LineNumber);
+    
+    int AreaEndIndex = LineNumber + ReplaceBefore.length - 1;
+    
+    String ReplacedAreaStart = Code.get(LineNumber);
+    String ReplacedAreaEnd = Code.get(AreaEndIndex);
+    ReplacedAreaStart = ReplacedAreaStart.substring (0, ReplacedAreaStart.length() - ReplaceBefore[0].length());
+    ReplacedAreaEnd = ReplacedAreaEnd.substring (LastItemOf (ReplaceBefore).length());
+    ReplacedAreaStart += ReplaceAfter[0];
+    ReplacedAreaEnd = LastItemOf (ReplaceAfter) + ReplacedAreaEnd;
+    Code.set(LineNumber, ReplacedAreaStart);
+    Code.set(AreaEndIndex, ReplacedAreaEnd);
+    
+    for (int i = 1; i < ReplaceBefore.length - 1; i ++) {
+      Code.remove(i + LineNumber);
+      LineNumbers.remove(i + LineNumber);
+      LineFileOrigins.remove(i + LineNumber);
+    }
+    
+    for (int i = 1; i < ReplaceAfter.length - 1; i ++) {
+      Code.add(i + LineNumber, ReplaceAfter[i]);
+      LineNumbers.add(i + LineNumber, CurrentLineNumber);
+      LineFileOrigins.add(i + LineNumber, CurrentLineFileOrigin);
+    }
+    
   }
   
   
@@ -940,65 +1109,6 @@ class LooFCompiler {
       }
     }
     throw (new LooFCompilerException (CodeData, StartIndex, "could not find matching \"#end_if\" for \"#if_...\" preprocessor statement."));
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  void RemoveComments (LooFCodeData CodeData) {
-    ArrayList <String> Code = CodeData.CodeArrayList;
-    int CodeSize = Code.size();
-    for (int i = 0; i < CodeSize; i ++) {
-      String CurrentLine = Code.get(i);
-      String NewLine = RemoveCommentForLine (CurrentLine);
-      if (NewLine != null) {
-        Code.set(i, NewLine);
-      }
-    }
-  }
-  
-  
-  
-  String RemoveCommentForLine (String CurrentLine) {
-    
-    // find index of comment
-    int FoundCommentIndex = -1;
-    int CurrentLineLength = CurrentLine.length() - 1;
-    for (int i = 0; i < CurrentLineLength; i ++) {
-      char CurrentChar = CurrentLine.charAt(i);
-      
-      // break if comment found
-      if (CurrentChar == '/' && CurrentLine.charAt(i + 1) == '/') {
-        FoundCommentIndex = i;
-        break;
-      }
-      
-      // skip strings
-      if (CurrentChar == '"') {
-        char PrevChar = CurrentChar;
-        i ++;
-        CurrentChar = CurrentLine.charAt(i);
-        while (!(CurrentChar == '"' && PrevChar != '\\')) {
-          PrevChar = CurrentChar;
-          i ++;
-          CurrentChar = CurrentLine.charAt(i);
-        }
-      }
-      
-    }
-    
-    // return if no comment found
-    if (FoundCommentIndex == -1) return null;
-    
-    // remove comment
-    return CurrentLine.substring(0, FoundCommentIndex);
-    
   }
   
   
@@ -1292,7 +1402,7 @@ class LooFCompiler {
   
   String GetLinkedFunctionCall_WithinFile (String FunctionCallData, LooFCodeData CodeData, int LineNumber) {
     Integer FunctionLocation = CodeData.FunctionLineNumbers.get(FunctionCallData);
-    if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "the function \"" + FunctionCallData + "\" is not defined or could not be found."));
+    if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "no function named \"" + FunctionCallData + "\" could be found."));
     return "newFunction {" + FunctionLocation.toString() + "}";
   }
   
@@ -1314,7 +1424,7 @@ class LooFCompiler {
     
     // get location of function
     Integer FunctionLocation = LinkedCodeData.FunctionLineNumbers.get(FunctionName);
-    if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "no function named \"" + FunctionName + "\" was found in the file \"" + FullFileName + "\"."));
+    if (FunctionLocation == null) throw (new LooFCompilerException (CodeData, LineNumber, "no function named \"" + FunctionName + "\" could be found in the file \"" + FullFileName + "\"."));
     
     // assemble and return new function data
     return "newFunction {" + FunctionLocation + ", \"" + FullFileName + "\"}";
@@ -1350,9 +1460,9 @@ class LooFCompiler {
     for (int i = 0; i < Code.size(); i ++) {
       try {
         String CurrentLine = Code.get(i);
-        ReturnValue2 <ArrayList <String>, ArrayList <Boolean>> Return = TokenizeLine (CurrentLine, CodeData, i);
-        CodeTokens.add(Return.Value1);
-        TokensFollowedBySpaces.add(Return.Value2);
+        Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizedLineData = TokenizeLine (CurrentLine, CodeData, i);
+        CodeTokens.add(TokenizedLineData.Value1);
+        TokensFollowedBySpaces.add(TokenizedLineData.Value2);
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -1368,7 +1478,7 @@ class LooFCompiler {
   
   
   
-  ReturnValue2 <ArrayList <String>, ArrayList <Boolean>> TokenizeLine (String CurrentLine, LooFCodeData CodeData, int LineNumber) {
+  Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizeLine (String CurrentLine, LooFCodeData CodeData, int LineNumber) {
     ArrayList <String> CurrentLineTokens = new ArrayList <String> ();
     ArrayList <Boolean> TokensFollowedBySpaces = new ArrayList <Boolean> ();
     int CurrentLineLength = CurrentLine.length();
@@ -1414,10 +1524,10 @@ class LooFCompiler {
       CurrentLineTokens.add(CurrToken);
       TokensFollowedBySpaces.add(CurrentLine.charAt(CurrentLineLength - 1) == ' ');
     }
-    ReturnValue2 <ArrayList <String>, ArrayList <Boolean>> Return = new ReturnValue2 <ArrayList <String>, ArrayList <Boolean>> ();
-    Return.Value1 = CurrentLineTokens;
-    Return.Value2 = TokensFollowedBySpaces;
-    return Return;
+    Tuple2 <ArrayList <String>, ArrayList <Boolean>> ReturnValue = new Tuple2 <ArrayList <String>, ArrayList <Boolean>> ();
+    ReturnValue.Value1 = CurrentLineTokens;
+    ReturnValue.Value2 = TokensFollowedBySpaces;
+    return ReturnValue;
   }
   
   
@@ -1477,7 +1587,7 @@ class LooFCompiler {
   void CombineTokensForLineAtPosition (ArrayList <String> CurrentLineTokens, ArrayList <Boolean> TokensFollowedBySpaces, String[] CombinedTokens, int StartIndex) {
     
     // find any fitting combined token
-    ReturnValue2 <String, Integer> FoundCombinedTokenData = GetCombinedTokenFromPosition (CurrentLineTokens, TokensFollowedBySpaces, CombinedTokens, StartIndex);
+    Tuple2 <String, Integer> FoundCombinedTokenData = GetCombinedTokenFromPosition (CurrentLineTokens, TokensFollowedBySpaces, CombinedTokens, StartIndex);
     if (FoundCombinedTokenData == null) return;
     String FoundCombinedToken = FoundCombinedTokenData.Value1;
     int FoundCombinedTokenEndIndex = FoundCombinedTokenData.Value2;
@@ -1496,23 +1606,23 @@ class LooFCompiler {
   
   
   
-  ReturnValue2 <String, Integer> GetCombinedTokenFromPosition (ArrayList <String> CurrentLineTokens, ArrayList <Boolean> TokensFollowedBySpaces, String[] CombinedTokens, int StartIndex) {
+  Tuple2 <String, Integer> GetCombinedTokenFromPosition (ArrayList <String> CurrentLineTokens, ArrayList <Boolean> TokensFollowedBySpaces, String[] CombinedTokens, int StartIndex) {
     if (CombinedTokens.length == 0) return null;
     String PossibleCombinedToken = "";
     int ResultIndex = 0;
     int CurrentLineTokensSize = CurrentLineTokens.size();
     int CombinedTokensLength = CombinedTokens.length;
     
-    ReturnValue2 <String, Integer> Return = null;
+    Tuple2 <String, Integer> ReturnValue = null;
     
     for (int i = StartIndex; i < CurrentLineTokensSize; i ++) {
-      if (i != StartIndex && TokensFollowedBySpaces.get(i - 1)) return Return;
+      if (i != StartIndex && TokensFollowedBySpaces.get(i - 1)) return ReturnValue;
       PossibleCombinedToken += CurrentLineTokens.get(i);
       
       // skip results that are too short
       while (CombinedTokens[ResultIndex].length() < PossibleCombinedToken.length()) {
         ResultIndex ++;
-        if (ResultIndex == CombinedTokensLength) return Return;
+        if (ResultIndex == CombinedTokensLength) return ReturnValue;
       }
     
       // add another token if the next results are too long
@@ -1521,17 +1631,17 @@ class LooFCompiler {
       // test results
       while (PossibleCombinedToken.length() == CombinedTokens[ResultIndex].length()) {
         if (PossibleCombinedToken.equals(CombinedTokens[ResultIndex])) {
-          Return = new ReturnValue2 <String, Integer> ();
-          Return.Value1 = PossibleCombinedToken;
-          Return.Value2 = i;
+          ReturnValue = new Tuple2 <String, Integer> ();
+          ReturnValue.Value1 = PossibleCombinedToken;
+          ReturnValue.Value2 = i;
         }
         ResultIndex ++;
-        if (ResultIndex == CombinedTokensLength) return Return;
+        if (ResultIndex == CombinedTokensLength) return ReturnValue;
       }
       
     }
     
-    return Return;
+    return ReturnValue;
     
   }
   
@@ -1568,7 +1678,7 @@ class LooFCompiler {
   LooFStatement GetStatementFromLine (ArrayList <String> CurrentLineTokens, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     
     // get basic data
-    ReturnValue2 <ArrayList <Integer>, ArrayList <Integer>> BlocksData = GetAllBlockLevelsAndEnds (CurrentLineTokens, CodeData, LineNumber);
+    Tuple2 <ArrayList <Integer>, ArrayList <Integer>> BlocksData = GetAllBlockLevelsAndEnds (CurrentLineTokens, CodeData, LineNumber);
     ArrayList <Integer> BlockLevels = BlocksData.Value1;
     ArrayList <Integer> BlockEnds = BlocksData.Value2;
     HashMap <String, LooFInterpreterAssignment> InterpreterAssignments = AddonsData.InterpreterAssignments;
@@ -1854,7 +1964,7 @@ class LooFCompiler {
       
     }
     
-    LooFTokenBranch LastToken = GetLastItemOf(FormulaChildren);
+    LooFTokenBranch LastToken = LastItemOf(FormulaChildren);
     switch (LastToken.TokenType) {
       
       case (TokenBranchType_EvaluatorOperation):
@@ -2086,7 +2196,7 @@ class LooFCompiler {
   
   
   
-  ReturnValue2 <ArrayList <Integer>, ArrayList <Integer>> GetAllBlockLevelsAndEnds (ArrayList <String> CurrentLineTokens, LooFCodeData CodeData, int LineNumber) {
+  Tuple2 <ArrayList <Integer>, ArrayList <Integer>> GetAllBlockLevelsAndEnds (ArrayList <String> CurrentLineTokens, LooFCodeData CodeData, int LineNumber) {
     ArrayList <Integer> BlockLevels = new ArrayList <Integer> ();
     ArrayList <Integer> BlockEnds = CreateFilledArrayList (CurrentLineTokens.size(), -1);
     ArrayList <Integer> BlockTypes = new ArrayList <Integer> ();
@@ -2120,10 +2230,10 @@ class LooFCompiler {
       
     }
     if (BlockTypes.size() > 0) throw (new LooFCompilerException (CodeData, LineNumber, "no closing bracket was found for the bracket at token " + BlockStarts.get(BlockStarts.size() - 1) + " (\"" + GetBracketFromType (BlockTypes.get(BlockTypes.size() - 1)) + "\")."));
-    ReturnValue2 <ArrayList <Integer>, ArrayList <Integer>> Return = new ReturnValue2 <ArrayList <Integer>, ArrayList <Integer>> ();
-    Return.Value1 = BlockLevels;
-    Return.Value2 = BlockEnds;
-    return Return;
+    Tuple2 <ArrayList <Integer>, ArrayList <Integer>> ReturnValue = new Tuple2 <ArrayList <Integer>, ArrayList <Integer>> ();
+    ReturnValue.Value1 = BlockLevels;
+    ReturnValue.Value2 = BlockEnds;
+    return ReturnValue;
   }
   
   

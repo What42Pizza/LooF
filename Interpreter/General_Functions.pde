@@ -26,11 +26,11 @@
 
 
 
-<T> T GetLastItemOf (ArrayList <T> Input) {
+<T> T LastItemOf (ArrayList <T> Input) {
   return Input.get(Input.size() - 1);
 }
 
-<T> T GetLastItemOf (T[] Input) {
+<T> T LastItemOf (T[] Input) {
   return Input[Input.length - 1];
 }
 
@@ -660,7 +660,7 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
 
 void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
-  int CurrentLockLevel = GetLastItemOf (LockLevels);
+  int CurrentLockLevel = LastItemOf (LockLevels);
   LockLevels.add(CurrentLockLevel + 1);
   if (DataValue.ValueType != DataValueType_Table) return;
   for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) IncreaseDataValueLockLevel (CurrentDataValue);

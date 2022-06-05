@@ -49,8 +49,8 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, LineNumber);
-    ReturnValue3 <Integer, String, String[]> Return = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
-    Statement.AdditionalStatementData = new LooFAdditionalCallStatementData (Return.Value1, Return.Value2);
+    Tuple3 <Integer, String, String[]> ReturnValue = GetFunctionCallData (Statement.Args, false, CodeData, LineNumber, "call");
+    Statement.AdditionalStatementData = new LooFAdditionalCallStatementData (ReturnValue.Value1, ReturnValue.Value2);
   }
   @Override public String toString (LooFStatement Statement) {
     LooFAdditionalCallStatementData AdditionalData = (LooFAdditionalCallStatementData) Statement.AdditionalStatementData;
@@ -76,16 +76,16 @@ class LooFAdditionalCallStatementData extends LooFAdditionalStatementData {
 
 
 
-ReturnValue3 <Integer, String, String[]> GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesToCatch, LooFCodeData CodeData, int LineNumber, String FunctionName) {
+Tuple3 <Integer, String, String[]> GetFunctionCallData (LooFTokenBranch[] Args, boolean GetErrorTypesToCatch, LooFCodeData CodeData, int LineNumber, String FunctionName) {
   LooFTokenBranch FirstArg = Args[0];
-  if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new ReturnValue3 <Integer, String, String[]> (); // if we don't know the type of the first value, we can't figure out anything else
+  if (FirstArg.TokenType != TokenBranchType_PreEvaluatedFormula) return new Tuple3 <Integer, String, String[]> (); // if we don't know the type of the first value, we can't figure out anything else
   LooFDataValue FirstArgValue = FirstArg.Result;
   if (FirstArgValue.ValueType != DataValueType_Function) throw (new LooFCompilerException (CodeData, LineNumber, FunctionName + " statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FirstArgValue.ValueType] + "."));
-  ReturnValue3 <Integer, String, String[]> Return = new ReturnValue3 <Integer, String, String[]> ();
-  Return.Value1 = FirstArgValue.FunctionLineValue;
-  Return.Value2 = FirstArgValue.FunctionPageValue;
-  if (GetErrorTypesToCatch) Return.Value3 = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
-  return Return;
+  Tuple3 <Integer, String, String[]> ReturnValue = new Tuple3 <Integer, String, String[]> ();
+  ReturnValue.Value1 = FirstArgValue.FunctionLineValue;
+  ReturnValue.Value2 = FirstArgValue.FunctionPageValue;
+  if (GetErrorTypesToCatch) ReturnValue.Value3 = LooFCompiler.GetStringArrayFromStatementArg (Args[1], 2, CodeData, LineNumber);
+  return ReturnValue;
 }
 
 
@@ -533,8 +533,8 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
   }
   @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 2, CodeData, LineNumber);
-    ReturnValue3 <Integer, String, String[]> Return = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
-    Statement.AdditionalStatementData = new LooFAdditionalTryStatementData (Return.Value1, Return.Value2, Return.Value3);
+    Tuple3 <Integer, String, String[]> ReturnValue = GetFunctionCallData (Statement.Args, true, CodeData, LineNumber, "try");
+    Statement.AdditionalStatementData = new LooFAdditionalTryStatementData (ReturnValue.Value1, ReturnValue.Value2, ReturnValue.Value3);
   }
   @Override public String toString (LooFStatement Statement) {
     LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalStatementData;
