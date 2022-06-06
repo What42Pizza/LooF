@@ -1,3 +1,5 @@
-Test = 5
-callOutside "test"
+Test = {
+`	A: 5,
+`	B: 10,
+`}
 :exit

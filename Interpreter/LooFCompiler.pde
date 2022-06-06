@@ -963,7 +963,7 @@ class LooFCompiler {
         String CurrentLine = Code.get(i);
         if (!CurrentLine.startsWith("#include ")) continue;
         ProcessIncludesForLine (CodeData, CurrentLine, i, AllCodeDatas, HeaderLength, AllExceptions);
-        i --;
+        i --; // for if the included file starts with an #include
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -976,38 +976,36 @@ class LooFCompiler {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+    String FileName = CurrentLine.substring(9);
     
-    if (CurrentLine.startsWith("#include ")) {
-      String FileName = CurrentLine.substring(9);
-      
-      // get file to include
-      String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CodeData, LineNumber);
-      if (FullFileName == null) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not include the file " + FileName + " because the file could not be found."));
-      LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
-      
-      // get code to include and data about it
-      String[] FileToIncludeContents = FileToInclude.OriginalCode;
-      String FileToIncludeName = FileToInclude.OriginalFileName;
-      int LineNumberOffset = FileToInclude.IncludesHeader ? HeaderLength * -1 : 0;
-      int StartIndex = FileToInclude.IncludesHeader ? 0 : 1; // for skipping #ignore_header
-      
-      // remove #include (has to be done here to not mess up the error messages)
-      Code.remove(LineNumber);
-      LineNumbers.remove(LineNumber);
-      LineFileOrigins.remove(LineNumber);
-      
-      // insert code
-      for (int i = StartIndex; i < FileToIncludeContents.length; i ++) {
-        String LineToInsert = FileToIncludeContents[i];
-        Code.add(LineNumber + i, LineToInsert);
-        LineNumbers.add(LineNumber + i, i + LineNumberOffset);
-        LineFileOrigins.add(LineNumber + i, FileToIncludeName);
-      }
-      
-      // process new data
-      ProcessIfStatements (CodeData, AllCodeDatas, LineNumber, LineNumber + FileToIncludeContents.length, AllExceptions);
-      
+    // get file to include
+    String FullFileName = GetFullFileNameFromPartialFileName (FileName, AllCodeDatas, CodeData, LineNumber);
+    if (FullFileName == null) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not include the file " + FileName + " because the file could not be found."));
+    LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
+    
+    // get code to include and data about it
+    String[] FileToIncludeContents = FileToInclude.OriginalCode;
+    String FileToIncludeName = FileToInclude.OriginalFileName;
+    int LineNumberOffset = FileToInclude.IncludesHeader ? -HeaderLength : 0;
+    int InsertionStartIndex = LineNumber - 1;
+    
+    // remove #include (has to be done here to not mess up the error messages)
+    Code.remove(LineNumber);
+    LineNumbers.remove(LineNumber);
+    LineFileOrigins.remove(LineNumber);
+    
+    // insert code
+    int FileToIncludeStartIndex = FileToInclude.IncludesHeader ? 0 : 1; // for skipping #ignore_header
+    for (int i = FileToIncludeStartIndex; i < FileToIncludeContents.length; i ++) {
+      String LineToInsert = FileToIncludeContents[i];
+      Code.add(InsertionStartIndex + i, LineToInsert);
+      LineNumbers.add(InsertionStartIndex + i, i + LineNumberOffset);
+      LineFileOrigins.add(InsertionStartIndex + i, FileToIncludeName);
     }
+    
+    // process new data
+    ProcessIfStatements (CodeData, AllCodeDatas, LineNumber, LineNumber + FileToIncludeContents.length, AllExceptions);
+    
   }
   
   
@@ -1435,7 +1433,7 @@ class LooFCompiler {
     for (int i = 0; i < Code.size(); i ++) {
       try {
         String CurrentLine = Code.get(i);
-        Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizedLineData = TokenizeLine (CurrentLine, CodeData, AllCodeDatas, i);
+        Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizedLineData = TokenizeLineOfCode (CurrentLine, CodeData, AllCodeDatas, i);
         CodeTokens.add(TokenizedLineData.Value1);
         TokensFollowedBySpaces.add(TokenizedLineData.Value2);
       } catch (LooFCompilerException e) {
@@ -1453,7 +1451,7 @@ class LooFCompiler {
   
   
   
-  Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizeLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+  Tuple2 <ArrayList <String>, ArrayList <Boolean>> TokenizeLineOfCode (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     ArrayList <String> CurrentLineTokens = new ArrayList <String> ();
     ArrayList <Boolean> TokensFollowedBySpaces = new ArrayList <Boolean> ();
     int CurrentLineLength = CurrentLine.length();
@@ -1491,8 +1489,9 @@ class LooFCompiler {
         continue;
       }
       
-      CurrToken += CurrChar;
-      continue;
+      if (!CharIsWhitespace (CurrChar)) {
+        CurrToken += CurrChar;
+      }
       
     }
     if (CurrToken.length() != 0) {
@@ -1914,6 +1913,7 @@ class LooFCompiler {
   
   
   void EnsureFormulaTokensAreValid (LooFTokenBranch[] FormulaChildren, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    if (FormulaChildren.length == 0) return;
     
     LooFTokenBranch FirstToken = FormulaChildren[0];
     switch (FirstToken.TokenType) {
@@ -2111,7 +2111,8 @@ class LooFCompiler {
       PrevNextCommaIndex = NextCommaIndex;
       NextCommaIndex = GetNextCommaIndex (CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd, TableBlockLevel, BlockLevels);
     }
-    PasrseAndAddTableItem (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, ArrayItems, HashMapItems, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
+    if (PrevNextCommaIndex != TableBlockEnd)
+      PasrseAndAddTableItem (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, ArrayItems, HashMapItems, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
     
     LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", ListToArray (ArrayItems, new LooFTokenBranch (0, "")), HashMapItems);
     FillTokenBranchCanBePreEvaluated (ParsedTable);

@@ -91,6 +91,14 @@ Boolean[] ToObject (boolean[] ArrayIn) {
 
 
 
+boolean ExceptionIsLooFCompilerException (RuntimeException e) {
+  return e.getClass().equals(LooFCompilerException.class);
+}
+
+
+
+
+
 class StringComparator_ShortestToLongest implements Comparator <String> {
   public int compare (String String1, String String2) {
     return String1.length() - String2.length();
