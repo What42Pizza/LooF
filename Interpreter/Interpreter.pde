@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/05/22
+// Last updated 06/06/22
 
 
 
@@ -32,12 +32,12 @@ void setup() {
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   
   LooFEnvironment TestEnvironment = null;
-  try {
+  //try {
     TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
-  } catch (RuntimeException e) {
-    if (!ExceptionIsLooFCompilerException (e)) e.printStackTrace();
-    throw e;
-  }
+  //} catch (RuntimeException e) {
+  //  if (!ExceptionIsLooFCompilerException (e)) e.printStackTrace();
+  //  throw e;
+  //}
   
   ///*
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);

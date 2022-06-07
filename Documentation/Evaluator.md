@@ -246,15 +246,28 @@ FunctionValueToPass = $this.ExampleFunction
 
 - **typeOf Input (any)**
   - returns a string representing the data type of Input
+- **isNumber Input (any)**
+  - returns whether Input is of type int or float
+- **isLocked Input (any)**
+  - returns whether Input is locked
 - **cloneValue Input (any)**
   - returns a clone of Input
   - useful for having a local mutable copy of a locked value 
+- **serialize Input (any)**
+  - returns Input represented as a byteArray
+- **deserialize Input (byteArray)**
+  - returns the value represented by Input
+
+<br>
+
 - **newByteArray Size (int)**
   - returns a new byte array with length of Size
 - **timeSince StartTime (int or float)**
   - returns the number of seconds since StartTime
 - **switch {SwitchValue (any), Cases (table), Default (any)}**
 
+<br>
+<br>
 <br>
 <br>
 <br>

@@ -1,5 +1,9 @@
+/*
+not code
+*/
+
 Test = {
-`	A: 5,
+`	A: A,
 `	B: 10,
 `}
 :exit

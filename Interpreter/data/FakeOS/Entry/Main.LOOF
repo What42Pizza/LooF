@@ -8,9 +8,11 @@ call $AddFile, _, MainExecutablePath, {"OS", "Basics", "Basics.LOOF"}
 call $AddFile, _, MainExecutablePath, {"OS", "Basics", "BasicFunctions.LOOF"}
 
 // add header
-call $GetFileStrings, _, MainExecutablePath, "MainHeader.LOOF"
-pop _, MainHeaderContents
-callOutside "Interpreter", "set header", MainHeaderContents
+/*
+call $GetFileStrings, _, MainExecutablePath, "OSHeader.LOOF"
+pop _, OSHeaderContents
+callOutside "Interpreter", "set header", OSHeaderContents
+*/
 
 // load kernal
 call $AddFile, _, MainExecutablePath, "Kernal.LOOF"

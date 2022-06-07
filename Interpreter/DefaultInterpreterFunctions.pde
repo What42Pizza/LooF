@@ -28,21 +28,6 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
 
 
 
-LooFInterpreterFunction InterpreterFunction_ConditionalPop = new LooFInterpreterFunction() {
-  @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
-    
-  }
-  @Override public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (Statement, 1, CodeData, AllCodeDatas, LineNumber);
-    LooFCompiler.SimplifyAllOutputVars (Statement, CodeData, AllCodeDatas, LineNumber);
-  }
-  @Override public String toString (LooFStatement Statement) {return "'conditionalPop'";}
-};
-
-
-
-
-
 LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
     

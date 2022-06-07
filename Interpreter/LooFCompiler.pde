@@ -240,7 +240,6 @@ class LooFCompiler {
     
     InterpreterFunctions.put("push", InterpreterFunction_Push);
     InterpreterFunctions.put("pop", InterpreterFunction_Pop);
-    InterpreterFunctions.put("conditionalPop", InterpreterFunction_ConditionalPop);
     
     InterpreterFunctions.put("call", InterpreterFunction_Call);
     InterpreterFunctions.put("return", InterpreterFunction_Return);
@@ -397,7 +396,11 @@ class LooFCompiler {
     EvaluatorFunctions.put("getFunctionFile", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("typeOf", Function_TypeOf);
+    EvaluatorFunctions.put("isNumber", NullEvaluatorFunction);
+    EvaluatorFunctions.put("isLocked", NullEvaluatorFunction);
     EvaluatorFunctions.put("cloneValue", Function_CloneValue);
+    EvaluatorFunctions.put("serialize", NullEvaluatorFunction);
+    EvaluatorFunctions.put("deserialize", NullEvaluatorFunction);
     EvaluatorFunctions.put("newByteArray", NullEvaluatorFunction);
     EvaluatorFunctions.put("timeSince", NullEvaluatorFunction);
     EvaluatorFunctions.put("switch", NullEvaluatorFunction);
@@ -524,16 +527,17 @@ class LooFCompiler {
   
   
   void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents, ArrayList <LooFCompilerException> AllExceptions) {
+    HashMap <String, boolean[]> CharsInQuotesCache = new HashMap <String, boolean[]> ();
     
     if (HeaderFileContents.length > 0) {
       InsertHeader (CodeData, HeaderFileContents);
     }
     AddPaddingLines (CodeData);
-    RemoveComments (CodeData);
+    RemoveComments (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData, AllCodeDatas, AllExceptions);
     ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length, AllExceptions);
-    ProcessReplaces (CodeData, AllCodeDatas, AllExceptions);
+    ProcessReplaces (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveExcessWhitespace (CodeData);
     CheckForIncorrectPreProcessorStatements (CodeData, AllCodeDatas, AllExceptions);
     
@@ -609,53 +613,98 @@ class LooFCompiler {
   
   
   
-  void RemoveComments (LooFCodeData CodeData) {
+  void RemoveComments (LooFCodeData CodeData, HashMap <String, boolean[]> CharsInQuotesCache, HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
-    int CodeSize = Code.size();
-    for (int i = 0; i < CodeSize; i ++) {
-      String CurrentLine = Code.get(i);
-      String NewLine = RemoveCommentForLine (CurrentLine);
-      if (NewLine != null) {
-        Code.set(i, NewLine);
+    for (int i = 0; i < Code.size(); i ++) {
+      try {
+        String CurrentLine = Code.get(i);
+        RemoveLineEndComments (Code, i, CurrentLine, CharsInQuotesCache);
+        RemoveBlockComments (CodeData, i, CurrentLine, CharsInQuotesCache, AllCodeDatas);
+      } catch (LooFCompilerException e) {
+        AllExceptions.add(e);
       }
     }
   }
   
   
   
-  String RemoveCommentForLine (String CurrentLine) {
-    
-    // find index of comment
-    int FoundCommentIndex = -1;
-    int CurrentLineLength = CurrentLine.length() - 1;
-    for (int i = 0; i < CurrentLineLength; i ++) {
-      char CurrentChar = CurrentLine.charAt(i);
-      
-      // break if comment found
-      if (CurrentChar == '/' && CurrentLine.charAt(i + 1) == '/') {
-        FoundCommentIndex = i;
-        break;
-      }
-      
-      // skip strings
-      if (CurrentChar == '"') {
-        char PrevChar = CurrentChar;
-        i ++;
-        CurrentChar = CurrentLine.charAt(i);
-        while (!(CurrentChar == '"' && PrevChar != '\\')) {
-          PrevChar = CurrentChar;
-          i ++;
-          CurrentChar = CurrentLine.charAt(i);
-        }
-      }
-      
+  void RemoveLineEndComments (ArrayList <String> Code, int LineNumber, String CurrentLine, HashMap <String, boolean[]> CharsInQuotesCache) {
+    boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
+    if (CharsInQuotes == null) {
+      CharsInQuotes = GetCharsInQuotes (CurrentLine);
+      CharsInQuotesCache.put(CurrentLine, CharsInQuotes);
     }
     
+    // find index of comment
+    int PossibleCommentIndex = CurrentLine.indexOf("//");
+    while (PossibleCommentIndex != -1 && CharsInQuotes[PossibleCommentIndex]) {
+      PossibleCommentIndex = CurrentLine.indexOf("//");
+    }
+    int FoundCommentIndex = PossibleCommentIndex;
+    
     // return if no comment found
-    if (FoundCommentIndex == -1) return null;
+    if (FoundCommentIndex == -1) return;
     
     // remove comment
-    return CurrentLine.substring(0, FoundCommentIndex);
+    Code.set(LineNumber, CurrentLine.substring(0, FoundCommentIndex));
+    
+  }
+  
+  
+  
+  
+  
+  void RemoveBlockComments (LooFCodeData CodeData, int LineNumber, String CurrentLine, HashMap <String, boolean[]> CharsInQuotesCache, HashMap <String, LooFCodeData> AllCodeDatas) {
+    ArrayList <String> Code = CodeData.CodeArrayList;
+    ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+    ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+    
+    boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
+    if (CharsInQuotes == null) {
+      CharsInQuotes = GetCharsInQuotes (CurrentLine);
+      CharsInQuotesCache.put(CurrentLine, CharsInQuotes);
+    }
+    
+    // find index of comment
+    int PossibleCommentIndex = CurrentLine.indexOf("/*");
+    while (PossibleCommentIndex != -1 && CharsInQuotes[PossibleCommentIndex]) {
+      PossibleCommentIndex = CurrentLine.indexOf("/*");
+    }
+    int CommentStart = PossibleCommentIndex;
+    
+    // return if no comment found
+    if (CommentStart == -1) return;
+    
+    // find index of commend end
+    Tuple2 <Integer, Integer> CommentEnd = FindBlockCommentEnd (Code, LineNumber, CommentStart, CodeData, AllCodeDatas);
+    
+    // remove middle
+    for (int i = LineNumber + 1; i < CommentEnd.Value1; i ++) {
+      Code.remove(i);
+      LineNumbers.remove(i);
+      LineFileOrigins.remove(i);
+    }
+    
+    // remove from start and end
+    Code.set(LineNumber, CurrentLine.substring(0, CommentStart));
+    Code.set(LineNumber + 1, Code.get(LineNumber + 1).substring(CommentEnd.Value2));
+    
+  }
+  
+  
+  
+  Tuple2 <Integer, Integer> FindBlockCommentEnd (ArrayList <String> Code, int LineNumber, int CommentStart, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    
+    // if comment ends on the same line (there could be a "*/" before the "/*", and this deals with that)
+    int PossibleCommentEndIndex = Code.get(LineNumber).indexOf("*/", CommentStart + 2);
+    if (PossibleCommentEndIndex != -1) return new Tuple2 <Integer, Integer> (LineNumber, PossibleCommentEndIndex + 2);
+    
+    for (int i = LineNumber + 1; i < Code.size(); i ++) {
+      PossibleCommentEndIndex = Code.get(i).indexOf("*/");
+      if (PossibleCommentEndIndex != -1) return new Tuple2 <Integer, Integer> (i, PossibleCommentEndIndex + 2);
+    }
+    
+    throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find the end of the block comment."));
     
   }
   
@@ -686,9 +735,8 @@ class LooFCompiler {
   
   
   
-  void ProcessReplaces (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompilerException> AllExceptions) {
+  void ProcessReplaces (LooFCodeData CodeData, HashMap <String, boolean[]> CharsInQuotesCache, HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
-    HashMap <String, Boolean[]> AllCharsInQuotes = new HashMap <String, Boolean[]> ();
     for (int i = 0; i < Code.size(); i ++) {
       try {
         String CurrentLine = Code.get(i);
@@ -699,7 +747,7 @@ class LooFCompiler {
           String[] ReplaceBefore = ReplacementData[0];
           String[] ReplaceAfter = ReplacementData[1];
           if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "'#replace' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
-          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, AllCharsInQuotes, false);
+          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, CharsInQuotesCache, false);
           i --;
           continue;
         }
@@ -709,7 +757,7 @@ class LooFCompiler {
           String[] ReplaceBefore = ReplacementData[0];
           String[] ReplaceAfter = ReplacementData[1];
           if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "'#replaceIgnoreQuotes' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
-          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, AllCharsInQuotes, true);
+          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, CharsInQuotesCache, true);
           i --;
           continue;
         }
@@ -778,13 +826,13 @@ class LooFCompiler {
   
   
   
-  void ReplaceAllStringOccurances (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, HashMap <String, Boolean[]> AllCharsInQuotes, boolean IgnoreQuotes) {
+  void ReplaceAllStringOccurances (LooFCodeData CodeData, String ReplaceBefore, String[] ReplaceAfter, HashMap <String, boolean[]> CharsInQuotesCache, boolean IgnoreQuotes) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     int LinesToJumpPerReplace = ReplaceAfter.length - 1;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
       if (CurrentLine.startsWith("#replace")) continue;  // NOT "#replace "
-      ArrayList <Integer> AllReplacementPositions = GetAllPositionsOfString (CurrentLine, AllCharsInQuotes, ReplaceBefore, IgnoreQuotes);
+      ArrayList <Integer> AllReplacementPositions = GetAllPositionsOfString (CurrentLine, CharsInQuotesCache, ReplaceBefore, IgnoreQuotes);
       ReplaceAllStringOccurancesInLine (CodeData, CurrentLine, i, AllReplacementPositions, ReplaceBefore, ReplaceAfter);
       int LinesToJump = LinesToJumpPerReplace * AllReplacementPositions.size();
       i += LinesToJump;
@@ -793,15 +841,15 @@ class LooFCompiler {
   
   
   
-  ArrayList <Integer> GetAllPositionsOfString (String StringIn, HashMap <String, Boolean[]> AllCharsInQuotes, String StringToFind, boolean IgnoreQuotes) {
+  ArrayList <Integer> GetAllPositionsOfString (String StringIn, HashMap <String, boolean[]> CharsInQuotesCache, String StringToFind, boolean IgnoreQuotes) {
     ArrayList <Integer> Output = new ArrayList <Integer> ();
     
-    Boolean[] CharsInQuotes = null;
+    boolean[] CharsInQuotes = null;
     if (!IgnoreQuotes) {
-      CharsInQuotes = AllCharsInQuotes.getOrDefault (StringIn, null);
+      CharsInQuotes = CharsInQuotesCache.getOrDefault (StringIn, null);
       if (CharsInQuotes == null) {
-        CharsInQuotes = ToObject (GetCharsInQuotes (StringIn));
-        AllCharsInQuotes.put(StringIn, CharsInQuotes);
+        CharsInQuotes = GetCharsInQuotes (StringIn);
+        CharsInQuotesCache.put(StringIn, CharsInQuotes);
       }
     }
     
@@ -1842,6 +1890,7 @@ class LooFCompiler {
     // Type_String
     if (CurrentToken.charAt(0) == '"') {
       String StringValue = CurrentToken.substring(1, CurrentToken.length() - 1);
+      StringValue = FormatBackslashes_SingleStringReturn (StringValue);
       return new LooFTokenBranch (TokenIndex, CurrentToken, TokenBranchType_String, StringValue, true, false);
     }
     
@@ -2077,7 +2126,7 @@ class LooFCompiler {
   
   
   void FillTokenBranchCanBePreEvaluated (LooFTokenBranch TokenBranch) {
-    boolean CanBePreEvaluated = true;
+    
     for (LooFTokenBranch CurrentToken : TokenBranch.Children) {
       if (
         !CurrentToken.CanBePreEvaluated ||
@@ -2085,11 +2134,27 @@ class LooFCompiler {
         (CurrentToken.TokenType == TokenBranchType_EvaluatorOperation && !CurrentToken.Operation.CanBePreEvaluated()) ||
         (CurrentToken.TokenType == TokenBranchType_EvaluatorFunction && !CurrentToken.Function.CanBePreEvaluated())
       ) {
-        CanBePreEvaluated = false;
-        break;
+        TokenBranch.CanBePreEvaluated = false;
+        return;
       }
     }
-    TokenBranch.CanBePreEvaluated = CanBePreEvaluated;
+    
+    if (TokenBranch.TokenType != TokenBranchType_Table) return;
+    
+    Set <String> KeySet = TokenBranch.HashMapChildren.keySet();
+    for (String CurrentKey : KeySet) {
+      LooFTokenBranch CurrentToken = TokenBranch.HashMapChildren.get(CurrentKey);
+      if (
+        !CurrentToken.CanBePreEvaluated ||
+        CurrentToken.TokenType == TokenBranchType_VarName ||
+        (CurrentToken.TokenType == TokenBranchType_EvaluatorOperation && !CurrentToken.Operation.CanBePreEvaluated()) ||
+        (CurrentToken.TokenType == TokenBranchType_EvaluatorFunction && !CurrentToken.Function.CanBePreEvaluated())
+      ) {
+        TokenBranch.CanBePreEvaluated = false;
+        return;
+      }
+    }
+    
   }
   
   
@@ -2529,20 +2594,22 @@ class LooFCompiler {
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
-      PrintWriter FileOutput = createWriter (FileOutputName);
-      
-      ArrayList <String> Code = CodeData.CodeArrayList;
-      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
-      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-      for (int i = 0; i < Code.size(); i ++) {
-        String Line = Code.get(i);
-        int LineNumber = LineNumbers.get(i);
-        String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + Line);
-      }
-      
-      FileOutput.flush();
-      FileOutput.close();
+      try {
+        PrintWriter FileOutput = new PrintWriter (FileOutputName);
+        
+        ArrayList <String> Code = CodeData.CodeArrayList;
+        ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+        ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+        for (int i = 0; i < Code.size(); i ++) {
+          String Line = Code.get(i);
+          int LineNumber = LineNumbers.get(i);
+          String LineFileOrigin = LineFileOrigins.get(i);
+          FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + Line);
+        }
+        
+        FileOutput.flush();
+        FileOutput.close();
+      } catch (java.io.FileNotFoundException e) {}
     }
   }
   
@@ -2560,30 +2627,32 @@ class LooFCompiler {
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
-      PrintWriter FileOutput = createWriter (FileOutputName);
-      
-      ArrayList <String> Code = CodeData.CodeArrayList;
-      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
-      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-      for (int i = 0; i < Code.size(); i ++) {
-        String Line = Code.get(i);
-        int LineNumber = LineNumbers.get(i);
-        String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + Line);
-      }
-      
-      FileOutput.println();
-      for (int j = 0; j < 100; j ++) FileOutput.print('-');
-      FileOutput.println();
-      HashMap <String, Integer> FunctionLocations = CodeData.FunctionLineNumbers;
-      Set <String> AllFunctionNames = FunctionLocations.keySet();
-      for (String CurrFunctionName : AllFunctionNames) {
-        int CurrFunctionLocation = FunctionLocations.get(CurrFunctionName);
-        FileOutput.println ("Function \"" + CurrFunctionName + "\": " + CurrFunctionLocation);
-      }
-      
-      FileOutput.flush();
-      FileOutput.close();
+      try {
+        PrintWriter FileOutput = new PrintWriter (FileOutputName);
+        
+        ArrayList <String> Code = CodeData.CodeArrayList;
+        ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+        ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+        for (int i = 0; i < Code.size(); i ++) {
+          String Line = Code.get(i);
+          int LineNumber = LineNumbers.get(i);
+          String LineFileOrigin = LineFileOrigins.get(i);
+          FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + Line);
+        }
+        
+        FileOutput.println();
+        for (int j = 0; j < 100; j ++) FileOutput.print('-');
+        FileOutput.println();
+        HashMap <String, Integer> FunctionLocations = CodeData.FunctionLineNumbers;
+        Set <String> AllFunctionNames = FunctionLocations.keySet();
+        for (String CurrFunctionName : AllFunctionNames) {
+          int CurrFunctionLocation = FunctionLocations.get(CurrFunctionName);
+          FileOutput.println ("Function \"" + CurrFunctionName + "\": " + CurrFunctionLocation);
+        }
+        
+        FileOutput.flush();
+        FileOutput.close();
+      } catch (java.io.FileNotFoundException e) {}
     }
   }
   
@@ -2601,20 +2670,22 @@ class LooFCompiler {
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
-      PrintWriter FileOutput = createWriter (FileOutputName);
-      
-      ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
-      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
-      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-      for (int i = 0; i < CodeTokens.size(); i ++) {
-        ArrayList <String> Line = CodeTokens.get(i);
-        int LineNumber = LineNumbers.get(i);
-        String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": \"" + CombineStringsWithSeperator (Line, "\"   \"") + "\"");
-      }
-      
-      FileOutput.flush();
-      FileOutput.close();
+      try {
+        PrintWriter FileOutput = new PrintWriter (FileOutputName);
+        
+        ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
+        ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+        ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+        for (int i = 0; i < CodeTokens.size(); i ++) {
+          ArrayList <String> Line = CodeTokens.get(i);
+          int LineNumber = LineNumbers.get(i);
+          String LineFileOrigin = LineFileOrigins.get(i);
+          FileOutput.println (LineFileOrigin + " " + LineNumber + ": \"" + CombineStringsWithSeperator (Line, "\"   \"") + "\"");
+        }
+        
+        FileOutput.flush();
+        FileOutput.close();
+      } catch (java.io.FileNotFoundException e) {}
     }
   }
   
@@ -2632,20 +2703,22 @@ class LooFCompiler {
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
-      PrintWriter FileOutput = createWriter (FileOutputName);
-      
-      LooFStatement[] Statements = CodeData.Statements;
-      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
-      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-      for (int i = 0; i < Statements.length; i ++) {
-        LooFStatement CurrentStatement = Statements[i];
-        int LineNumber = LineNumbers.get(i);
-        String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
-      }
-      
-      FileOutput.flush();
-      FileOutput.close();
+      try {
+        PrintWriter FileOutput = new PrintWriter (FileOutputName);
+        
+        LooFStatement[] Statements = CodeData.Statements;
+        ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+        ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+        for (int i = 0; i < Statements.length; i ++) {
+          LooFStatement CurrentStatement = Statements[i];
+          int LineNumber = LineNumbers.get(i);
+          String LineFileOrigin = LineFileOrigins.get(i);
+          FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
+        }
+        
+        FileOutput.flush();
+        FileOutput.close();
+      } catch (java.io.FileNotFoundException e) {}
     }
   }
   
@@ -2663,20 +2736,22 @@ class LooFCompiler {
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
       FileOutputName = ReplaceFileExtention (FileOutputName, FileExtention);
-      PrintWriter FileOutput = createWriter (FileOutputName);
-      
-      LooFStatement[] Statements = CodeData.Statements;
-      ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
-      ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-      for (int i = 0; i < Statements.length; i ++) {
-        LooFStatement CurrentStatement = Statements[i];
-        int LineNumber = LineNumbers.get(i);
-        String LineFileOrigin = LineFileOrigins.get(i);
-        FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
-      }
-      
-      FileOutput.flush();
-      FileOutput.close();
+      try {
+        PrintWriter FileOutput = new PrintWriter (FileOutputName);
+        
+        LooFStatement[] Statements = CodeData.Statements;
+        ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
+        ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+        for (int i = 0; i < Statements.length; i ++) {
+          LooFStatement CurrentStatement = Statements[i];
+          int LineNumber = LineNumbers.get(i);
+          String LineFileOrigin = LineFileOrigins.get(i);
+          FileOutput.println (LineFileOrigin + " " + LineNumber + ": " + ConvertLooFStatementToString (CurrentStatement));
+        }
+        
+        FileOutput.flush();
+        FileOutput.close();
+      } catch (java.io.FileNotFoundException e) {}
     }
   }
   

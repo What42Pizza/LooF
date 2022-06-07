@@ -350,8 +350,8 @@ boolean CharIsLetter (char CurrentChar) {
 
 
 
-String[] FormatBackslashes (String InputString) {
-  char[] InputStringChars = InputString.toCharArray();
+String[] FormatBackslashes (String StringIn) {
+  char[] InputStringChars = StringIn.toCharArray();
   ArrayList <String> FormattedStrings = new ArrayList <String> ();
   String CurrentString = "";
   
@@ -383,6 +383,13 @@ String[] FormatBackslashes (String InputString) {
   
   FormattedStrings.add (CurrentString);
   return FormattedStrings.toArray(new String [FormattedStrings.size()]);
+}
+
+
+
+String FormatBackslashes_SingleStringReturn (String StringIn) {
+  String[] FormattedString = FormatBackslashes (StringIn);
+  return CombineStringsWithSeperator (FormattedString, "\n");
 }
 
 
