@@ -133,10 +133,14 @@ These use the value directly following the function. If the function takes in mu
   - returns a table containing all of the keys of the hashmap part of TableIn
 - **valuesOf TableIn**
   - returns a table containing all of the values of the hashmap part of TableIn
-- **randomItem TableIn**
+- **randomItem TableIn (table)**
+  - returns a random value from either the array part of TableIn or the hashmap part of TableIn
+- **randomArrayItem TableIn**
   - returns a random item from the array part of TableIn
-- **randomValue TableIn**
-  - returns a random value from the hashmap part of TableIn
+- **randomHashmapItem TableIn**
+  - returns a random item from the hashmap part of TableIn
+- **randomByteArrayItem ByteArrayIn**
+  - returns a random int in ByteArrayIn
 - **firstIndexOfItem {TableIn (table or byteArray), Item (any)}**
   - returns the index of the first found occurrence of Item in TableIn
 - **firstIndexOfItem {TableIn (table or byteArray), Item (any), StartIndex (int)}**
@@ -155,13 +159,23 @@ These use the value directly following the function. If the function takes in mu
   - returns true if the hashmap part of TableIn contains ItemToFind
 - **byteArrayContainsItems {ByteArrayIn, ByteToFind (int)}**
   - returns true if ByteArrayIn contains ByteToFind 
-- **splitTable {TableIn, Position (int)}**
-  - returns a table containing two more tables which are TableIn split at Position. (`splitTable {{0, 1, 2}, 1}` would evaluate to {{0}, {1, 2}})
-  - Position is modulo-ed by the length of TableIn (with -1 mapping correctly to endOf TableIn)
-- **removeDuplicateItems TableIn**
+- **removeDuplicateItems TableIn (table or byteArray)**
   - returns a new table which contains a single instance of each item in TableIn
 - **deepCloneTable TableIn**
   - returns a new table which contains deep cloned versions of all the items in TableIn
+- **createFilledTable {FillItem (any), Size (int)}**
+  - returns a new table with size Size and filled with FillItem
+- **createFilledByteArray {FillByte (int), Size (int)}**
+  - returns a new byteArray with size Size and filled with FillByte
+- **getSubArray {TableIn (table or byteArray), StartIndex (int), EndIndex (int)}**
+  - returns a new table or byteArray which is a sub-section of TableIn
+  - both StartIndex and EndIndex are modulo-ed by the length of TableIn (with -1 mapping correctly to endOf TableIn)
+- **replaceSubArray {TableIn (table or byteArray), StartIndex (int), EndIndex (int), NewItems (same type as TableIn)}**
+  - returns a new table or byteArray where the sub-section of TableIn is replaced with NewItems
+  - both StartIndex and EndIndex are modulo-ed by the length of TableIn (with -1 mapping correctly to endOf TableIn)
+- **splitArray {TableIn (table or byteArray), Position (int)}**
+  - returns a table containing two more tables which are TableIn split at Position. (`splitTable {{0, 1, 2}, 1}` would evaluate to {{0}, {1, 2}})
+  - Position is modulo-ed by the length of TableIn (with -1 mapping correctly to endOf TableIn)
 
 <br>
 

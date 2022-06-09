@@ -36,6 +36,16 @@
 
 
 
+<T> T RemoveLastItem (ArrayList <T> Input) {
+  return Input.remove(Input.size() - 1);
+}
+
+<T> T SetLastItem (ArrayList <T> Input, T NewItem) {
+  return Input.set(Input.size() - 1, NewItem);
+}
+
+
+
 <T> boolean TableContainsItem (T[] Input, T Item) {
   for (int i = 0; i < Input.length; i ++) {
     if (Input[i].equals(Item)) return true;
@@ -687,7 +697,7 @@ void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
 
 void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
-  LockLevels.remove(LockLevels.size() - 1);
+  RemoveLastItem (LockLevels);
   if (DataValue.ValueType != DataValueType_Table) return;
   for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) DecreaseDataValueLockLevel (CurrentDataValue);
   Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
@@ -698,7 +708,7 @@ void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
 
 void UnlockDataValue (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
-  LockLevels.set(LockLevels.size() - 1, 0);
+  SetLastItem (LockLevels, 0);
   if (DataValue.ValueType != DataValueType_Table) return;
   for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) UnlockDataValue (CurrentDataValue);
   Set <String> HashMapKeys = DataValue.HashMapValue.keySet();

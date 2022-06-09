@@ -1191,7 +1191,7 @@ LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_RandomArrayItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
@@ -1208,7 +1208,7 @@ LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_RandomValue = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_RandomHashmapItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});

@@ -49,7 +49,7 @@
   - Pushes Value to the general stack
 - **pop VarName**
   - Pops the first value of the general stack into VarName. Errors if the general stack is empty or if no more values have been pushed to the stack since the function started
-- **pop TableVarName (table), Item0, Item1, ...**
+- **pop TableVarName, Item0, Item1, ...**
   - Pops the first value of the general stack into TableVarName, then sets the var Item0 to index 0 of TableVarName, sets the var Item0 to index 1 of TableVarName, etc. If the number of items in TableVarName runs out, all remaining arguments will be set to null. Errors if the general stack is empty or if no more values have been pushed to the stack since the function started
 
 <br>
@@ -73,7 +73,7 @@
 - **returnRawIf Condition, ReturnValue**
   - If Condition is truthy, pushes ReturnValue to the general stack and jumps execution to the value popped off of the IP stack. Errors if the IP stack is empty or if the size of the general stack is not the same as when the function was called
 
-**NOTE:** remember that functions have to take in values of type 'function', which can only be created with the 'createFunction' evaluator function. (more info in 'Language Basics.md')
+**NOTE:** remember that 'call' and 'try' statements have to take in values of type 'function', which can only be created with the 'createFunction' evaluator function. (more info in 'Language Basics.md')
 
 <br>
 
@@ -85,6 +85,8 @@
   - If Condition is truthy xor Invert is truthy, executes the next statement (otherwise skips it)
 - **skip**
   - Jumps execution to after the first 'end' statement it can find that is on the same code block level. Errors if no suitable 'end' statement is found
+- **skip IsFunction**
+  - Jumps execution to after the first 'end' statement it can find that is on the same code block level. If IsFunction is true, the matching 'end' statement will throw an error if executed to make sure you make the function return. Errors if no suitable 'end' statement is found
 - **end**
   - Effectively nop; only useful because of 'skip' statements
 

@@ -15,43 +15,34 @@ class LooFInterpreter {
     if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     for (int i = 0; i < NumOfStatements; i ++) {
       LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
-      ExecuteNextStatement (CurrentStatement, Environment);
+      ExecuteStatement (CurrentStatement, Environment);
       if (Environment.Stopped) return;
     }
   }
   
   
   
-  
-  
-  void ExecuteNextStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) throws LooFInterpreterException {
+  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) throws LooFInterpreterException {
     
     try {
-      ExecuteStatement (CurrentStatement, Environment);
+      switch (CurrentStatement.StatementType) {
+        
+        case (StatementType_Assignment):
+          ExecuteAssignmentStatement (CurrentStatement, Environment);
+          break;
+        
+        case (StatementType_Function):
+          ExecuteFunctionStatement (CurrentStatement, Environment);
+          break;
+        
+      }
     } catch (LooFInterpreterException e) {
-      HandleEnvironmentException (e);
+      HandleEnvironmentException (e, Environment);
     }
     
     IncrementEnvironmentLineNumber (Environment);
     
   }
-  
-  
-  
-  
-  
-  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
-    
-    if (CurrentStatement.StatementType == StatementType_Assignment) {
-      ExecuteAssignmentStatement (CurrentStatement, Environment);
-      return;
-    }
-    
-    ExecuteFunctionStatement (CurrentStatement, Environment);
-    
-  }
-  
-  
   
   
   
@@ -94,8 +85,6 @@ class LooFInterpreter {
   
   
   
-  
-  
   LooFDataValue GetTargetTableForStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) {
     LooFDataValue TargetTable = GetVariableValue (CurrentStatement.VarName, Environment, true);
     LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
@@ -125,7 +114,7 @@ class LooFInterpreter {
   
   
   
-  void HandleEnvironmentException (LooFInterpreterException e) throws LooFInterpreterException  {
+  void HandleEnvironmentException (LooFInterpreterException CurrentException, LooFEnvironment Environment) throws LooFInterpreterException  {
     ArrayList <String> StackTraceFiles = new ArrayList <String> ();
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
     
@@ -143,21 +132,79 @@ class LooFInterpreter {
   
   
   void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, String[] ErrorTypesToCatch) {
+    if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
+    ErrorTypesToCatch = (ErrorTypesToCatch == null) ? new String [0] : ErrorTypesToCatch;
     
-    if (NewPageName != null) {
-      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(NewPageName, null);
-      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "could not find page named \"" + NewPageName + "\".", new String[] {"InvalidArgType"}));
-      Environment.CurrentCodeData = NewCodeData;
-      Environment.CurrentPageName = NewPageName;
-    }
-    Environment.CallStackFileNames.add(Environment.CurrentPageName);
-    
+    // add call stack data
+    Environment.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
+    Environment.CallStackPageNames.add(Environment.CurrentPageName);
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
+    Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
+    Environment.CallStackErrorTypesToPass.add(new String [0]);
+    Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
+    Environment.CallStackInitialLockedValuesSizes.add(Environment.CallStackLockedValues.size());
+    
+    // set current page
+    if (NewPageName != null) {
+      Environment.CurrentPageName = NewPageName;
+      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(NewPageName, null);
+      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "jump to function failed because the page \"" + NewPageName + "\" does not exist.", new String[] {"JumpToFunctionError", "PageNotFound"}));
+      Environment.CurrentCodeData = NewCodeData;
+    }
+    
+    int StatementsLength = Environment.CurrentCodeData.Statements.length;
+    if (NewLineNumber >= StatementsLength) {
+      ReturnFromFunction (Environment);
+      throw (new LooFInterpreterException (Environment, "the function being jumped to is past the end of the file.", new String[] {"JumpToFunctionError", "LineNumberTooLarge"}));
+    }
+    
+    // set current line
     Environment.CurrentLineNumber = NewLineNumber;
     
-    Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
+  }
+  
+  
+  
+  
+  
+  void ReturnFromFunction (LooFEnvironment Environment) {
     
-    Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
+    // remove call stack data
+    RemoveLastItem (Environment.VariableListsStack);
+    String NewPageName = RemoveLastItem (Environment.CallStackPageNames);
+    int NewLineNumber = RemoveLastItem (Environment.CallStackLineNumbers);
+    RemoveLastItem (Environment.CallStackErrorTypesToCatch);
+    RemoveLastItem (Environment.CallStackErrorTypesToPass);
+    RemoveLastItem (Environment.CallStackInitialGeneralStackSizes);
+    int InitialLockedValuesSize = RemoveLastItem (Environment.CallStackInitialLockedValuesSizes);
+    
+    // set current page
+    if (!Environment.CurrentPageName.equals(NewPageName)) {
+      Environment.CurrentPageName = NewPageName;
+      LooFCodeData NewCodeData = Environment.AllCodeDatas.getOrDefault(NewPageName, null);
+      if (NewCodeData == null) throw (new LooFInterpreterException (Environment, "return from function failed because the page \"" + NewPageName + "\" no longer exists.", new String[] {"PageNotFound"}));
+      Environment.CurrentCodeData = NewCodeData;
+    }
+    
+    // set current line
+    Environment.CurrentLineNumber = NewLineNumber;
+    
+    // unlock args
+    UnlockCallStackValues (Environment, InitialLockedValuesSize);
+    
+  }
+  
+  
+  
+  void UnlockCallStackValues (LooFEnvironment Environment, int InitialLockedValuesSize) {
+    ArrayList <LooFDataValue[]> LockedValues = Environment.CallStackLockedValues;
+    
+    while (LockedValues.size() > InitialLockedValuesSize) {
+      LooFDataValue[] ValuesToUnlock = RemoveLastItem (LockedValues);
+      for (LooFDataValue CurrentValue : ValuesToUnlock) {
+        DecreaseDataValueLockLevel (CurrentValue);
+      }
+    }
     
   }
   

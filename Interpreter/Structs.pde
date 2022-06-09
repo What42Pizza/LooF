@@ -21,7 +21,7 @@ class LooFModuleData {
 class LooFInterpreterAssignment {
   
   public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment is a base class and it does not have an overridden GetNewVarValue().", new String[] {"InvalidInterpreterAssignment"}));
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterAssignment does not have an overridden GetNewVarValue().", new String[] {"InvalidInterpreterAssignment"}));
   }
   
   public boolean AddToCombinedTokens() {
@@ -41,11 +41,15 @@ class LooFInterpreterAssignment {
 class LooFInterpreterFunction {
   
   public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
   }
   
   public void FinishStatement (LooFStatement Statement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) throws LooFCompilerException {
-    throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction is a base class and it does not have an overridden FinishStatement()."));
+    throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
+  }
+  
+  public boolean DealWithError (LooFInterpreterException CurrentException, LooFStatement Statement, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden DealWithError().", new String[] {"InvalidInterpreterFunction"}));
   }
   
   public int GetBlockLevelChange() {
@@ -57,7 +61,7 @@ class LooFInterpreterFunction {
   }
   
   public String toString (LooFStatement Statement) {
-    throw new AssertionError("this LooFInterpreterFunction is a base class and it does not have an overridden toString().");
+    throw new AssertionError("this LooFInterpreterFunction does not have an overridden toString().");
   }
   
 }
@@ -69,7 +73,7 @@ class LooFInterpreterFunction {
 class LooFEvaluatorOperation {
   
   public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorOperation is a base class and it does not have an overridden HandleOperation().", new String[] {"InvalidEvaluatorOperation"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorOperation does not have an overridden HandleOperation().", new String[] {"InvalidEvaluatorOperation"});
     throw new AssertionError();
   }
   
@@ -96,7 +100,7 @@ LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
 class LooFEvaluatorFunction {
   
   public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorFunction is a base class and it does not have an overridden HandleFunctionCall().", new String[] {"InvalidEvaluatorFunction"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "this LooFEvaluatorFunction does not have an overridden HandleFunctionCall().", new String[] {"InvalidEvaluatorFunction"});
     throw new AssertionError();
   }
   
@@ -153,12 +157,13 @@ class LooFEnvironment {
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
   
-  ArrayList <String> CallStackFileNames = new ArrayList <String> ();
+  ArrayList <String> CallStackPageNames = new ArrayList <String> ();
   ArrayList <Integer> CallStackLineNumbers = new ArrayList <Integer> ();
-  ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
   ArrayList <String[]> CallStackErrorTypesToCatch = new ArrayList <String[]> ();
   ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
-  ArrayList <LooFDataValue[]> CallStackLockedArguments = new ArrayList <LooFDataValue[]> ();
+  ArrayList <LooFDataValue[]> CallStackLockedValues = new ArrayList <LooFDataValue[]> ();
+  ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
+  ArrayList <Integer> CallStackInitialLockedValuesSizes = new ArrayList <Integer> ();
   
   
   

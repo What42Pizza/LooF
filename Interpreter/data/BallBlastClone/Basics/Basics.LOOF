@@ -6,7 +6,7 @@ $link BasicFunctions.LOOF as Basics
 
 
 
-#replaceMultiLine "\nfunction " "\nskip\n$function "
+#replaceMultiLine "\nfunction " "\nskip true\n$function "
 
 #replaceMultiLine "\ncall " "\ncall $"
 #replaceMultiLine "\ncall_ " "\ncall "

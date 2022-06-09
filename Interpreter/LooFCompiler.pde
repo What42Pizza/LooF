@@ -357,8 +357,9 @@ class LooFCompiler {
     EvaluatorFunctions.put("lastItemOf", Function_LastItemOf);
     EvaluatorFunctions.put("keysOf", Function_KeysOf);
     EvaluatorFunctions.put("valuesOf", Function_ValuesOf);
-    EvaluatorFunctions.put("randomItem", Function_RandomItem);
-    EvaluatorFunctions.put("randomValue", Function_RandomValue);
+    EvaluatorFunctions.put("randomArrayItem", Function_RandomArrayItem);
+    EvaluatorFunctions.put("randomHashmapItem", Function_RandomHashmapItem);
+    EvaluatorFunctions.put("randomByteArrayItem", Function_RandomHashmapItem);
     EvaluatorFunctions.put("firstIndexOfItem", Function_FirstIndexOfItem);
     EvaluatorFunctions.put("lastIndexOfItem", Function_LastIndexOfItem);
     EvaluatorFunctions.put("allIndexesOfItem", NullEvaluatorFunction);
@@ -366,9 +367,13 @@ class LooFCompiler {
     EvaluatorFunctions.put("arrayContainsItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("hashmapContainsItem", NullEvaluatorFunction);
     EvaluatorFunctions.put("byteArrayContainsItems", NullEvaluatorFunction);
-    EvaluatorFunctions.put("splitTable", NullEvaluatorFunction);
     EvaluatorFunctions.put("removeDuplicateItems", NullEvaluatorFunction);
     EvaluatorFunctions.put("deepCloneTable", NullEvaluatorFunction);
+    EvaluatorFunctions.put("createFilledTable", NullEvaluatorFunction);
+    EvaluatorFunctions.put("createFilledByteArray", NullEvaluatorFunction);
+    EvaluatorFunctions.put("getSubArray", NullEvaluatorFunction);
+    EvaluatorFunctions.put("replaceSubArray", NullEvaluatorFunction);
+    EvaluatorFunctions.put("splitArray", NullEvaluatorFunction);
     
     EvaluatorFunctions.put("getChar", Function_GetChar);
     EvaluatorFunctions.put("getCharInts", Function_GetCharInts);
@@ -2365,7 +2370,7 @@ class LooFCompiler {
   
   void EnsureStatementHasCorrectNumberOfArgs_Bounded (LooFStatement Statement, int MinNumberOfArgs, int MaxNumberOfArgs, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     int NumberOfArgs = Statement.Args.length;
-    if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this statement takes " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "or " : "and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
+    if (NumberOfArgs < MinNumberOfArgs || NumberOfArgs > MaxNumberOfArgs) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this statement takes " + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? "either " : "between ") + MinNumberOfArgs + (MinNumberOfArgs + 1 == MaxNumberOfArgs ? " or " : " and ") + MaxNumberOfArgs + " arguments, but " + (NumberOfArgs < MinNumberOfArgs ? "only " : "") + NumberOfArgs + " were found."));
   }
   
   
@@ -2443,7 +2448,6 @@ class LooFCompiler {
     int StartIndex = StartingLineNumber + Increment;
     int EndIndex = (Increment > 0) ? AllStatements.length : -1;
     for (int i = StartIndex; i != EndIndex; i += Increment) {
-      if (BlockLevel < 0) throw (new LooFCompilerException (CodeData, AllCodeDatas, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (block ended with wrong statement type)."));
       LooFStatement CurrentStatement = AllStatements[i];
       if (CurrentStatement.StatementType != StatementType_Function) continue;
       
@@ -2452,7 +2456,9 @@ class LooFCompiler {
       }
       
       LooFInterpreterFunction StatementFunction = CurrentStatement.Function;
-      BlockLevel += StatementFunction.GetBlockLevelChange();
+      BlockLevel += StatementFunction.GetBlockLevelChange() * Math.signum(Increment);
+      
+      if (BlockLevel < 0) throw (new LooFCompilerException (CodeData, AllCodeDatas, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (block ended with wrong statement type ('" + CurrentStatement.Name + "' at line " + CodeData.LineNumbers.get(i) + "))."));
       
     }
     throw (new LooFCompilerException (CodeData, AllCodeDatas, StartingLineNumber, "could not find a matching statement of type {" + CombineStringsWithSeperator (StatementToFind, ", ") + "} (statement completely missing)."));
@@ -2559,6 +2565,15 @@ class LooFCompiler {
     LooFDataValue InputArgValue = InputArg.Result;
     if (InputArgValue.ValueType != DataValueType_String) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "arg number " + ArgNumber + " was expected to be an string, but the value given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
     return InputArgValue.StringValue;
+  }
+  
+  
+  
+  Boolean GetBoolFromStatementArg (LooFTokenBranch InputArg, int ArgNumber, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    if (InputArg.TokenType != TokenBranchType_PreEvaluatedFormula) return null;
+    LooFDataValue InputArgValue = InputArg.Result;
+    if (InputArgValue.ValueType != DataValueType_Bool) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "arg number " + ArgNumber + " was expected to be a bool, but the value given was of type " + TokenBranchTypeNames[InputArgValue.ValueType] + "."));
+    return InputArgValue.BoolValue;
   }
   
   
