@@ -6,7 +6,7 @@ function Switch  -> Input, Cases, Default, RunFunctions, FunctionArgs  throwsErr
 	SwitchResult = Cases[Input] orDefault Default
 	
 	if RunFunctions and typeOf SwitchResult == "function" then
-		errorIf (getFunctionFile SwitchResult == null), "Cannot call a function with a null file name. (use \"$this.\")", {"NullFunctionFile"}
+		errorIf (getFunctionFile SwitchResult == null), "Cannot call a function with a null file name. (use \"\$this.\")", {"NullFunctionFile"}
 		if FunctionArgs != null; push FunctionArgs
 		call_ SwitchResult  -> FunctionResults
 		returnRawIf (FunctionResults != null), FunctionResults

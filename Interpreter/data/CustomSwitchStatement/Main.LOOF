@@ -41,7 +41,7 @@ end
 
 
 call F.Switch, UserLikesPizzaResponse, {
-`	yes: $Case_Yes
-`	no: $Case_No
-`	maybe: $Case_Maybe
+`	yes: $Case_Yes,
+`	no: $Case_No,
+`	maybe: $Case_Maybe,
 `}, $Case_Default

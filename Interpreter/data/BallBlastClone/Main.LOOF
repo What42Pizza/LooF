@@ -1,5 +1,6 @@
-Settings = {}
-Settings["TargetFramerate"] = 60
+Settings = {
+`	TargetFramerate: 60,
+`}
 
 
 
@@ -16,31 +17,38 @@ $link BallsHandler.LOOF as BallsHandler
 
 
 
-BallsData = {}
-BallsData["AllBalls"] = {}
-BallsData["StartingHealth"] = 5
-BallsData["MaxSize0Balls"] = 10
-BallsData["Size"] = 0.05
-BallsData["Gravity"] = 0.05
-BallsData["BounceVelOffset"] = 0.5
-BallsData["BounceVelScale"] = 0.05
+BallsData = {
+`	AllBalls: {},
+`	StartingHealth: 5,
+`	MaxSize0Balls: 10,
+`	Size: 0.05,
+`	Gravity: 0.05,
+`	BounceVelOffset: 0.5,
+`	BounceVelScale: 0.05,
+`}
 
-BulletsData = {}
-BulletsData["AllBullets"] = {}
-BulletsData["Damage"] = 1
-BulletsData["Size"] = 0.01
-BulletsData["LeftoverSpawnAmount"] = 0
+BulletsData = {
+`	AllBullets: {},
+`	Damage: 1,
+`	Size: 0.01,
+`	LeftoverSpawnAmount: 0,
+`}
 
 
 
-GameData = {}
-GameData["Playing"] = false
-GameData["Paused"] = false
-GameData["PlayerIsAlive"] = false
-GameData["Score"] = 0
+
+
+GameData = {
+`	Playing: false,
+`	Paused: false,
+`	PlayerIsAlive: false,
+`	Score: 0,
+`}
+
+
 
 PrevFrameSecond = timeSince 0
-TargetFrameDelta = 1 / TargetFramerate
+TargetFrameDelta = 1.0 / Settings["TargetFramerate"]
 
 
 

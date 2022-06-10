@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/09/22
+// Last updated 06/10/22
 
 
 
@@ -39,8 +39,7 @@ void setup() {
   LooFEnvironment TestEnvironment = null;
   try {
     TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
-  } catch (RuntimeException e) {
-    if (!ExceptionIsLooFCompilerException (e)) e.printStackTrace();
+  } catch (LooFCompilerException e) {
     throw e;
   }
   

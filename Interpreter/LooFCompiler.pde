@@ -622,9 +622,8 @@ class LooFCompiler {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       try {
-        String CurrentLine = Code.get(i);
-        RemoveLineEndComments (Code, i, CurrentLine, CharsInQuotesCache);
-        RemoveBlockComments (CodeData, i, CurrentLine, CharsInQuotesCache, AllCodeDatas);
+        RemoveLineEndComments (Code, i, CharsInQuotesCache);
+        RemoveBlockComments (CodeData, i, CharsInQuotesCache, AllCodeDatas);
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -633,7 +632,8 @@ class LooFCompiler {
   
   
   
-  void RemoveLineEndComments (ArrayList <String> Code, int LineNumber, String CurrentLine, HashMap <String, boolean[]> CharsInQuotesCache) {
+  void RemoveLineEndComments (ArrayList <String> Code, int LineNumber, HashMap <String, boolean[]> CharsInQuotesCache) {
+    String CurrentLine = Code.get(LineNumber);
     boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
     if (CharsInQuotes == null) {
       CharsInQuotes = GetCharsInQuotes (CurrentLine);
@@ -659,10 +659,11 @@ class LooFCompiler {
   
   
   
-  void RemoveBlockComments (LooFCodeData CodeData, int LineNumber, String CurrentLine, HashMap <String, boolean[]> CharsInQuotesCache, HashMap <String, LooFCodeData> AllCodeDatas) {
+  void RemoveBlockComments (LooFCodeData CodeData, int LineNumber, HashMap <String, boolean[]> CharsInQuotesCache, HashMap <String, LooFCodeData> AllCodeDatas) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
+    String CurrentLine = Code.get(LineNumber);
     
     boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
     if (CharsInQuotes == null) {
@@ -685,14 +686,16 @@ class LooFCompiler {
     
     // remove middle
     for (int i = LineNumber + 1; i < CommentEnd.Value1; i ++) {
-      Code.remove(i);
-      LineNumbers.remove(i);
-      LineFileOrigins.remove(i);
+      Code.remove(LineNumber);
+      LineNumbers.remove(LineNumber);
+      LineFileOrigins.remove(LineNumber);
     }
     
     // remove from start and end
-    Code.set(LineNumber, CurrentLine.substring(0, CommentStart));
-    Code.set(LineNumber + 1, Code.get(LineNumber + 1).substring(CommentEnd.Value2));
+    Code.set(LineNumber, CurrentLine.substring(0, CommentStart) + Code.get(LineNumber + 1).substring(CommentEnd.Value2));
+    Code.remove(LineNumber + 1);
+    LineNumbers.remove(LineNumber + 1);
+    LineFileOrigins.remove(LineNumber + 1);
     
   }
   
@@ -1381,8 +1384,9 @@ class LooFCompiler {
   String ReplaceFunctionCallsForLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     int CurrentFunctionCallStart = CurrentLine.indexOf('$');
     while (CurrentFunctionCallStart != -1) {
-      CurrentLine = ReplaceSingleFunctionCall (CurrentLine, CurrentFunctionCallStart, CodeData, AllCodeDatas, LineNumber);
-      CurrentFunctionCallStart = CurrentLine.indexOf('$');
+      boolean SkipReplacement = CurrentFunctionCallStart > 0 && CurrentLine.charAt(CurrentFunctionCallStart - 1) == '\\';
+      if (!SkipReplacement) CurrentLine = ReplaceSingleFunctionCall (CurrentLine, CurrentFunctionCallStart, CodeData, AllCodeDatas, LineNumber);
+      CurrentFunctionCallStart = CurrentLine.indexOf('$', CurrentFunctionCallStart + 1);
     }
     return CurrentLine;
   }
@@ -1559,17 +1563,13 @@ class LooFCompiler {
   
   
   
-  int GetEndQuoteIndex (String CurrentLine, int i, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    int EndQuoteIndex = i;
-    int FakeEndQuoteIndex = i - 1;
-    while (EndQuoteIndex == FakeEndQuoteIndex + 1) {
-      FakeEndQuoteIndex = CurrentLine.indexOf('\\', EndQuoteIndex + 1);
+  int GetEndQuoteIndex (String CurrentLine, int StartQuoteIndex, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    int EndQuoteIndex = CurrentLine.indexOf('"', StartQuoteIndex + 1);
+    while (true) {
+      if (EndQuoteIndex == -1) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + StartQuoteIndex + "."));
+      if (CurrentLine.charAt(EndQuoteIndex - 1) != '\\') return EndQuoteIndex;
       EndQuoteIndex = CurrentLine.indexOf('"', EndQuoteIndex + 1);
-      if (EndQuoteIndex == -1) {
-        throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + i + "."));
-      }
     }
-    return EndQuoteIndex;
   }
   
   

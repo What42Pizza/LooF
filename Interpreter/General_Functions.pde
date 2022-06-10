@@ -644,7 +644,7 @@ String ConvertLooFDataValueToString (LooFDataValue DataValueIn) {
       return DataValueIn.IntValue + "";
     
     case (DataValueType_Float):
-      return DataValueIn.IntValue + "";
+      return DataValueIn.FloatValue + "";
     
     case (DataValueType_String):
       return "\"" + DataValueIn.StringValue + "\"";
