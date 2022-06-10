@@ -118,7 +118,7 @@ class LooFInterpreter {
     ArrayList <String> StackTraceFiles = new ArrayList <String> ();
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
     
-    
+    throw CurrentException;
     
   }
   
@@ -342,9 +342,6 @@ class LooFInterpreter {
   LooFDataValue GetDataValueFromToken (LooFTokenBranch CurrentToken, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     switch (CurrentToken.TokenType) {
       
-      default:
-        throw new AssertionError();
-      
       case (TokenBranchType_Null):
         return new LooFDataValue();
       
@@ -383,6 +380,9 @@ class LooFInterpreter {
       
       case (TokenBranchType_PreEvaluatedFormula):
         return CurrentToken.Result.clone();
+      
+      default:
+        throw new AssertionError();
       
     }
   }

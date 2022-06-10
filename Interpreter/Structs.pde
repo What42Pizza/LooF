@@ -229,6 +229,12 @@ class LooFCompileSettings {
   HashMap <String, LooFEvaluatorOperation> CustomOperations = new HashMap <String, LooFEvaluatorOperation> ();
   HashMap <String, LooFEvaluatorFunction> CustomFunctions = new HashMap <String, LooFEvaluatorFunction> ();
   
+  boolean PrintPreProcessedLooF = false;
+  boolean PrintLinkedLooF = false;
+  boolean PrintLexedLooF = false;
+  boolean PrintParsedLooF = false;
+  boolean PrintFinalLooF = false;
+  
   String PreProcessorOutputPath = null;
   String LinkerOutputPath = null;
   String LexerOutputPath = null;
@@ -646,12 +652,21 @@ class LooFTokenBranch {
     this.IsAction = false;
   }
   
+  public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFTokenBranch[] Children) {
+    this.OriginalTokenIndex = OriginalTokenIndex;
+    this.OriginalString = OriginalString;
+    this.TokenType = TokenBranchType_Formula;
+    this.Children = Children;
+    this.ConvertsToDataValue = true;
+    this.IsAction = false;
+  }
+  
   public LooFTokenBranch (int OriginalTokenIndex, String OriginalString, LooFTokenBranch[] Children, HashMap <String, LooFTokenBranch> HashMapChildren) {
     this.OriginalTokenIndex = OriginalTokenIndex;
     this.OriginalString = OriginalString;
+    this.TokenType = TokenBranchType_Table;
     this.Children = Children;
     this.HashMapChildren = HashMapChildren;
-    this.TokenType = TokenBranchType_Table;
     this.ConvertsToDataValue = true;
     this.IsAction = false;
   }
@@ -757,7 +772,7 @@ class LooFStatement {
   LooFInterpreterFunction Function;
   LooFTokenBranch[] Args;
   
-  LooFAdditionalStatementData AdditionalStatementData;
+  LooFAdditionalStatementData AdditionalData;
   
   public LooFStatement (String Name, String VarName, LooFTokenBranch[] IndexQueries, LooFInterpreterAssignment Assignment, LooFTokenBranch NewValueFormula) {
     this.StatementType = StatementType_Assignment;

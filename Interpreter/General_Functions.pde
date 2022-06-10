@@ -581,11 +581,52 @@ String ConvertLooFTokenBranchToString (LooFTokenBranch TokenBranch) {
 
 
 String ConvertLooFTokenBranchChildrenToString (LooFTokenBranch TokenBranch) {
-  ArrayList <String> Output = new ArrayList <String> ();
-  for (LooFTokenBranch CurrentChild : TokenBranch.Children) {
-    Output.add(ConvertLooFTokenBranchToString (CurrentChild));
+  
+  String ArrayPartString = "";
+  LooFTokenBranch[] Children = TokenBranch.Children;
+  if (Children.length > 0) {
+    ArrayPartString += ConvertLooFTokenBranchToString (Children[0]);
+    for (int i = 1; i < Children.length; i ++) {
+      ArrayPartString += ", " + ConvertLooFTokenBranchToString (Children[i]);
+    }
   }
-  return CombineStringsWithSeperator (Output, ", ");
+  
+  if (TokenBranch.HashMapChildren == null) {
+    return ArrayPartString;
+  }
+  
+  String HashMapPartString = "";
+  HashMap <String, LooFTokenBranch> HashMapPart = TokenBranch.HashMapChildren;
+  Set <String> HashMapKeys = HashMapPart.keySet();
+  boolean FirstItem = true;
+  for (String CurrentKey : HashMapKeys) {
+    LooFTokenBranch CurrentTokenBranch = HashMapPart.get(CurrentKey);
+    String CurrentDataValueAsString = ConvertLooFTokenBranchToString (CurrentTokenBranch);
+    String MappingToAdd = CurrentKey + " = " + CurrentDataValueAsString;
+    HashMapPartString += FirstItem  ?  MappingToAdd  :  ", " + MappingToAdd;
+    FirstItem = false;
+  }
+  
+  int CaseToUse = (ArrayPartString.length() > 0 ? 1 : 0) + (HashMapPartString.length() > 0 ? 2 : 0);
+  switch (CaseToUse) {
+    
+    case (0): // no Children or HashMapChildren
+      return "";
+    
+    case (1): // Children but non HashMapChildren
+      return ArrayPartString;
+    
+    case (2): // HashMapChildren but no Children
+      return HashMapPartString;
+    
+    case (3): // Children and HashMapChildren
+      return ArrayPartString + "; " + HashMapPartString;
+    
+    default:
+      throw new AssertionError();
+    
+  }
+  
   
 }
 
@@ -662,7 +703,7 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
       return "{" + ArrayPartString + "}";
     
     case (2): // HashMapPart but no ArrayPart
-      return "{" + HashMapPartString+ "}";
+      return "{" + HashMapPartString + "}";
     
     case (3): // ArrayPart and HashMapPart
       return "{" + ArrayPartString + "; " + HashMapPartString + "}";

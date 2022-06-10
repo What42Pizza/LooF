@@ -60,7 +60,7 @@ class LooFCompiler {
       throw (new LooFCompilerException (AllExceptions));
     }
     
-    if (CompileSettings.PreProcessorOutputPath != null) {
+    if (CompileSettings.PrintPreProcessedLooF) {
       StopTimer ("OnlyCompilation");
       PrintPreProcessorOutput (AllCodeDatas, CompileSettings.PreProcessorOutputPath, "PreProcessedLOOF");
       StartTimer ("OnlyCompilation");
@@ -75,7 +75,7 @@ class LooFCompiler {
       throw (new LooFCompilerException (AllExceptions));
     }
     
-    if (CompileSettings.LinkerOutputPath != null) {
+    if (CompileSettings.PrintLinkedLooF) {
       StopTimer ("OnlyCompilation");
       PrintLinkerOutput (AllCodeDatas, CompileSettings.LinkerOutputPath, "LinkedLOOF");
       StartTimer ("OnlyCompilation");
@@ -92,7 +92,7 @@ class LooFCompiler {
       throw (new LooFCompilerException (AllExceptions));
     }
     
-    if (CompileSettings.LexerOutputPath != null) {
+    if (CompileSettings.PrintLexedLooF) {
       StopTimer ("OnlyCompilation");
       PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "LexedLOOF");
       StartTimer ("OnlyCompilation");
@@ -109,7 +109,7 @@ class LooFCompiler {
       throw (new LooFCompilerException (AllExceptions));
     }
     
-    if (CompileSettings.ParserOutputPath != null) {
+    if (CompileSettings.PrintParsedLooF) {
       StopTimer ("OnlyCompilation");
       PrintParserOutput (AllCodeDatas, CompileSettings.ParserOutputPath, "ParsedLOOF");
       StartTimer ("OnlyCompilation");
@@ -126,7 +126,7 @@ class LooFCompiler {
       throw (new LooFCompilerException (AllExceptions));
     }
     
-    if (CompileSettings.FinalOutputPath != null) {
+    if (CompileSettings.PrintFinalLooF) {
       StopTimer ("OnlyCompilation");
       PrintFinalOutput (AllCodeDatas, CompileSettings.FinalOutputPath, "FinalLOOF");
       StartTimer ("OnlyCompilation");
@@ -164,8 +164,8 @@ class LooFCompiler {
   void ClearCompilerOutputs (LooFCompileSettings CompileSettings) {
     if (CompileSettings.PreProcessorOutputPath != null) DeleteAllFilesOfType (CompileSettings.PreProcessorOutputPath, "PreProcessedLOOF");
     if (CompileSettings.LinkerOutputPath       != null) DeleteAllFilesOfType (CompileSettings.LinkerOutputPath      , "LinkedLOOF"      );
-    if (CompileSettings.LexerOutputPath        != null) DeleteAllFilesOfType (CompileSettings.LexerOutputPath       , "LexerLOOF"       );
-    if (CompileSettings.ParserOutputPath       != null) DeleteAllFilesOfType (CompileSettings.ParserOutputPath      , "ParserLOOF"      );
+    if (CompileSettings.LexerOutputPath        != null) DeleteAllFilesOfType (CompileSettings.LexerOutputPath       , "LexedLOOF"       );
+    if (CompileSettings.ParserOutputPath       != null) DeleteAllFilesOfType (CompileSettings.ParserOutputPath      , "ParsedLOOF"      );
     if (CompileSettings.FinalOutputPath        != null) DeleteAllFilesOfType (CompileSettings.FinalOutputPath       , "FinalLOOF"       );
   }
   
@@ -1708,14 +1708,14 @@ class LooFCompiler {
     HashMap <String, LooFInterpreterFunction> InterpreterFunctions = AddonsData.InterpreterFunctions;
     
     // interpreter functions
-    LooFInterpreterFunction FoundInterpreterFunction = InterpreterFunctions.get(CurrentLineTokens.get(0));
+    LooFInterpreterFunction FoundInterpreterFunction = InterpreterFunctions.getOrDefault(CurrentLineTokens.get(0), null);
     if (FoundInterpreterFunction != null) {
       return GetStatementFromLine_InterpreterFunction (CurrentLineTokens, FoundInterpreterFunction, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
     }
     
     if (CurrentLineTokens.size() < 2) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not understand statement type. No interpreter function named \"" + CurrentLineTokens.get(0) + "\" exists, and statement is not long enough to be an assignment."));
     
-    // get assignment token
+    // get assignment token's string and index
     int PossibleAssignmentTokenIndex = 1;
     String PossibleAssignmentToken = CurrentLineTokens.get(PossibleAssignmentTokenIndex);
     while (PossibleAssignmentToken.equals("[")) {
@@ -1823,7 +1823,7 @@ class LooFCompiler {
     }
     LooFTokenBranch[] FormulaChildren = ListToArray (FormulaChildrenList, new LooFTokenBranch (0, ""));
     EnsureFormulaTokensAreValid (FormulaChildren, CodeData, AllCodeDatas, LineNumber);
-    LooFTokenBranch ParsedFormula = new LooFTokenBranch (FormulaBlockStart - 1, "(", FormulaChildren, new HashMap <String, LooFTokenBranch> ());
+    LooFTokenBranch ParsedFormula = new LooFTokenBranch (FormulaBlockStart - 1, "(", FormulaChildren);
     FillFormulaTokenEvaluationOrders (ParsedFormula);
     FillTokenBranchCanBePreEvaluated (ParsedFormula);
     return ParsedFormula;
@@ -2091,13 +2091,7 @@ class LooFCompiler {
       int CurrentIndexQueryIndex = IndexQueryIndexes[i];
       ShiftEvaluationOrdersPastIndex (IndexQueryIndexes, CurrentIndexQueryIndex, -1);
       ShiftEvaluationOrdersPastIndex (FunctionIndexes, CurrentIndexQueryIndex, -1);
-      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentIndexQueryIndex, 1000000, -1);
-    }
-    
-    for (int i = 0; i < FunctionIndexes.length; i ++) {
-      int CurrentFormulaIndex = FunctionIndexes[i];
-      ShiftEvaluationOrdersPastIndex (FunctionIndexes, CurrentFormulaIndex, -1);
-      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentFormulaIndex, 1000000, -1);
+      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentIndexQueryIndex, Integer.MAX_VALUE, -1);
     }
     
     for (int i = 0; i < OperationIndexes.length; i ++) {
@@ -2528,16 +2522,18 @@ class LooFCompiler {
   LooFTokenBranch PreEvaluateFormula (LooFTokenBranch Formula, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     CodeData.CurrentLineNumber = LineNumber;
     
+    // if it can be evaluated, return evaluated result
     if (Formula.CanBePreEvaluated) {
       LooFDataValue Result = LooFInterpreter.EvaluateFormula (Formula, null, CodeData, AllCodeDatas);
       return new LooFTokenBranch (Formula.OriginalTokenIndex, Formula.OriginalString, Result);
     }
     
+    // if it can't be evaluated, still try to evaluate children
     LooFTokenBranch[] Children = Formula.Children;
     for (int i = 0; i < Children.length; i ++) {
-      LooFTokenBranch CurrentChild = Children[i];
-      if (CurrentChild.TokenType == TokenBranchType_Formula) Children[i] = PreEvaluateFormula (CurrentChild, CodeData, AllCodeDatas, LineNumber);
+      if (Children[i].TokenType == TokenBranchType_Formula) Children[i] = PreEvaluateFormula (Children[i], CodeData, AllCodeDatas, LineNumber);
     }
+    
     return Formula;
     
   }
@@ -2605,6 +2601,7 @@ class LooFCompiler {
   
   
   void PrintPreProcessorOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    if (OutputPath == null) throw (new LooFCompilerException ("PrintPreProcessedLooF in CompileSettings is set to true but PreProcessorOutputPath is null."));
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
@@ -2624,7 +2621,9 @@ class LooFCompiler {
         
         FileOutput.flush();
         FileOutput.close();
-      } catch (java.io.FileNotFoundException e) {}
+      } catch (java.io.FileNotFoundException e) {
+        throw (new LooFCompilerException ("Error while printing the PreProcessor's output: " + e.toString()));
+      }
     }
   }
   
@@ -2638,6 +2637,7 @@ class LooFCompiler {
   
   
   void PrintLinkerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    if (OutputPath == null) throw (new LooFCompilerException ("PrintLinkedLooF in CompileSettings is set to true but LinkerOutputPath is null."));
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
@@ -2667,7 +2667,9 @@ class LooFCompiler {
         
         FileOutput.flush();
         FileOutput.close();
-      } catch (java.io.FileNotFoundException e) {}
+      } catch (java.io.FileNotFoundException e) {
+        throw (new LooFCompilerException ("Error while printing the Linker's output: " + e.toString()));
+      }
     }
   }
   
@@ -2681,6 +2683,7 @@ class LooFCompiler {
   
   
   void PrintLexerOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    if (OutputPath == null) throw (new LooFCompilerException ("PrintLexedLooF in CompileSettings is set to true but LexerOutputPath is null."));
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
@@ -2700,7 +2703,9 @@ class LooFCompiler {
         
         FileOutput.flush();
         FileOutput.close();
-      } catch (java.io.FileNotFoundException e) {}
+      } catch (java.io.FileNotFoundException e) {
+        throw (new LooFCompilerException ("Error while printing the Lexer's output: " + e.toString()));
+      }
     }
   }
   
@@ -2714,6 +2719,7 @@ class LooFCompiler {
   
   
   void PrintParserOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    if (OutputPath == null) throw (new LooFCompilerException ("PrintParsedLooF in CompileSettings is set to true but ParserOutputPath is null."));
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
@@ -2733,7 +2739,9 @@ class LooFCompiler {
         
         FileOutput.flush();
         FileOutput.close();
-      } catch (java.io.FileNotFoundException e) {}
+      } catch (java.io.FileNotFoundException e) {
+        throw (new LooFCompilerException ("Error while printing the Parser's output: " + e.toString()));
+      }
     }
   }
   
@@ -2747,6 +2755,7 @@ class LooFCompiler {
   
   
   void PrintFinalOutput (HashMap <String, LooFCodeData> AllCodeDatas, String OutputPath, String FileExtention) {
+    if (OutputPath == null) throw (new LooFCompilerException ("PrintFinalLooF in CompileSettings is set to true but FinalOutputPath is null."));
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       String FileOutputName = OutputPath + "/" + CodeData.OriginalFileName;
@@ -2766,7 +2775,9 @@ class LooFCompiler {
         
         FileOutput.flush();
         FileOutput.close();
-      } catch (java.io.FileNotFoundException e) {}
+      } catch (java.io.FileNotFoundException e) {
+        throw (new LooFCompilerException ("Error while printing the Final output: " + e.toString()));
+      }
     }
   }
   

@@ -26,10 +26,15 @@ void setup() {
   
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
   CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
-  //CompileSettings.LinkerOutputPath = dataPath("") + "/CompilerOutputs";
-  //CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
-  //CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.LinkerOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
+  CompileSettings.PrintPreProcessedLooF = false;
+  CompileSettings.PrintLinkedLooF = false;
+  CompileSettings.PrintLexedLooF = false;
+  CompileSettings.PrintParsedLooF = false;
+  CompileSettings.PrintFinalLooF = true;
   
   LooFEnvironment TestEnvironment = null;
   try {

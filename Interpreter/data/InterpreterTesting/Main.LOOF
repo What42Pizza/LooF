@@ -1,9 +1,10 @@
-/*
-not code
-*/
-
+Test = lengthOf toString 5
+A = 5
+B = 7
+C = 13
 Test = {
-`	A: A,
-`	B: 10,
+`	1: 3,
+`	2: A + lengthOf toString (B * C),
+`	"Hello"
 `}
 :exit

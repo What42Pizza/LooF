@@ -10,7 +10,7 @@ LooFEvaluatorOperation Operation_Add = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) + GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"+\" can only add ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -33,7 +33,7 @@ LooFEvaluatorOperation Operation_Subtract = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) - GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"-\" can only subtract ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -56,7 +56,7 @@ LooFEvaluatorOperation Operation_Multiply = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) * GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"+\" can only multiply ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -82,7 +82,7 @@ LooFEvaluatorOperation Operation_Divide = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) / RightFloatValue);
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"/\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"/\" can only divide ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -105,7 +105,7 @@ LooFEvaluatorOperation Operation_Power = new LooFEvaluatorOperation() {
       return new LooFDataValue (Math.pow (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"^\" can only take an int or float to the power of an int or float, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " to the power of " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -128,7 +128,7 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
       return new LooFDataValue (CorrectModulo (GetDataValueNumber (LeftValue), GetDataValueNumber (RightValue)));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"%\" can only modulo ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -157,7 +157,7 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewArrayValue, NewHashMapValue);
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -236,7 +236,7 @@ LooFEvaluatorOperation Operation_GreaterThan = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) > GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -258,7 +258,7 @@ LooFEvaluatorOperation Operation_LessThan = new LooFEvaluatorOperation() {
       return new LooFDataValue (GetDataValueNumber (LeftValue) < GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -337,7 +337,7 @@ LooFEvaluatorOperation Operation_GreaterThanOrEqual = new LooFEvaluatorOperation
       return new LooFDataValue (GetDataValueNumber (LeftValue) >= GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -360,7 +360,7 @@ LooFEvaluatorOperation Operation_LessThanOrEqual = new LooFEvaluatorOperation() 
       return new LooFDataValue (GetDataValueNumber (LeftValue) <= GetDataValueNumber (RightValue));
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<=\" can only compare ints and floats, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     throw new AssertionError();
     
   }
@@ -424,7 +424,7 @@ LooFEvaluatorOperation Operation_BitwiseAnd = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"&&\" can only 'and' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"&&\" can only 'and' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue & RightValue.IntValue);
     
@@ -441,7 +441,7 @@ LooFEvaluatorOperation Operation_BitwiseOr = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"||\" can only 'or' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"||\" can only 'or' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue | RightValue.IntValue);
     
@@ -458,7 +458,7 @@ LooFEvaluatorOperation Operation_BitwiseXor = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"^^\" can only 'xor' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"^^\" can only 'xor' ints, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue ^ RightValue.IntValue);
     
@@ -475,7 +475,7 @@ LooFEvaluatorOperation Operation_ShiftRight = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">>\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \">>\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue >> RightValue.IntValue);
     
@@ -492,7 +492,7 @@ LooFEvaluatorOperation Operation_ShiftLeft = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (!(LeftValue.ValueType == DataValueType_Int && RightValue.ValueType == DataValueType_Int))
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[LeftValue.ValueType] + ".", new String[] {"InvalidArgType"});
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"<<\" can only shift an int with an int, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " with " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (LeftValue.IntValue << RightValue.IntValue);
     
