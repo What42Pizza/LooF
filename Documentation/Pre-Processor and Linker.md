@@ -32,3 +32,5 @@
   - gives the current file access to all the functions in FileName. Calls to functions in FileName have to be proceeded by ShortenedFileName and a period (example: `call ExampleShortendName.ExampleFunctionName`)
 - **(anywhere in line) $FunctionName**
   - replaces $FunctionName with the values required to call FunctionName
+
+**Note:** every time there is a '$' character in the middle of a line of code, the linker will try to replace it with newFunction. To stop this, you can add '\' directly before the '$'.

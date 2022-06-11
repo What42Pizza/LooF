@@ -46,9 +46,16 @@
 
 
 
-<T> boolean TableContainsItem (T[] Input, T Item) {
+<T> boolean ArrayContainsItem (T[] Input, T Item) {
   for (int i = 0; i < Input.length; i ++) {
     if (Input[i].equals(Item)) return true;
+  }
+  return false;
+}
+
+<T> boolean AnyItemsMatch (T[] Array1, T[] Array2) {
+  for (T CurrentItem : Array1) {
+    if (ArrayContainsItem (Array2, CurrentItem)) return true;
   }
   return false;
 }
@@ -713,6 +720,43 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
     
   }
   
+}
+
+
+
+
+
+boolean GetDataValueTruthiness (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+  switch (Input.ValueType) {
+    
+    case (DataValueType_Null):
+      return false;
+    
+    case (DataValueType_Int):
+      return Input.IntValue > 0;
+    
+    case (DataValueType_Float):
+      return Input.FloatValue > 0;
+    
+    case (DataValueType_String):
+      return Input.StringValue.length() > 0;
+    
+    case (DataValueType_Bool):
+      return Input.BoolValue;
+    
+    case (DataValueType_Table):
+      return Input.ArrayValue.size() > 0;
+    
+    case (DataValueType_ByteArray):
+      ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
+    
+    case (DataValueType_Function):
+      return true;
+    
+    default:
+      throw new AssertionError();
+    
+  }
 }
 
 

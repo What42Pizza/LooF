@@ -44,7 +44,9 @@ void setup() {
   }
   
   ///*
+  int StartMillis = millis();
   LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);
+  println ("Execution time: " + (millis() - StartMillis) + " ms");
   
   HashMap <String, LooFDataValue> AllVars = TestEnvironment.VariableListsStack.get(0);
   Set <String> AllVarKeys = AllVars.keySet();

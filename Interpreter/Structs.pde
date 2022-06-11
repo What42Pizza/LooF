@@ -40,7 +40,7 @@ class LooFInterpreterAssignment {
 
 class LooFInterpreterFunction {
   
-  public void HandleFunctionCall (LooFTokenBranch[] Args, LooFEnvironment Environment) {
+  public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden HandleFunctionCall().", new String[] {"InvalidInterpreterFunction"}));
   }
   
@@ -48,8 +48,8 @@ class LooFInterpreterFunction {
     throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
   }
   
-  public boolean DealWithError (LooFInterpreterException CurrentException, LooFStatement Statement, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden DealWithError().", new String[] {"InvalidInterpreterFunction"}));
+  public boolean AttemptErrorCatch (LooFInterpreterException CurrentException, LooFStatement Statement, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines, LooFEnvironment Environment) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden AttemptErrorCatch().", new String[] {"InvalidInterpreterFunction"}));
   }
   
   public int GetBlockLevelChange() {
@@ -159,7 +159,7 @@ class LooFEnvironment {
   
   ArrayList <String> CallStackPageNames = new ArrayList <String> ();
   ArrayList <Integer> CallStackLineNumbers = new ArrayList <Integer> ();
-  ArrayList <String[]> CallStackErrorTypesToCatch = new ArrayList <String[]> ();
+  ArrayList <Boolean> CallStackAttemptErrorCatches = new ArrayList <Boolean> ();
   ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
   ArrayList <LooFDataValue[]> CallStackLockedValues = new ArrayList <LooFDataValue[]> ();
   ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
@@ -257,27 +257,27 @@ class LooFCompilerException extends RuntimeException {
   String Message;
   
   public LooFCompilerException (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, null, Message));
+    super ("    " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, null, Message));
     this.Message = GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, null, Message);
   }
   
   public LooFCompilerException (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, int TokenIndex, String Message) {
-    super ("  " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, TokenIndex, Message));
+    super ("    " + GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, TokenIndex, Message));
     this.Message = GetCompilerErrorMessage (CodeData, AllCodeDatas, CodeData.OriginalFileName, LineNumber, TokenIndex, Message);
   }
   
   public LooFCompilerException (String Message) {
-    super ("  " + Message);
+    super ("    " + Message);
     this.Message = Message;
   }
   
   public LooFCompilerException (ArrayList <LooFCompilerException> AllExceptions) {
-    super ("  " + GetCompilerErrorMessage (AllExceptions));
+    super ("    " + GetCompilerErrorMessage (AllExceptions));
     this.Message = GetCompilerErrorMessage (AllExceptions);
   }
   
   public LooFCompilerException (Exception e) {
-    super ("   An error occured while compiling:   " + e.toString());
+    super ("    An error occured while compiling:   " + e.toString());
   }
   
   /*
@@ -356,18 +356,29 @@ String GetCompilerErrorMessage (ArrayList <LooFCompilerException> AllExceptions)
 
 class LooFInterpreterException extends RuntimeException {
   
+  String Message;
+  
   String[] ErrorTypeTags;
+  ArrayList <String> StackTracePages;
+  ArrayList <Integer> StackTraceLines;
   
   public LooFInterpreterException (LooFEnvironment Environment, String Message, String[] ErrorTypeTags) {
-    super ("  " + GetInterpreterErrorMessage (Environment, Message));
+    super ("    " + GetInterpreterErrorMessage (Environment, Message, ErrorTypeTags));
+    this.Message = GetInterpreterErrorMessage (Environment, Message, ErrorTypeTags);
     this.ErrorTypeTags = ErrorTypeTags;
+  }
+  
+  public LooFInterpreterException (String Message, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
+    super (" " + Message);
+    this.StackTracePages = StackTracePages;
+    this.StackTraceLines = StackTraceLines;
   }
   
 }
 
 
 
-String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) {
+String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message, String[] ErrorTypeTags) {
   String FileName;
   FileName = Environment.CurrentPageName;
   LooFCodeData CodeData = Environment.CurrentCodeData;
@@ -381,7 +392,7 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message) 
   if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
   if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
-  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
+  return Message + "\nTags: " + CombineStringsWithSeperator (ErrorTypeTags, ", ") + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
 }
 
 

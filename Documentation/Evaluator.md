@@ -119,8 +119,10 @@ These use the value directly following the function. If the function takes in mu
   - returns whether or not TableIn is empty
 - **isEmpty ByteArrayIn**
   - returns whether or not ByteArrayIn is empty
-- **totalItemsIn TableIn**
-  - returns the number of items in the array part of TableIn plus the number of items in the hashmap part of Table
+- **totalLengthOf TableIn**
+  - returns the number of items in the array part of TableIn plus the number of items in the hashmap part of TableIn
+- **lengthOfHashMap TableIn**
+  - returns the number of items in the hashmap part of TableIn
 - **endOf TableIn**
   - returns lengthOf TableIn - 1
 - **endOf ByteArrayIn**
@@ -320,6 +322,7 @@ FunctionValueToPass = $this.ExampleFunction
 - bool: returns 1 for true and 0 for false
 - table: throws error
 - byteArray: throws error
+- function: throws error
 
 <br>
 
@@ -332,6 +335,7 @@ FunctionValueToPass = $this.ExampleFunction
 - bool: returns 1.0 for true and 0.0 for false
 - table: throws error
 - byteArray: throws error
+- function: throws error
 
 <br>
 
@@ -344,6 +348,7 @@ FunctionValueToPass = $this.ExampleFunction
 - bool: returns "true" for true and "false" for false
 - table: returns the contents of Input cast to strings (plus separators and brackets)
 - byteArray: returns the contents of Input as ascii characters
+- function: return data about Input as a string
 
 <br>
 
@@ -356,6 +361,7 @@ FunctionValueToPass = $this.ExampleFunction
 - bool: returns Input
 - table: returns (lengthOf Input > 0)
 - byteArray: returns (lengthOf Input > 0)
+- function: return true
 
 <br>
 <br>
@@ -398,4 +404,9 @@ FunctionValueToPass = $this.ExampleFunction
 <br>
 
 - **byteArray == byteArray:** contents of left == contents of right ?
+- **else:** false
+
+<br>
+
+- **function == function:** contents of left == contents of right ?
 - **else:** false

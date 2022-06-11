@@ -18,11 +18,9 @@ class LooFCompiler {
     if (!CodeFolder.isDirectory()) throw (new LooFCompilerException ("AddNewEnvironment must take a folder as its argument. (File is not a folder)."));
     if (CompileSettings == null) throw (new LooFCompilerException ("AddNewEnvironment cannot take a null LoofCompileSettings object. Either pass a new LooFCompileSettings object or call AddNewEvironment with no LooFCompileSettings argument."));
     
-    StartTimer ("Total");
+    long StartMillis = System.currentTimeMillis();
     
     ClearCompilerOutputs (CompileSettings);
-    
-    StartTimer ("OnlyCompilation");
     
     
     
@@ -61,9 +59,7 @@ class LooFCompiler {
     }
     
     if (CompileSettings.PrintPreProcessedLooF) {
-      StopTimer ("OnlyCompilation");
       PrintPreProcessorOutput (AllCodeDatas, CompileSettings.PreProcessorOutputPath, "PreProcessedLOOF");
-      StartTimer ("OnlyCompilation");
     }
     
     
@@ -76,9 +72,7 @@ class LooFCompiler {
     }
     
     if (CompileSettings.PrintLinkedLooF) {
-      StopTimer ("OnlyCompilation");
       PrintLinkerOutput (AllCodeDatas, CompileSettings.LinkerOutputPath, "LinkedLOOF");
-      StartTimer ("OnlyCompilation");
     }
     
     
@@ -93,9 +87,7 @@ class LooFCompiler {
     }
     
     if (CompileSettings.PrintLexedLooF) {
-      StopTimer ("OnlyCompilation");
       PrintLexerOutput (AllCodeDatas, CompileSettings.LexerOutputPath, "LexedLOOF");
-      StartTimer ("OnlyCompilation");
     }
     
     
@@ -110,9 +102,7 @@ class LooFCompiler {
     }
     
     if (CompileSettings.PrintParsedLooF) {
-      StopTimer ("OnlyCompilation");
       PrintParserOutput (AllCodeDatas, CompileSettings.ParserOutputPath, "ParsedLOOF");
-      StartTimer ("OnlyCompilation");
     }
     
     
@@ -127,9 +117,7 @@ class LooFCompiler {
     }
     
     if (CompileSettings.PrintFinalLooF) {
-      StopTimer ("OnlyCompilation");
       PrintFinalOutput (AllCodeDatas, CompileSettings.FinalOutputPath, "FinalLOOF");
-      StartTimer ("OnlyCompilation");
     }
     
     
@@ -139,12 +127,10 @@ class LooFCompiler {
     
     
     
-    StopTimer ("OnlyCompilation");
-    StopTimer ("Total");
+    long EndMillis = System.currentTimeMillis();
     
     System.out.println ("Compiled environment from folder " + CodeFolder + ".");
-    System.out.println ("Total time for only compiling: " + GetTimerMillis ("OnlyCompilation") + " ms.");
-    System.out.println ("Total time: " + GetTimerMillis ("Total") + " ms.");
+    System.out.println ("Total compile time: " + (EndMillis - StartMillis) + " ms.");
     
     
     
@@ -267,6 +253,7 @@ class LooFCompiler {
     InterpreterFunctions.put("try", InterpreterFunction_Try);
     
     InterpreterFunctions.put("callOutside", InterpreterFunction_CallOutside);
+    InterpreterFunctions.put("TODO:", InterpreterFunction_TODO);
     
     return InterpreterFunctions;
   }
@@ -352,7 +339,8 @@ class LooFCompiler {
     
     EvaluatorFunctions.put("lengthOf", Function_LengthOf);
     EvaluatorFunctions.put("isEmpty", NullEvaluatorFunction);
-    EvaluatorFunctions.put("totalItemsIn", Function_TotalItemsIn);
+    EvaluatorFunctions.put("totalLengthOf", Function_TotalLengthOf);
+    EvaluatorFunctions.put("lengthOfHashMap", NullEvaluatorFunction);
     EvaluatorFunctions.put("endOf", Function_EndOf);
     EvaluatorFunctions.put("lastItemOf", Function_LastItemOf);
     EvaluatorFunctions.put("keysOf", Function_KeysOf);
@@ -2445,7 +2433,7 @@ class LooFCompiler {
       LooFStatement CurrentStatement = AllStatements[i];
       if (CurrentStatement.StatementType != StatementType_Function) continue;
       
-      if (BlockLevel == 0 && TableContainsItem (StatementToFind, CurrentStatement.Name)) {
+      if (BlockLevel == 0 && ArrayContainsItem (StatementToFind, CurrentStatement.Name)) {
         return i;
       }
       

@@ -171,7 +171,9 @@
 
 <br>
 
-## Interacting with external code
+## Mics
 
 - **callOutside ModuleName (string), Arg1, Arg2, ...**
   - Calls the module ModuleName with the remaining arguments as arguments for the module
+- **TODO: Details (string)**
+  - Same as `error Details, {"TODO"}`

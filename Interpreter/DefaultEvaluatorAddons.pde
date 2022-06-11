@@ -1085,7 +1085,7 @@ LooFEvaluatorFunction Function_LengthOf = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_TotalItemsIn = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_TotalLengthOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function totalItemsIn can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
@@ -1605,36 +1605,7 @@ LooFEvaluatorFunction Function_ToString = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    switch (Input.ValueType) {
-      
-      case (DataValueType_Null):
-        return new LooFDataValue (false);
-      
-      case (DataValueType_Int):
-        return new LooFDataValue (Input.IntValue > 0);
-      
-      case (DataValueType_Float):
-        return new LooFDataValue (Input.FloatValue > 0);
-      
-      case (DataValueType_String):
-        return new LooFDataValue (Input.StringValue.length() > 0);
-      
-      case (DataValueType_Bool):
-        return new LooFDataValue (Input.BoolValue);
-      
-      case (DataValueType_Table):
-        return new LooFDataValue (Input.ArrayValue.size() > 0);
-      
-      case (DataValueType_ByteArray):
-        ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
-      
-      case (DataValueType_Function):
-        ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot cast function to bool", new String[] {"InvalidCast", "InvalidArgType"});
-      
-      default:
-        throw new AssertionError();
-      
-    }
+    return new LooFDataValue (GetDataValueTruthiness (Input, Environment, CodeData, AllCodeDatas));
   }
 };
 

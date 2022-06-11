@@ -14,15 +14,15 @@ class LooFInterpreter {
   void ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) throws LooFInterpreterException  {
     if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     for (int i = 0; i < NumOfStatements; i ++) {
-      LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
-      ExecuteStatement (CurrentStatement, Environment);
+      ExecuteNextStatement (Environment);
       if (Environment.Stopped) return;
     }
   }
   
   
   
-  void ExecuteStatement (LooFStatement CurrentStatement, LooFEnvironment Environment) throws LooFInterpreterException {
+  void ExecuteNextStatement (LooFEnvironment Environment) throws LooFInterpreterException {
+    LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
     
     try {
       switch (CurrentStatement.StatementType) {
@@ -101,8 +101,7 @@ class LooFInterpreter {
   
   void ExecuteFunctionStatement (LooFStatement Statement, LooFEnvironment Environment) {
     LooFInterpreterFunction StatementFunction = Statement.Function;
-    LooFTokenBranch[] StatementArgs = Statement.Args;
-    StatementFunction.HandleFunctionCall(StatementArgs, Environment);
+    StatementFunction.HandleFunctionCall(Statement, Environment);
   }
   
   
@@ -115,10 +114,35 @@ class LooFInterpreter {
   
   
   void HandleEnvironmentException (LooFInterpreterException CurrentException, LooFEnvironment Environment) throws LooFInterpreterException  {
-    ArrayList <String> StackTraceFiles = new ArrayList <String> ();
+    ArrayList <String> StackTracePages = new ArrayList <String> ();
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
+    ArrayList <Boolean> AttemptErrorCatches = Environment.CallStackAttemptErrorCatches;
+    boolean CanPassErrors = true;
     
-    throw CurrentException;
+    while (AttemptErrorCatches.size() > 0) {
+      
+      String CurrentPageName = LastItemOf (Environment.CallStackPageNames);
+      int CurrentLineNumber = LastItemOf (Environment.CallStackLineNumbers);
+      String[] CurrentErrorTypesToPass = LastItemOf (Environment.CallStackErrorTypesToPass);
+      boolean AttemptErrorCatch = LastItemOf (AttemptErrorCatches);
+      
+      ReturnFromFunction (Environment);
+      
+      if (!(CanPassErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, CurrentErrorTypesToPass))) {
+        CanPassErrors = false;
+        StackTracePages.add(CurrentPageName);
+        StackTraceLines.add(CurrentLineNumber);
+      }
+      
+      if (AttemptErrorCatch) {
+        LooFStatement CurrentEnvironmentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
+        boolean ErrorWasCaught = CurrentEnvironmentStatement.Function.AttemptErrorCatch(CurrentException, CurrentEnvironmentStatement, StackTracePages, StackTraceLines, Environment);
+        if (ErrorWasCaught) return;
+      }
+      
+    }
+    
+    throw (new LooFInterpreterException ("Uncaught error during execution:     " + CurrentException.Message, StackTracePages, StackTraceLines));
     
   }
   
@@ -131,15 +155,15 @@ class LooFInterpreter {
   
   
   
-  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, String[] ErrorTypesToCatch) {
+  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, boolean AttemptErrorCatch) {
     if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
-    ErrorTypesToCatch = (ErrorTypesToCatch == null) ? new String [0] : ErrorTypesToCatch;
+    NewLineNumber --;
     
     // add call stack data
     Environment.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
     Environment.CallStackPageNames.add(Environment.CurrentPageName);
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
-    Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
+    Environment.CallStackAttemptErrorCatches.add(AttemptErrorCatch);
     Environment.CallStackErrorTypesToPass.add(new String [0]);
     Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
     Environment.CallStackInitialLockedValuesSizes.add(Environment.CallStackLockedValues.size());
@@ -173,7 +197,7 @@ class LooFInterpreter {
     RemoveLastItem (Environment.VariableListsStack);
     String NewPageName = RemoveLastItem (Environment.CallStackPageNames);
     int NewLineNumber = RemoveLastItem (Environment.CallStackLineNumbers);
-    RemoveLastItem (Environment.CallStackErrorTypesToCatch);
+    RemoveLastItem (Environment.CallStackAttemptErrorCatches);
     RemoveLastItem (Environment.CallStackErrorTypesToPass);
     RemoveLastItem (Environment.CallStackInitialGeneralStackSizes);
     int InitialLockedValuesSize = RemoveLastItem (Environment.CallStackInitialLockedValuesSizes);
@@ -221,10 +245,6 @@ class LooFInterpreter {
     if (VariableName.equals("_")) return;
     ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
     HashMap <String, LooFDataValue> CurrentVariableList = LastItemOf (VariableListsStack);
-    if (NewValue.ValueType == DataValueType_Null) {
-      CurrentVariableList.remove(VariableName);
-      return;
-    }
     CurrentVariableList.put(VariableName, NewValue);
   }
   
@@ -234,14 +254,18 @@ class LooFInterpreter {
   
   LooFDataValue GetVariableValue (String VariableName, LooFEnvironment Environment, boolean CreateNullVar) {
     if (VariableName.equals("_")) return new LooFDataValue();
-    ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = Environment.VariableListsStack;
-    HashMap <String, LooFDataValue> CurrentVariableList = LastItemOf (VariableListsStack);
+    
+    // if var exists
+    HashMap <String, LooFDataValue> CurrentVariableList = LastItemOf (Environment.VariableListsStack);
     LooFDataValue FoundVariableValue = CurrentVariableList.get(VariableName);
     if (FoundVariableValue != null) return CurrentVariableList.get(VariableName);
+    
+    // if var doesn't exist
     if (!CreateNullVar) throw (new LooFInterpreterException (Environment, "could not find any variable named \"" + VariableName + "\".", new String[] {"VariableNotFound"}));
     LooFDataValue NewVariableValue = new LooFDataValue ();
     CurrentVariableList.put(VariableName, NewVariableValue);
     return NewVariableValue;
+    
   }
   
   
