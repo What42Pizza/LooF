@@ -1,11 +1,26 @@
-function Test
-A = 5
-B = A + 5
-call Test
+function FizzBuzz  -> Input
+	Output = ""
+	Output ..= (Input % 3 == 0) and "Fizz" or ""
+	Output ..= (Input % 5 == 0) and "Buzz" or ""
+	Output = (lengthOf Output > 0) and Output or toString Input
+	return Output
 end
 
-A = 5
-B = A + 5
 
-call Test
+
+call FizzBuzz, 1  -> A
+call FizzBuzz, 2  -> B
+call FizzBuzz, 3  -> C
+call FizzBuzz, 4  -> D
+call FizzBuzz, 5  -> E
+call FizzBuzz, 6  -> F
+call FizzBuzz, 7  -> G
+call FizzBuzz, 8  -> H
+call FizzBuzz, 9  -> I
+call FizzBuzz, 10  -> J
+call FizzBuzz, 11  -> K
+call FizzBuzz, 12  -> L
+call FizzBuzz, 13  -> M
+call FizzBuzz, 14  -> N
+call FizzBuzz, 15  -> O
 :exit

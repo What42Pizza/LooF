@@ -202,12 +202,12 @@ class LooFCodeData {
   
   int CurrentLineNumber;
   
-  public LooFCodeData (String[] Code, String OriginalFileName) {
+  public LooFCodeData (String[] OriginalCode, String OriginalFileName) {
     this.OriginalFileName = OriginalFileName;
-    this.OriginalCode = Code;
-    this.CodeArrayList = new ArrayList <String> (Arrays.asList (Code));
-    this.LineNumbers = CreateNumberedIntegerList (Code.length);
-    this.LineFileOrigins = CreateFilledArrayList (Code.length, OriginalFileName);
+    this.OriginalCode = OriginalCode;
+    this.CodeArrayList = new ArrayList <String> (Arrays.asList (OriginalCode));
+    this.LineNumbers = CreateNumberedIntegerList (OriginalCode.length);
+    this.LineFileOrigins = CreateFilledArrayList (OriginalCode.length, OriginalFileName);
   }
   
 }
@@ -315,8 +315,8 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, Has
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
-  LooFCodeData LineCodeDataOrigin = AllCodeDatas.get(LineFileOrigin);
-  String OriginalLineOfCode = LineCodeDataOrigin.OriginalCode[OriginalLineNumber].trim();
+  LooFCodeData OriginalCodeData = AllCodeDatas.get(LineFileOrigin);
+  String OriginalLineOfCode = OriginalCodeData.OriginalCode[OriginalLineNumber].trim();
   
   boolean LineHasChanged = !LineOfCode.equals(OriginalLineOfCode);
   

@@ -56,7 +56,7 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
     // push args
     if (Args.length > 1) {
       ArrayList <LooFDataValue> ArgsToPush = new ArrayList <LooFDataValue> ();
-      for (int i = 1; i < ArgsToPush.size(); i ++) {
+      for (int i = 1; i < Args.length; i ++) {
         ArgsToPush.add(LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null));
       }
       LooFDataValue ValueToPush = new LooFDataValue (ArgsToPush, new HashMap <String, LooFDataValue> ());
@@ -121,6 +121,15 @@ LooFInterpreterFunction InterpreterFunction_Return = new LooFInterpreterFunction
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    
+    if (Args.length > 0) {
+      LooFDataValue ValueToPush = GetReturnStatementValueToPush (Args, 0, Environment);
+      if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
+    }
+    
+    LooFInterpreter.ReturnFromFunction(Environment);
+    
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 0, CodeData, AllCodeDatas, LineNumber);
@@ -136,9 +145,16 @@ LooFInterpreterFunction InterpreterFunction_ReturnRaw = new LooFInterpreterFunct
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    
+    LooFDataValue ValueToPush = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
+    
+    LooFInterpreter.ReturnFromFunction(Environment);
+    
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 0, CodeData, AllCodeDatas, LineNumber);
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
   }
   @Override public String toString (LooFStatement CurrentStatement) {return "'returnRaw'";}
 };
@@ -150,6 +166,18 @@ LooFInterpreterFunction InterpreterFunction_ReturnRaw = new LooFInterpreterFunct
 LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
+    
+    LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
+    
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    
+    if (Args.length > 1) {
+      LooFDataValue ValueToPush = GetReturnStatementValueToPush (Args, 1, Environment);
+      if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
+    }
+    
+    LooFInterpreter.ReturnFromFunction(Environment);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -166,12 +194,32 @@ LooFInterpreterFunction InterpreterFunction_ReturnRawIf = new LooFInterpreterFun
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
+    LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
+    
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    
+    LooFDataValue ValueToPush = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+    if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
+    
+    LooFInterpreter.ReturnFromFunction(Environment);
+    
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 2, CodeData, AllCodeDatas, LineNumber);
   }
   @Override public String toString (LooFStatement CurrentStatement) {return "'returnRawIf'";}
 };
+
+
+
+LooFDataValue GetReturnStatementValueToPush (LooFTokenBranch[] Args, int ArgsStart, LooFEnvironment Environment) {
+  ArrayList <LooFDataValue> ArgsAsValues = new ArrayList <LooFDataValue> ();
+  for (int i = ArgsStart; i < Args.length; i ++) {
+    ArgsAsValues.add(LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null));
+  }
+  return new LooFDataValue (ArgsAsValues, new HashMap <String, LooFDataValue> ());
+}
 
 
 
@@ -195,6 +243,9 @@ LooFInterpreterFunction InterpreterFunction_If = new LooFInterpreterFunction() {
 LooFInterpreterFunction InterpreterFunction_Skip = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalSkipStatementData AdditionalData = (LooFAdditionalSkipStatementData) Statement.AdditionalData;
+    
+    Environment.CurrentLineNumber = AdditionalData.MatchingEndStatementIndex - 1;
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {

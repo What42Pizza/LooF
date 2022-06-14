@@ -112,6 +112,10 @@ boolean ExceptionIsLooFCompilerException (RuntimeException e) {
   return e.getClass().equals(LooFCompilerException.class);
 }
 
+boolean ExceptionIsLooFInterpreterException (RuntimeException e) {
+  return e.getClass().equals(LooFInterpreterException.class);
+}
+
 
 
 

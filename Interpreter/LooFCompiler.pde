@@ -737,36 +737,8 @@ class LooFCompiler {
       try {
         String CurrentLine = Code.get(i);
         if (!CurrentLine.startsWith("#replace")) continue;
-        
-        if (CurrentLine.startsWith("#replace ")) {
-          String[][] ReplacementData = GetReplacementData (CodeData, i, 10);
-          String[] ReplaceBefore = ReplacementData[0];
-          String[] ReplaceAfter = ReplacementData[1];
-          if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "'#replace' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
-          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, CharsInQuotesCache, false);
-          i --;
-          continue;
-        }
-        
-        if (CurrentLine.startsWith("#replaceIgnoreQuotes ")) {
-          String[][] ReplacementData = GetReplacementData (CodeData, i, 22);
-          String[] ReplaceBefore = ReplacementData[0];
-          String[] ReplaceAfter = ReplacementData[1];
-          if (ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "'#replaceIgnoreQuotes' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
-          ReplaceAllStringOccurances (CodeData, ReplaceBefore[0], ReplaceAfter, CharsInQuotesCache, true);
-          i --;
-          continue;
-        }
-        
-        if (CurrentLine.startsWith("#replaceMultiLine ")) {
-          String[][] ReplacementData = GetReplacementData (CodeData, i, 19);
-          String[] ReplaceBefore = ReplacementData[0];
-          String[] ReplaceAfter = ReplacementData[1];
-          ReplaceAllStringOccurances_MultiLine (CodeData, ReplaceBefore, ReplaceAfter);
-          i --;
-          continue;
-        }
-        
+        ProcessReplaceForLine (CurrentLine, CodeData, AllCodeDatas, CharsInQuotesCache, i);
+        i --;
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -775,7 +747,33 @@ class LooFCompiler {
   
   
   
-  String[][] GetReplacementData (LooFCodeData CodeData, int i, int SearchStart) {
+  void ProcessReplaceForLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, HashMap <String, boolean[]> CharsInQuotesCache, int LineNumber) {
+        
+    if (CurrentLine.startsWith("#replace ")) {
+      String[][] ReplacementData = GetReplacementData (CodeData, LineNumber, 10, false, AllCodeDatas, LineNumber);
+      ReplaceAllStringOccurances (CodeData, ReplacementData[0][0], ReplacementData[1], CharsInQuotesCache, false);
+      return;
+    }
+    
+    if (CurrentLine.startsWith("#replaceIgnoreQuotes ")) {
+      String[][] ReplacementData = GetReplacementData (CodeData, LineNumber, 22, false, AllCodeDatas, LineNumber);
+      ReplaceAllStringOccurances (CodeData, ReplacementData[0][0], ReplacementData[1], CharsInQuotesCache, true);
+      return;
+    }
+    
+    if (CurrentLine.startsWith("#replaceMultiLine ")) {
+      String[][] ReplacementData = GetReplacementData (CodeData, LineNumber, 19, true, AllCodeDatas, LineNumber);
+      ReplaceAllStringOccurances_MultiLine (CodeData, ReplacementData[0], ReplacementData[1]);
+      return;
+    }
+    
+    throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "cannot understand this #replace statement."));
+    
+  }
+  
+  
+  
+  String[][] GetReplacementData (LooFCodeData CodeData, int i, int SearchStart, boolean AllowMultiLineDetect, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -788,6 +786,8 @@ class LooFCompiler {
     
     String[] ReplaceBefore = FormatBackslashes (RawReplacementData[0]);
     String[] ReplaceAfter = FormatBackslashes (RawReplacementData[1]);
+    
+    if (!AllowMultiLineDetect && ReplaceBefore.length > 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "'#replaceIgnoreQuotes' cannot detect multi-line strings, either remove the '\\n' or use '#replaceMultiLine'."));
     
     return new String[][] {ReplaceBefore, ReplaceAfter};
   }
@@ -1028,7 +1028,7 @@ class LooFCompiler {
     LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
     
     // get code to include and data about it
-    String[] FileToIncludeContents = FileToInclude.OriginalCode;
+    String[] FileToIncludeContents = FileToInclude.OriginalCode.clone();
     String FileToIncludeName = FileToInclude.OriginalFileName;
     int LineNumberOffset = FileToInclude.IncludesHeader ? -HeaderLength : 0;
     int InsertionStartIndex = LineNumber - 1;
@@ -1571,12 +1571,9 @@ class LooFCompiler {
   
   void CombineTokensForCode (LooFCodeData CodeData, String[] CombinedTokens, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <ArrayList <String>> CodeTokens = CodeData.CodeTokens;
-    ArrayList <ArrayList <Boolean>> TokensFollowedBySpaces = CodeData.TokensFollowedBySpaces;
     for (int i = 0; i < CodeTokens.size(); i ++) {
       try {
-        ArrayList <String> CurrentLineTokens = CodeTokens.get(i);
-        ArrayList <Boolean> CurrentLineTokensFollowedBySpaces = TokensFollowedBySpaces.get(i);
-        CombineTokensForLine (CurrentLineTokens, CurrentLineTokensFollowedBySpaces, CombinedTokens);
+        CombineTokensForLine (CodeData, CombinedTokens, i);
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -1585,11 +1582,11 @@ class LooFCompiler {
   
   
   
-  
-  
-  void CombineTokensForLine (ArrayList <String> CurrentLineTokens, ArrayList <Boolean> TokensFollowedBySpaces, String[] CombinedTokens) {
+  void CombineTokensForLine (LooFCodeData CodeData, String[] CombinedTokens, int LineNumber) {
+    ArrayList <String> CurrentLineTokens = CodeData.CodeTokens.get(LineNumber);
+    ArrayList <Boolean> CurrentLineTokensFollowedBySpaces = CodeData.TokensFollowedBySpaces.get(LineNumber);
     for (int i = 0; i < CurrentLineTokens.size(); i ++) {
-      CombineTokensForLineAtPosition (CurrentLineTokens, TokensFollowedBySpaces, CombinedTokens, i);
+      CombineTokensForLineAtPosition (CurrentLineTokens, CurrentLineTokensFollowedBySpaces, CombinedTokens, i);
     }
   }
   
@@ -1605,13 +1602,15 @@ class LooFCompiler {
     String FoundCombinedToken = FoundCombinedTokenData.Value1;
     int FoundCombinedTokenEndIndex = FoundCombinedTokenData.Value2;
     
+    // replace start token with combined token
+    CurrentLineTokens.set(StartIndex, FoundCombinedToken);
+    TokensFollowedBySpaces.set(StartIndex, TokensFollowedBySpaces.get(FoundCombinedTokenEndIndex));
+    
     // remove tokens to combine
     for (int i = FoundCombinedTokenEndIndex; i > StartIndex; i --) {
       CurrentLineTokens.remove(i);
+      TokensFollowedBySpaces.remove(i);
     }
-    
-    // replace start token with combined token
-    CurrentLineTokens.set(StartIndex, FoundCombinedToken);
     
   }
   
@@ -1629,7 +1628,7 @@ class LooFCompiler {
     Tuple2 <String, Integer> ReturnValue = null;
     
     for (int i = StartIndex; i < CurrentLineTokensSize; i ++) {
-      if (i != StartIndex && TokensFollowedBySpaces.get(i - 1)) return ReturnValue;
+      if (i > StartIndex && TokensFollowedBySpaces.get(i - 1)) return ReturnValue;
       PossibleCombinedToken += CurrentLineTokens.get(i);
       
       // skip results that are too short
@@ -1637,7 +1636,7 @@ class LooFCompiler {
         ResultIndex ++;
         if (ResultIndex == CombinedTokensLength) return ReturnValue;
       }
-    
+      
       // add another token if the next results are too long
       if (CombinedTokens[ResultIndex].length() > PossibleCombinedToken.length()) continue;
       
@@ -1824,23 +1823,23 @@ class LooFCompiler {
     switch (CurrentToken) {
       
       // constants
-      case ("PI"): return new LooFTokenBranch (TokenIndex, CurrentToken, Math.PI);
+      case ("MATH_PI"): return new LooFTokenBranch (TokenIndex, CurrentToken, Math.PI);
       
-      case ("E"): return new LooFTokenBranch (TokenIndex, CurrentToken, Math.E);
+      case ("MATH_E"): return new LooFTokenBranch (TokenIndex, CurrentToken, Math.E);
       
-      case ("MAX_INT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Long.MAX_VALUE);
+      case ("MATH_MAX_INT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Long.MAX_VALUE);
       
-      case ("MIN_INT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Long.MIN_VALUE);
+      case ("MATH_MIN_INT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Long.MIN_VALUE);
       
-      case ("MAX_FLOAT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.MAX_VALUE);
+      case ("MATH_MAX_FLOAT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.MAX_VALUE);
       
-      case ("MIN_FLOAT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.MIN_VALUE);
+      case ("MATH_MIN_FLOAT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.MIN_VALUE);
       
-      case ("POSITIVE_INFINITY"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.POSITIVE_INFINITY);
+      case ("MATH_POSITIVE_INFINITY"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.POSITIVE_INFINITY);
       
-      case ("NEGATIVE_INFINITY"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NEGATIVE_INFINITY);
+      case ("MATH_NEGATIVE_INFINITY"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NEGATIVE_INFINITY);
       
-      case ("FLOAT_NAN"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NaN);
+      case ("MATH_FLOAT_NAN"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NaN);
       
       // Type_Bool
       case ("true"): return new LooFTokenBranch (TokenIndex, CurrentToken, true);
@@ -2080,6 +2079,11 @@ class LooFCompiler {
       ShiftEvaluationOrdersPastIndex (IndexQueryIndexes, CurrentIndexQueryIndex, -1);
       ShiftEvaluationOrdersPastIndex (FunctionIndexes, CurrentIndexQueryIndex, -1);
       ShiftOperationOrdersPastIndex (OperationIndexes, CurrentIndexQueryIndex, Integer.MAX_VALUE, -1);
+    }
+    
+    for (int i = 0; i < FunctionIndexes.length; i ++) {
+      int CurrentFunctionIndex = FunctionIndexes[i];
+      ShiftOperationOrdersPastIndex (OperationIndexes, CurrentFunctionIndex, Integer.MAX_VALUE, -1);
     }
     
     for (int i = 0; i < OperationIndexes.length; i ++) {
@@ -2377,10 +2381,11 @@ class LooFCompiler {
   
   void SimplifySingleOutputVar (LooFStatement Statement, int OutputVarIndex, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     LooFTokenBranch OutputArg = Statement.Args[OutputVarIndex];
+    if (OutputArg.TokenType == TokenBranchType_PreEvaluatedFormula) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch[] OutputArgChildren = OutputArg.Children;
     if (OutputArgChildren.length != 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to."));
     LooFTokenBranch OutputVarToken = OutputArgChildren[0];
-    if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not " + TokenBranchTypeNames_PlusA[OutputVarToken.TokenType] + "."));
+    if (OutputVarToken.TokenType != TokenBranchType_VarName) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "argument " + OutputVarIndex + " needs to be the name of a variable to output to, not a token of type " + TokenBranchTypeNames[OutputVarToken.TokenType] + "."));
     OutputVarToken.TokenType = TokenBranchType_OutputVar;
     Statement.Args[OutputVarIndex] = OutputVarToken;
   }
