@@ -43,7 +43,7 @@ class LooFInterpreterModuleData extends LooFModuleData {
   double StartTime;
   
   public LooFInterpreterModuleData (double StartTime) {
-    StartTime = StartTime;
+    this.StartTime = StartTime;
   }
   
 }

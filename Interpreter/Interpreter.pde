@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/16/22
+// Last updated 06/17/22
 
 
 
@@ -35,7 +35,7 @@ void setup() {
   CompileSettings.PrintPreProcessedLooF = false;
   CompileSettings.PrintLinkedLooF = false;
   CompileSettings.PrintLexedLooF = false;
-  CompileSettings.PrintParsedLooF = false;
+  CompileSettings.PrintParsedLooF = true;
   CompileSettings.PrintFinalLooF = true;
   
   
@@ -54,7 +54,7 @@ void setup() {
   // interpret
   int StartMillis = millis();
   try {
-    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000);
+    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000000);
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
     throw e;

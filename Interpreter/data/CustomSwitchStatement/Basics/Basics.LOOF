@@ -6,27 +6,32 @@ $link BasicFunctions.LOOF as Basics
 
 
 
-#replaceMultiLine "\nfunction " "\nskip true\n$function "
 
+// functions
+#replaceMultiLine "\nfunction " "\nskip true\n$function "
 #replaceMultiLine "\ncall " "\ncall $"
 #replaceMultiLine "\ncall_ " "\ncall "
-
-#replaceMultiLine " then\n" ", true\nskip\n"
-
 #replace "  -> " "\npop ARGS, "
 #replace "  throwsErrors " "\nsetPassedErrors "
 
+// if statements
+#replaceMultiLine " then\n" ", true\nskip\n"
+
+// multi-line code
 #replace ";" "\n"
 #replaceMultiLine "\n`" ""
 
+// calls to Basics
 #replaceMultiLine "\n:" "\ncall $Basics."
 
+// values in strings
 #replaceIgnoreQuotes "{`" "\" .. toString ("
 #replaceIgnoreQuotes "`}\"" ")"
 #replaceIgnoreQuotes "`}" ") .. \""
 
 
 
+// fixing calls to Basics
 #replace "$Basics.print " "$Basics.print, "
 #replace "$Basics.exit " "$Basics.exit, "
 #replace "$Basics.addItem " "$Basics.addItem, "

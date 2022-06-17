@@ -40,7 +40,8 @@ class LooFInterpreter {
       HandleEnvironmentException (e, Environment);
     }
     
-    IncrementEnvironmentLineNumber (Environment);
+    if (Environment.IncLineNumber) IncrementEnvironmentLineNumber (Environment);
+    Environment.IncLineNumber = true;
     
   }
   
@@ -157,7 +158,6 @@ class LooFInterpreter {
   
   void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int ExpectedGeneralStackSize, boolean AttemptErrorCatch) {
     if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
-    NewLineNumber --;
     
     // add call stack data
     Environment.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
@@ -184,6 +184,7 @@ class LooFInterpreter {
     
     // set current line
     Environment.CurrentLineNumber = NewLineNumber;
+    Environment.IncLineNumber = false;
     
   }
   
@@ -211,7 +212,8 @@ class LooFInterpreter {
     }
     
     // set current line
-    Environment.CurrentLineNumber = NewLineNumber;
+    Environment.CurrentLineNumber = NewLineNumber + 1;
+    Environment.IncLineNumber = false;
     
     // unlock args
     UnlockCallStackValues (Environment, InitialLockedValuesSize);

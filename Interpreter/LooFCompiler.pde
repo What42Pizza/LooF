@@ -540,7 +540,7 @@ class LooFCompiler {
     RemoveComments (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData, AllCodeDatas, AllExceptions);
-    ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length, AllExceptions);
+    ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length, CharsInQuotesCache, AllExceptions);
     ProcessReplaces (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveExcessWhitespace (CodeData);
     CheckForIncorrectPreProcessorStatements (CodeData, AllCodeDatas, AllExceptions);
@@ -945,9 +945,8 @@ class LooFCompiler {
     if (!Code.get(StartIndex).endsWith(ReplaceBefore[0])) return false;
     if (!Code.get(EndIndex).startsWith(LastItemOf (ReplaceBefore))) return false;
     
-    for (int i = 1; i < ReplaceBefore.length - 2; i ++) {
-      String CurrentLineToMatch = ReplaceBefore[i];
-      if (!Code.get(i + StartIndex).equals(CurrentLineToMatch)) return false;
+    for (int i = 1; i < ReplaceBefore.length - 1; i ++) {
+      if (!Code.get(i + StartIndex).equals(ReplaceBefore[i])) return false;
     }
     
     return true;
@@ -962,6 +961,7 @@ class LooFCompiler {
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     int CurrentLineNumber = LineNumbers.get(LineNumber);
     String CurrentLineFileOrigin = LineFileOrigins.get(LineNumber);
+    if (ReplaceBefore[0].equals("") && ReplaceAfter[0].equals("")) CurrentLineNumber ++;
     
     // remove the lines inside the replaced area
     for (int i = 1; i < ReplaceBefore.length - 1; i ++) {
@@ -979,12 +979,15 @@ class LooFCompiler {
     
     // single line replacement
     if (ReplaceAfter.length == 1) {
+      
       Code.remove(LineNumber);
       LineNumbers.remove(LineNumber);
       LineFileOrigins.remove(LineNumber);
+      
       Code.set(LineNumber, ReplacedAreaStart + ReplaceAfter[0] + ReplacedAreaEnd);
       LineNumbers.set(LineNumber, CurrentLineNumber);
       LineFileOrigins.set(LineNumber, CurrentLineFileOrigin);
+      
       return;
     }
     
@@ -1011,13 +1014,13 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, ArrayList <LooFCompilerException> AllExceptions) {
+  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       try {
         String CurrentLine = Code.get(i);
         if (!CurrentLine.startsWith("#include ")) continue;
-        ProcessIncludesForLine (CodeData, CurrentLine, i, AllCodeDatas, HeaderLength, AllExceptions);
+        ProcessIncludesForLine (CodeData, CurrentLine, i, AllCodeDatas, HeaderLength, CharsInQuotesCache, AllExceptions);
         i --; // for if the included file starts with an #include
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
@@ -1027,7 +1030,7 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludesForLine (LooFCodeData CodeData, String CurrentLine, int LineNumber, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, ArrayList <LooFCompilerException> AllExceptions) {
+  void ProcessIncludesForLine (LooFCodeData CodeData, String CurrentLine, int LineNumber, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -1039,7 +1042,7 @@ class LooFCompiler {
     LooFCodeData FileToInclude = AllCodeDatas.get(FullFileName);
     
     // get code to include and data about it
-    String[] FileToIncludeContents = FileToInclude.OriginalCode.clone();
+    String[] FileToIncludeContents = FileToInclude.OriginalCode;
     String FileToIncludeName = FileToInclude.OriginalFileName;
     int LineNumberOffset = FileToInclude.IncludesHeader ? -HeaderLength : 0;
     int InsertionStartIndex = LineNumber - 1;
@@ -1059,6 +1062,9 @@ class LooFCompiler {
     }
     
     // process new data
+    AddPaddingLines (CodeData);
+    RemoveComments (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
+    RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData, AllCodeDatas, LineNumber, LineNumber + FileToIncludeContents.length, AllExceptions);
     
   }

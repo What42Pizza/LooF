@@ -157,6 +157,7 @@ class LooFEnvironment {
   String CurrentPageName;
   LooFCodeData CurrentCodeData;
   int CurrentLineNumber;
+  boolean IncLineNumber = true;
   
   ArrayList <LooFDataValue> GeneralStack = new ArrayList <LooFDataValue> ();
   ArrayList <HashMap <String, LooFDataValue>> VariableListsStack = new ArrayList <HashMap <String, LooFDataValue>> ();
