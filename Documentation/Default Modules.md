@@ -6,8 +6,8 @@
 
 ### Console:
 
-- **"println", ToPrint1, ToPrint2, etc**
-  - Prints all arguments to the console, separated with spaces.
+- **"print", ToPrint**
+  - Prints ToPrint to the console.
 
 <br>
 
@@ -17,6 +17,8 @@
   - Pauses execution for Time seconds.
 - **"pause until", EndTime (int or float)**
   - Pauses until timeSince 0 >= EndTime.
+- **"get start time"**
+  - Pushes the approximate time the program finished compilation, according to System.currentTimeMillis().
 - **"stop"**
   - Stops execution.
 - **"add page from file", FilePath (string or table {string, ...}), CompileSettings (table)**

@@ -2,8 +2,12 @@ LooFInterpreterModule NullInterpreterModule = new LooFInterpreterModule();
 
 class LooFInterpreterModule {
   
-  public void HandleCall (LooFDataValue[] Args, ArrayList <LooFDataValue> GeneralStack, LooFEnvironment Environment, LooFModuleData ModuleData) {
-    
+  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleData) {
+    throw (new LooFInterpreterException (Environment, "this LooFInterpreterModule does not have an overridden HandleCall().", new String[] {"InvalidInterpreterModule"}));
+  }
+  
+  public LooFModuleData CreateModuleData (LooFEnvironment Environment) {
+    return new LooFModuleData();
   }
   
 }
@@ -145,7 +149,7 @@ class LooFEnvironment {
   
   LooFAddonsData AddonsData;
   
-  HashMap <LooFInterpreterModule, LooFModuleData> AllModuleDatas;
+  HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas = new HashMap <LooFInterpreterModule, LooFModuleData> ();
   
   
   
@@ -162,7 +166,7 @@ class LooFEnvironment {
   ArrayList <Boolean> CallStackAttemptErrorCatches = new ArrayList <Boolean> ();
   ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
   ArrayList <LooFDataValue[]> CallStackLockedValues = new ArrayList <LooFDataValue[]> ();
-  ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
+  ArrayList <Integer> CallStackExpectedGeneralStackSizes = new ArrayList <Integer> ();
   ArrayList <Integer> CallStackInitialLockedValuesSizes = new ArrayList <Integer> ();
   
   
@@ -385,9 +389,10 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message, 
   int LineNumber = Environment.CurrentLineNumber;
   
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
-  String OriginalLineOfCode = CodeData.OriginalCode[OriginalLineNumber].trim();
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
+  LooFCodeData OriginalCodeData = Environment.AllCodeDatas.get(LineFileOrigin);
+  String OriginalLineOfCode = OriginalCodeData.OriginalCode[OriginalLineNumber].trim();
   
   if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
   if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";

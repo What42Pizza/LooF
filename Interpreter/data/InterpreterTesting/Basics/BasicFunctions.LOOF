@@ -6,8 +6,14 @@
 
 
 
-function print  -> ValueToPrint
-	callOutside "Console", "println", ValueToPrint
+function print  throwsErrors {"InvalidArgType", "InvalidArgsLength"}
+	pop ValuesToPrint
+	errorIf (typeOf ValuesToPrint != "table"), "the function 'print' must pull a table from the general stack.", {"InvalidArgType"}
+	if lengthOf ValuesToPrint == 0 then
+		ValuesToPrint[0] = ""
+	end
+	ValuesToPrint[0] ..= "\n"
+	callOutside "Console", "print", ValuesToPrint
 	return
 end
 

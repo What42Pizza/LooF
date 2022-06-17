@@ -187,7 +187,7 @@ LooFEvaluatorOperation Operation_Equals = new LooFEvaluatorOperation() {
         return new LooFDataValue (false);
       
       case (DataValueType_String):
-        return new LooFDataValue (RightValue.ValueType == DataValueType_String && LeftValue.StringValue.equals(RightValue.IntValue));
+        return new LooFDataValue (RightValue.ValueType == DataValueType_String && LeftValue.StringValue.equals(RightValue.StringValue));
       
       case (DataValueType_Bool):
         return new LooFDataValue (RightValue.ValueType == DataValueType_Bool && LeftValue.BoolValue == RightValue.BoolValue);
@@ -287,7 +287,7 @@ LooFEvaluatorOperation Operation_NotEquals = new LooFEvaluatorOperation() {
         return new LooFDataValue (false);
       
       case (DataValueType_String):
-        return new LooFDataValue (!(RightValue.ValueType == DataValueType_String && LeftValue.StringValue.equals(RightValue.IntValue)));
+        return new LooFDataValue (!(RightValue.ValueType == DataValueType_String && LeftValue.StringValue.equals(RightValue.StringValue)));
       
       case (DataValueType_Bool):
         return new LooFDataValue (!(RightValue.ValueType == DataValueType_Bool && LeftValue.BoolValue == RightValue.BoolValue));

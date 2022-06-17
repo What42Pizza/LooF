@@ -127,6 +127,17 @@ class LooFCompiler {
     
     
     
+    // create ModuleData-s
+    HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas = NewEnvironment.ModuleDatas;
+    HashMap <String, LooFInterpreterModule> InterpreterModules = AddonsData.InterpreterModules;
+    Set <String> InterpreterModuleNames = InterpreterModules.keySet();
+    for (String CurrentModuleName : InterpreterModuleNames) {
+      LooFInterpreterModule CurrentModule = InterpreterModules.get(CurrentModuleName);
+      ModuleDatas.put(CurrentModule, CurrentModule.CreateModuleData (NewEnvironment));
+    }
+    
+    
+    
     long EndMillis = System.currentTimeMillis();
     
     System.out.println ("Compiled environment from folder " + CodeFolder + ".");
@@ -182,8 +193,8 @@ class LooFCompiler {
     HashMap <String, LooFInterpreterModule> InterpreterModules = new HashMap <String, LooFInterpreterModule> ();
     if (!CompileSettings.AddDefaultInterpreterModules) return InterpreterModules;
     
-    InterpreterModules.put("Console", NullInterpreterModule);
-    InterpreterModules.put("Interpreter", NullInterpreterModule);
+    InterpreterModules.put("Interpreter", InterpreterModule_Interpreter);
+    InterpreterModules.put("Console", InterpreterModule_Console);
     InterpreterModules.put("Files", NullInterpreterModule);
     InterpreterModules.put("Graphics", NullInterpreterModule);
     
@@ -439,7 +450,7 @@ class LooFCompiler {
     }
     
     CombinedTokens.sort(new StringComparator_ShortestToLongest());
-    return ListToArray (CombinedTokens, "");
+    return ListToArray (CombinedTokens, String.class);
   }
   
   
@@ -473,7 +484,7 @@ class LooFCompiler {
       if (CurrentFileName.equals("Header.LOOF")) HeaderFileContents = ReadFileAsStrings (AllFilesRaw.remove(i));
     }
     
-    AllFiles = ListToArray (AllFilesRaw, new File(""));
+    AllFiles = ListToArray (AllFilesRaw, File.class);
     
     
     
@@ -1769,7 +1780,7 @@ class LooFCompiler {
       PossibleIndexIndex = IndexEndIndex + 2;
     }
     
-    return ListToArray (IndexQueriesList, new LooFTokenBranch (0, ""));
+    return ListToArray (IndexQueriesList, LooFTokenBranch.class);
   }
   
   
@@ -1808,7 +1819,7 @@ class LooFCompiler {
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
     }
-    LooFTokenBranch[] FormulaChildren = ListToArray (FormulaChildrenList, new LooFTokenBranch (0, ""));
+    LooFTokenBranch[] FormulaChildren = ListToArray (FormulaChildrenList, LooFTokenBranch.class);
     EnsureFormulaTokensAreValid (FormulaChildren, CodeData, AllCodeDatas, LineNumber);
     LooFTokenBranch ParsedFormula = new LooFTokenBranch (FormulaBlockStart - 1, "(", FormulaChildren);
     FillFormulaTokenEvaluationOrders (ParsedFormula);
@@ -2056,8 +2067,8 @@ class LooFCompiler {
     Arrays.sort(OperationIndexesAndOrders, new FloatIntPairComparator());
     
     // fill orders
-    FormulaToken.IndexQueryIndexes = ToPrimitive (ListToArray (IndexQueryIndexes, 0));
-    FormulaToken.FunctionIndexes = ToPrimitive (ListToArray (FunctionIndexes, 0));
+    FormulaToken.IndexQueryIndexes = ToPrimitive (ListToArray (IndexQueryIndexes, Integer.class));
+    FormulaToken.FunctionIndexes = ToPrimitive (ListToArray (FunctionIndexes, Integer.class));
     FormulaToken.OperationIndexes = OperationIndexesAndOrders;
     
     ShiftAllFormulaTokenEvaluationOrders (FormulaToken);
@@ -2170,7 +2181,7 @@ class LooFCompiler {
     if (PrevNextCommaIndex != TableBlockEnd)
       PasrseAndAddTableItem (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, ArrayItems, HashMapItems, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
     
-    LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", ListToArray (ArrayItems, new LooFTokenBranch (0, "")), HashMapItems);
+    LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", ListToArray (ArrayItems, LooFTokenBranch.class), HashMapItems);
     FillTokenBranchCanBePreEvaluated (ParsedTable);
     return ParsedTable;
   }

@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/14/22
+// Last updated 06/16/22
 
 
 
@@ -24,40 +24,6 @@ LooFCodeData TestCodeData = new LooFCodeData (new String[] {"not actual code"}, 
 
 void setup() {
   
-  TestCodeData.CodeTokens = new ArrayList <ArrayList <String>> ();
-  TestCodeData.TokensFollowedBySpaces = new ArrayList <ArrayList <Boolean>> ();
-  
-  ArrayList <String> TestTokens = ArrayToArrayList (new String[] {
-    "Output",
-    ".",
-    ".",
-    "=",
-    "a",
-    "=",
-    "=",
-    "b",
-  });
-  
-  ArrayList <Boolean> B = ArrayToArrayList (new Boolean[] {
-    true,
-    false,
-    false,
-    true,
-    true,
-    false,
-    true,
-    false,
-  });
-  
-  TestCodeData.CodeTokens.add(TestTokens);
-  TestCodeData.TokensFollowedBySpaces.add(B);
-  
-  String[] CombinedTokens = {"==", "..="};
-  
-  LooFCompiler.CombineTokensForLine (TestCodeData, CombinedTokens, 0);
-  
-  for (String S : TestCodeData.CodeTokens.get(0)) println (S);
-  
   
   
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
@@ -66,16 +32,15 @@ void setup() {
   CompileSettings.LexerOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.ParserOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
-  CompileSettings.PrintPreProcessedLooF = true;
+  CompileSettings.PrintPreProcessedLooF = false;
   CompileSettings.PrintLinkedLooF = false;
-  CompileSettings.PrintLexedLooF = true;
+  CompileSettings.PrintLexedLooF = false;
   CompileSettings.PrintParsedLooF = false;
   CompileSettings.PrintFinalLooF = true;
   
   
   
   // compile
-  /**/
   LooFEnvironment TestEnvironment = null;
   try {
     TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
@@ -89,7 +54,7 @@ void setup() {
   // interpret
   int StartMillis = millis();
   try {
-    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, TestEnvironment.CurrentCodeData.Statements.length - 1);
+    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000);
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
     throw e;
@@ -108,7 +73,6 @@ void setup() {
       e.printStackTrace();
     }
   }
-  //*/
   
   
   

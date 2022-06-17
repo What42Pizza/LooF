@@ -155,7 +155,7 @@ class LooFInterpreter {
   
   
   
-  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, boolean AttemptErrorCatch) {
+  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int ExpectedGeneralStackSize, boolean AttemptErrorCatch) {
     if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
     NewLineNumber --;
     
@@ -165,7 +165,7 @@ class LooFInterpreter {
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
     Environment.CallStackAttemptErrorCatches.add(AttemptErrorCatch);
     Environment.CallStackErrorTypesToPass.add(new String [0]);
-    Environment.CallStackInitialGeneralStackSizes.add(Environment.GeneralStack.size());
+    Environment.CallStackExpectedGeneralStackSizes.add(ExpectedGeneralStackSize);
     Environment.CallStackInitialLockedValuesSizes.add(Environment.CallStackLockedValues.size());
     
     // set current page
@@ -199,7 +199,7 @@ class LooFInterpreter {
     int NewLineNumber = RemoveLastItem (Environment.CallStackLineNumbers);
     RemoveLastItem (Environment.CallStackAttemptErrorCatches);
     RemoveLastItem (Environment.CallStackErrorTypesToPass);
-    RemoveLastItem (Environment.CallStackInitialGeneralStackSizes);
+    RemoveLastItem (Environment.CallStackExpectedGeneralStackSizes);
     int InitialLockedValuesSize = RemoveLastItem (Environment.CallStackInitialLockedValuesSizes);
     
     // set current page
@@ -266,6 +266,14 @@ class LooFInterpreter {
     CurrentVariableList.put(VariableName, NewVariableValue);
     return NewVariableValue;
     
+  }
+  
+  
+  
+  
+  
+  void PushValuesToStack (LooFDataValue[] NewValues, LooFEnvironment Environment) {
+    Environment.GeneralStack.add(new LooFDataValue (ArrayToArrayList (NewValues), new HashMap <String, LooFDataValue> ()));
   }
   
   

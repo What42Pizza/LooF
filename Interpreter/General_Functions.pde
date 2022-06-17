@@ -7,8 +7,8 @@
   return new ArrayList <T> (Arrays.asList (Input));
 }
 
-<T> T[] ListToArray (List <T> Input, T ExampleItem) {
-  return Input.toArray((T[]) Array.newInstance(ExampleItem.getClass(), Input.size()));
+<T> T[] ListToArray (List <T> Input, Class OutputClass) {
+  return Input.toArray((T[]) Array.newInstance(OutputClass, Input.size()));
 }
 
 
@@ -35,6 +35,14 @@
 }
 
 
+
+<T> T[] RemoveFirstItem (T[] Input, Class OutputClass) {
+  T[] Output = (T[]) Array.newInstance(OutputClass, Input.length - 1);
+  for (int i = 0; i < Output.length; i ++) {
+    Output[i] = Input[i + 1];
+  }
+  return Output;
+}
 
 <T> T RemoveLastItem (ArrayList <T> Input) {
   return Input.remove(Input.size() - 1);
@@ -229,7 +237,7 @@ void DeleteAllFilesOfType (String FolderPath, String TypeToRemove) {
 
 String[] ReadFileAsStrings (File FileToRead) throws IOException {
   List <String> FileContents = Files.readAllLines(FileToRead.toPath());
-  return ListToArray (FileContents, "");
+  return ListToArray (FileContents, String.class);
 }
 
 
