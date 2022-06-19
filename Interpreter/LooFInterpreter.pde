@@ -132,7 +132,8 @@ class LooFInterpreter {
       if (!(CanPassErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, CurrentErrorTypesToPass))) {
         CanPassErrors = false;
         StackTracePages.add(CurrentPageName);
-        StackTraceLines.add(CurrentLineNumber);
+        LooFCodeData OriginalCodeData = Environment.AllCodeDatas.get(CurrentPageName);
+        StackTraceLines.add(OriginalCodeData.LineNumbers.get(CurrentLineNumber));
       }
       
       if (AttemptErrorCatch) {
@@ -143,7 +144,7 @@ class LooFInterpreter {
       
     }
     
-    throw (new LooFInterpreterException ("Uncaught error during execution:     " + CurrentException.Message, StackTracePages, StackTraceLines));
+    throw (new LooFInterpreterException (CurrentException, StackTracePages, StackTraceLines));
     
   }
   

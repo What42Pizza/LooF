@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/17/22
+// Last updated 06/19/22
 
 
 
@@ -35,7 +35,7 @@ void setup() {
   CompileSettings.PrintPreProcessedLooF = false;
   CompileSettings.PrintLinkedLooF = false;
   CompileSettings.PrintLexedLooF = false;
-  CompileSettings.PrintParsedLooF = true;
+  CompileSettings.PrintParsedLooF = false;
   CompileSettings.PrintFinalLooF = true;
   
   
@@ -52,6 +52,8 @@ void setup() {
   
   
   // interpret
+  println();
+  println("Program output:");
   int StartMillis = millis();
   try {
     LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000000);
@@ -59,11 +61,16 @@ void setup() {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
     throw e;
   }
+  println();
   println ("Execution time: " + (millis() - StartMillis) + " ms");
   
   
   
   // print vars
+  println ();
+  println ();
+  println ();
+  println ("Vars:");
   HashMap <String, LooFDataValue> AllVars = TestEnvironment.VariableListsStack.get(0);
   Set <String> AllVarKeys = AllVars.keySet();
   for (String S : AllVarKeys) {

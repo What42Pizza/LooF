@@ -12,7 +12,7 @@ function print  throwsErrors {"InvalidArgType", "InvalidArgsLength"}
 	if lengthOf ValuesToPrint == 0 then
 		ValuesToPrint[0] = ""
 	end
-	ValuesToPrint[0] ..= "\n"
+	ValuesToPrint[endOf ValuesToPrint] = toString ValuesToPrint[endOf ValuesToPrint] .. "\n"
 	callOutside "Console", "print", ValuesToPrint
 	return
 end

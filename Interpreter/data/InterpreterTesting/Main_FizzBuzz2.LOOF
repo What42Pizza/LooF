@@ -1,0 +1,24 @@
+function FizzBuzz2  -> Input
+	Output = ""
+	if Input % 3 == 0 then
+		Output ..= "Fizz"
+	end
+	if Input % 5 == 0 then
+		Output ..= "Buzz"
+	end
+	if Output == "" then
+		Output = toString Input
+	end
+	return Output
+end
+
+
+
+i = 1
+while true//i <= 15
+	call FizzBuzz2, i  -> FizzBuzzOutput
+	:print FizzBuzzOutput
+	i ++
+repeat
+
+:exit

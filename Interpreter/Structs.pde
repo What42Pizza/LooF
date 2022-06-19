@@ -281,16 +281,6 @@ class LooFCompilerException extends RuntimeException {
     this.Message = GetCompilerErrorMessage (AllExceptions);
   }
   
-  public LooFCompilerException (Exception e) {
-    super ("    An error occured while compiling:   " + e.toString());
-  }
-  
-  /*
-  String toString() {
-    return "LooFCompilerException";
-  }
-  */
-  
 }
 
 
@@ -298,7 +288,10 @@ class LooFCompilerException extends RuntimeException {
 String GetCompilerErrorMessage (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String FileName, int LineNumber, Integer TokenIndex, String Message) {
   int OriginalLineNumber = CodeData.LineNumbers.get(LineNumber);
   String OriginalFileName = CodeData.LineFileOrigins.get(LineNumber);
-  return Message + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, AllCodeDatas, LineNumber, TokenIndex);
+  return
+    Message +
+    "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":" +
+    "\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, AllCodeDatas, LineNumber, TokenIndex);
 }
 
 
@@ -373,8 +366,10 @@ class LooFInterpreterException extends RuntimeException {
     this.ErrorTypeTags = ErrorTypeTags;
   }
   
-  public LooFInterpreterException (String Message, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
-    super (" " + Message);
+  public LooFInterpreterException (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
+    super (" " + GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines));
+    this.Message = GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines);
+    this.ErrorTypeTags = BaseException.ErrorTypeTags;
     this.StackTracePages = StackTracePages;
     this.StackTraceLines = StackTraceLines;
   }
@@ -398,7 +393,26 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message, 
   if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
   if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
-  return Message + "\nTags: " + CombineStringsWithSeperator (ErrorTypeTags, ", ") + "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
+  return
+    Message +
+    "\nTags: " + CombineStringsWithSeperator (ErrorTypeTags, ", ") +
+    "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":" +
+    "\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
+}
+
+
+
+String GetInterpreterErrorMessage (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
+  
+  String StackTraceMessage = "";
+  for (int i = 0; i < StackTracePages.size(); i ++) {
+    StackTraceMessage += "\n" + StackTracePages.get(i) + ", line " + StackTraceLines.get(i);
+  }
+  
+  return "Uncaught error during execution:     " + BaseException.Message + 
+  "\n\n\nStack trace:" + 
+  StackTraceMessage;
+  
 }
 
 

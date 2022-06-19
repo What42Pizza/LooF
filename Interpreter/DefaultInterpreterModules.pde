@@ -78,7 +78,7 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
         
         String ToPrint = Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(0), Environment, null, null).StringValue;
         for (int i = 1; i < ValuesToPrintArray.size(); i ++) {
-          ToPrint += Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(i), Environment, null, null).StringValue;
+          ToPrint += " " + Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(i), Environment, null, null).StringValue;
         }
         print (ToPrint);
         
