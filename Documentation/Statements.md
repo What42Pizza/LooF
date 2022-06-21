@@ -146,9 +146,9 @@
 ## Error Handling
 
 - **try Function, ErrorTypesToCatch (table {string, ...})**
-  - Pushes the instruction pointer and file name to the IP stack and jumps execution to Function. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
+  - Pushes the instruction pointer and file name to the IP stack and jumps execution to Function. When any error occurs with at least one tag that is in ErrorTypesToCatch (or if ErrorTypesToCatch starts with "all"), execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 - **try Function, ErrorTypesToCatch (table {string, ...}), Arg1, Arg2, ...**
-  - Pushes the instruction pointer and file name to the IP stack, jumps execution to Function, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch, execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
+  - Pushes the instruction pointer and file name to the IP stack, jumps execution to Function, and pushes all remaining arguments (except ErrorTypesToCatch) to the general stack in a single table. When any error occurs with at least one tag that is in ErrorTypesToCatch (or if ErrorTypesToCatch starts with "all"), execution is taken back to the statement after this, and a table containing details and return values is pushed to the general stack
 
 
 **Note:** Value pushed to the stack by 'try' statements:

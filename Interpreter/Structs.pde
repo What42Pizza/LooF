@@ -52,7 +52,7 @@ class LooFInterpreterFunction {
     throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
   }
   
-  public boolean AttemptErrorCatch (LooFInterpreterException CurrentException, LooFStatement Statement, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines, LooFEnvironment Environment) {
+  public boolean AttemptErrorCatch (LooFInterpreterException CurrentException, LooFStatement Statement, LooFEnvironment Environment) {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden AttemptErrorCatch().", new String[] {"InvalidInterpreterFunction"}));
   }
   
@@ -179,6 +179,7 @@ class LooFEnvironment {
     this.CurrentCodeData = AllCodeDatas.get(CurrentPageName);
     this.CurrentLineNumber = 0;
     this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
+    CallStackExpectedGeneralStackSizes.add(0);
   }
   
   
@@ -366,9 +367,9 @@ class LooFInterpreterException extends RuntimeException {
     this.ErrorTypeTags = ErrorTypeTags;
   }
   
-  public LooFInterpreterException (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
-    super (" " + GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines));
-    this.Message = GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines);
+  public LooFInterpreterException (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines, LooFEnvironment Environment) {
+    super (" " + GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines, Environment));
+    this.Message = GetInterpreterErrorMessage (BaseException, StackTracePages, StackTraceLines, Environment);
     this.ErrorTypeTags = BaseException.ErrorTypeTags;
     this.StackTracePages = StackTracePages;
     this.StackTraceLines = StackTraceLines;
@@ -402,17 +403,41 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message, 
 
 
 
-String GetInterpreterErrorMessage (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines) {
+String GetInterpreterErrorMessage (LooFInterpreterException BaseException, ArrayList <String> StackTracePages, ArrayList <Integer> StackTraceLines, LooFEnvironment Environment) {
+  
+  int[] ColumnSizes = new int[] {0, 0};
+  for (int i = 0; i < StackTracePages.size(); i ++) {
+    Tuple2 <String, Integer> OriginalPageAndLine = GetOriginalPageAndLine (StackTracePages.get(i), StackTraceLines.get(i), Environment);
+    ColumnSizes[0] = Math.max (ColumnSizes[0], OriginalPageAndLine.Value1.length());
+    ColumnSizes[1] = Math.max (ColumnSizes[1], OriginalPageAndLine.Value2.toString().length());
+  }
   
   String StackTraceMessage = "";
   for (int i = 0; i < StackTracePages.size(); i ++) {
-    StackTraceMessage += "\n" + StackTracePages.get(i) + ", line " + StackTraceLines.get(i);
+    Tuple2 <String, Integer> OriginalPageAndLine = GetOriginalPageAndLine (StackTracePages.get(i), StackTraceLines.get(i), Environment);
+    LooFCodeData OriginalCodeData = Environment.AllCodeDatas.get(OriginalPageAndLine.Value1);
+    String OriginalLineOfCode = OriginalCodeData.OriginalCode[OriginalPageAndLine.Value2];
+    StackTraceMessage += "\n" +
+      EnsureStringLength (OriginalPageAndLine.Value1 + ",", ColumnSizes[0] + 1, ' ') +
+      " line " + EnsureStringLength (OriginalPageAndLine.Value2 + ",", ColumnSizes[1] + 1, ' ') +
+      " line of code: `" + OriginalLineOfCode.trim() + "`";
   }
   
-  return "Uncaught error during execution:     " + BaseException.Message + 
-  "\n\n\nStack trace:" + 
-  StackTraceMessage;
+  return
+    "Uncaught error during execution:     " +
+    BaseException.Message +
+    "\n\n\nStack trace:" +
+    StackTraceMessage;
   
+}
+
+
+
+Tuple2 <String, Integer> GetOriginalPageAndLine (String CurrentPageName, int CurrentLineNumber, LooFEnvironment Environment) {
+  LooFCodeData CurrentCodeData = Environment.AllCodeDatas.get(CurrentPageName);
+  String OriginalPageName = CurrentCodeData.LineFileOrigins.get(CurrentLineNumber);
+  Integer OriginalLineNumber = CurrentCodeData.LineNumbers.get(CurrentLineNumber);
+  return new Tuple2 <String, Integer> (OriginalPageName, OriginalLineNumber);
 }
 
 

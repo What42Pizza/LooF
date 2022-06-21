@@ -20,11 +20,21 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
+    // if there's no value to pop
+    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) {
+      for (int i = 0; i < Args.length; i ++) {
+        LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
+      }
+      return;
+    }
+    
+    // pop first value into first arg
     LooFDataValue PoppedValue = RemoveLastItem (Environment.GeneralStack);
     LooFTokenBranch FirstArg = Args[0];
     LooFInterpreter.SetVariableValue (FirstArg.StringValue, PoppedValue, Environment);
     if (Args.length == 1) return;
     
+    // pop into rest of args
     if (PoppedValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "attempted to pop table values into vars, but the popped value was of type " + DataValueTypeNames[PoppedValue.ValueType] + ".", new String[] {"NonTableValueOnGeneralStack", "InvalidArgType"}));
     ArrayList <LooFDataValue> PoppedValueItems = PoppedValue.ArrayValue;
     int EndIndex = Math.min (PoppedValueItems.size() + 1, Args.length);
@@ -500,6 +510,9 @@ LooFInterpreterFunction InterpreterFunction_Continue = new LooFInterpreterFuncti
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalData;
     
+    Environment.CurrentLineNumber = AdditionalData.MatchingLoopingStatementIndex;
+    Environment.IncLineNumber = false;
+    
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 0, CodeData, AllCodeDatas, LineNumber);
@@ -524,6 +537,11 @@ LooFInterpreterFunction InterpreterFunction_ContinueIf = new LooFInterpreterFunc
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    
+    if (Condition) {
+      Environment.CurrentLineNumber = AdditionalData.MatchingLoopingStatementIndex;
+      Environment.IncLineNumber = false;
+    }
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -629,7 +647,8 @@ LooFInterpreterFunction InterpreterFunction_Error = new LooFInterpreterFunction(
     String ErrorMessage = GetErrorStatementErrorMessage (Args[0], AdditionalData, Environment, "first");
     if (Args.length == 1) throw (new LooFInterpreterException (Environment, ErrorMessage, new String [0]));
     
-    String[] ErrorTypeTags = GetErrorStatementErrorTypeTags (Args[1], AdditionalData, Environment, "second");
+    String[] ErrorTypeTags = AdditionalData.ErrorTypeTags;
+    if (ErrorTypeTags == null) ErrorTypeTags = GetStatementErrorTypeTags (Args[1], Environment, "error", "second");
     throw (new LooFInterpreterException (Environment, ErrorMessage, ErrorTypeTags));
     
   }
@@ -663,7 +682,8 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
     String ErrorMessage = GetErrorStatementErrorMessage (Args[1], AdditionalData, Environment, "second");
     if (Args.length == 2) throw (new LooFInterpreterException (Environment, ErrorMessage, new String [0]));
     
-    String[] ErrorTypeTags = GetErrorStatementErrorTypeTags (Args[2], AdditionalData, Environment, "third");
+    String[] ErrorTypeTags = AdditionalData.ErrorTypeTags;
+    if (ErrorTypeTags == null) ErrorTypeTags = GetStatementErrorTypeTags (Args[2], Environment, "errorIf", "third");
     throw (new LooFInterpreterException (Environment, ErrorMessage, ErrorTypeTags));
     
   }
@@ -709,17 +729,15 @@ String GetErrorStatementErrorMessage (LooFTokenBranch Arg, LooFAdditionalErrorSt
 
 
 
-String[] GetErrorStatementErrorTypeTags (LooFTokenBranch Arg, LooFAdditionalErrorStatementData AdditionalData, LooFEnvironment Environment, String ArgIndexName) {
-  
-  if (AdditionalData.ErrorTypeTags != null) return AdditionalData.ErrorTypeTags;
+String[] GetStatementErrorTypeTags (LooFTokenBranch Arg, LooFEnvironment Environment, String StatementName, String ArgIndexName) {
   
   LooFDataValue ErrorTypeTagsValue = LooFInterpreter.EvaluateFormula (Arg, Environment, null, null);
-  if (ErrorTypeTagsValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "'error' statements must take a table of string as its " + ArgIndexName + " arg, but the " + ArgIndexName + " arg was of type " + DataValueTypeNames[ErrorTypeTagsValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+  if (ErrorTypeTagsValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "'" + StatementName + "' statements must take a table of string as its " + ArgIndexName + " arg, but the " + ArgIndexName + " arg was of type " + DataValueTypeNames[ErrorTypeTagsValue.ValueType] + ".", new String[] {"InvalidArgType"}));
   ArrayList <LooFDataValue> ErrorTypeTagsList = ErrorTypeTagsValue.ArrayValue;
   String[] ErrorTypeTags = new String [ErrorTypeTagsList.size()];
   for (int i = 0; i < ErrorTypeTags.length; i ++) {
     LooFDataValue CurrentErrorType = ErrorTypeTagsList.get(i);
-    if (CurrentErrorType.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "'error' statements must take a table of strings as its " + ArgIndexName + " arg, but the table given has a value of type " + DataValueTypeNames[CurrentErrorType.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (CurrentErrorType.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "'" + StatementName + "' statements must take a table of strings as its " + ArgIndexName + " arg, but the table given has a value of type " + DataValueTypeNames[CurrentErrorType.ValueType] + ".", new String[] {"InvalidArgType"}));
     ErrorTypeTags[i] = CurrentErrorType.StringValue;
   }
   return ErrorTypeTags;
@@ -766,6 +784,45 @@ class LooFAdditionalSetPassedErrorsStatementData extends LooFAdditionalStatement
 LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalData;
+    
+    String[] ErrorTypesToCatch = AdditionalData.ErrorTypesToCatch;
+    if (ErrorTypesToCatch == null) ErrorTypesToCatch = GetStatementErrorTypeTags (Args[1], Environment, "try", "second");
+    int ExpectedGeneralStackSize = Environment.GeneralStack.size();
+    
+    // push args
+    if (Args.length > 1) {
+      ArrayList <LooFDataValue> ArgsToPush = new ArrayList <LooFDataValue> ();
+      for (int i = 1; i < Args.length; i ++) {
+        ArgsToPush.add(LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null));
+      }
+      LooFDataValue ValueToPush = new LooFDataValue (ArgsToPush, new HashMap <String, LooFDataValue> ());
+      Environment.GeneralStack.add(ValueToPush);
+    }
+    
+    // pre-evaluated
+    if (AdditionalData.NewIPLineNumber != null) {
+      LooFInterpreter.JumpToFunction (Environment, AdditionalData.NewIPPageName, AdditionalData.NewIPLineNumber, ExpectedGeneralStackSize, true);
+      SetLastItem (Environment.CallStackErrorTypesToPass, ErrorTypesToCatch);
+      return;
+    }
+    
+    LooFDataValue FunctionToCall = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (FunctionToCall.ValueType != DataValueType_Function) throw (new LooFInterpreterException (Environment, "'try' statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FunctionToCall.ValueType] + ".", new String[] {"InvalidArgType"}));
+    LooFInterpreter.JumpToFunction (Environment, FunctionToCall.FunctionPageValue, FunctionToCall.FunctionLineValue, ExpectedGeneralStackSize, true);
+    SetLastItem (Environment.CallStackErrorTypesToPass, ErrorTypesToCatch);
+    
+  }
+  @Override public boolean AttemptErrorCatch (LooFInterpreterException CurrentException, LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) Statement.AdditionalData;
+    String[] ErrorTypeTags = CurrentException.ErrorTypeTags;
+    
+    String[] ErrorTypesToCatch = AdditionalData.ErrorTypesToCatch;
+    if (ErrorTypesToCatch == null) ErrorTypesToCatch = GetStatementErrorTypeTags (Args[1], Environment, "try", "second");
+    
+    if (ErrorTypesToCatch[0].equals("all")) return true;
+    return AnyItemsMatch (ErrorTypeTags, ErrorTypesToCatch);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -776,7 +833,7 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
   @Override public String toString (LooFStatement CurrentStatement) {
     LooFAdditionalTryStatementData AdditionalData = (LooFAdditionalTryStatementData) CurrentStatement.AdditionalData;
     if (AdditionalData == null) return "'try'";
-    return "'try' (File: " + AdditionalData.NewIPFileName + ", line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
+    return "'try' (File: " + AdditionalData.NewIPPageName + ", line: " + AdditionalData.NewIPLineNumber + "; error types to catch: {" + CombineStringsWithSeperator (AdditionalData.ErrorTypesToCatch, ", ") + "})";
   }
 };
 
@@ -785,12 +842,12 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
 class LooFAdditionalTryStatementData extends LooFAdditionalStatementData {
   
   Integer NewIPLineNumber;
-  String NewIPFileName;
+  String NewIPPageName;
   String[] ErrorTypesToCatch;
   
-  public LooFAdditionalTryStatementData (Integer NewIPLineNumber, String NewIPFileName, String[] ErrorTypesToCatch) {
+  public LooFAdditionalTryStatementData (Integer NewIPLineNumber, String NewIPPageName, String[] ErrorTypesToCatch) {
     this.NewIPLineNumber = NewIPLineNumber;
-    this.NewIPFileName = NewIPFileName;
+    this.NewIPPageName = NewIPPageName;
     this.ErrorTypesToCatch = ErrorTypesToCatch;
   }
   
@@ -878,7 +935,7 @@ LooFInterpreterFunction InterpreterFunction_TODO = new LooFInterpreterFunction()
   public boolean AddToCombinedTokens() {return true;}
   @Override public String toString (LooFStatement CurrentStatement) {
     LooFAdditionalTODOStatementData AdditionalData = (LooFAdditionalTODOStatementData) CurrentStatement.AdditionalData;
-    if (AdditionalData == null) return "'TODO'";
+    if (AdditionalData == null) return "'TODO:'";
     return "'TODO:' (Details: " + AdditionalData.Details + ")";
   }
 };

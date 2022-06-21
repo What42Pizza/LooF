@@ -117,34 +117,35 @@ class LooFInterpreter {
   void HandleEnvironmentException (LooFInterpreterException CurrentException, LooFEnvironment Environment) throws LooFInterpreterException  {
     ArrayList <String> StackTracePages = new ArrayList <String> ();
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
-    ArrayList <Boolean> AttemptErrorCatches = Environment.CallStackAttemptErrorCatches;
     boolean CanPassErrors = true;
     
-    while (AttemptErrorCatches.size() > 0) {
+    StackTracePages.add(Environment.CurrentPageName);
+    StackTraceLines.add(Environment.CurrentLineNumber);
+    
+    while (Environment.CallStackPageNames.size() > 0) {
       
       String CurrentPageName = LastItemOf (Environment.CallStackPageNames);
       int CurrentLineNumber = LastItemOf (Environment.CallStackLineNumbers);
       String[] CurrentErrorTypesToPass = LastItemOf (Environment.CallStackErrorTypesToPass);
-      boolean AttemptErrorCatch = LastItemOf (AttemptErrorCatches);
+      boolean AttemptErrorCatch = LastItemOf (Environment.CallStackAttemptErrorCatches);
       
       ReturnFromFunction (Environment);
       
       if (!(CanPassErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, CurrentErrorTypesToPass))) {
         CanPassErrors = false;
         StackTracePages.add(CurrentPageName);
-        LooFCodeData OriginalCodeData = Environment.AllCodeDatas.get(CurrentPageName);
-        StackTraceLines.add(OriginalCodeData.LineNumbers.get(CurrentLineNumber));
+        StackTraceLines.add(CurrentLineNumber);
       }
       
       if (AttemptErrorCatch) {
-        LooFStatement CurrentEnvironmentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
-        boolean ErrorWasCaught = CurrentEnvironmentStatement.Function.AttemptErrorCatch(CurrentException, CurrentEnvironmentStatement, StackTracePages, StackTraceLines, Environment);
+        LooFStatement CallingStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber - 1];
+        boolean ErrorWasCaught = CallingStatement.Function.AttemptErrorCatch(CurrentException, CallingStatement, Environment);
         if (ErrorWasCaught) return;
       }
       
     }
     
-    throw (new LooFInterpreterException (CurrentException, StackTracePages, StackTraceLines));
+    throw (new LooFInterpreterException (CurrentException, StackTracePages, StackTraceLines, Environment));
     
   }
   

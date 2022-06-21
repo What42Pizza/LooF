@@ -1,15 +1,19 @@
-function Factorial  -> Input
-	
-	if Input == 1
-	return Input
-	
-	call Factorial, Input - 1  -> NextResult
-	return Input * NextResult
-	
+function FunctionThatCrashes
+	error "nothing", {"TestErrorTag"}
 end
 
 
 
-call Factorial, 10  -> Result
-:print Result
+function TestFunctionThatCrashes
+	try FunctionThatCrashes, {"all"}  -> Success1, ErrorData1
+	try FunctionThatCrashes, {"TestErrorTag"}  -> Success2, ErrorData2
+	try FunctionThatCrashes, {"NotTestErrorTag"}  -> Success3, ErrorData3
+	return
+end
+
+
+
+try TestFunctionThatCrashes, {"all"}  -> Success, ErrorData
+
+:print Success, toString ErrorData
 :exit

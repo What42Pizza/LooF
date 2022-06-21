@@ -479,6 +479,18 @@ String CombineStringsWithSeperator (String[] StringsIn, String Seperator) {
 
 
 
+String EnsureStringLength (String StringIn, int NeededLength, char FillChar) {
+  int NumToAdd = NeededLength - StringIn.length();
+  for (int i = 0; i < NumToAdd; i ++) {
+    StringIn += FillChar;
+  }
+  return StringIn;
+}
+
+
+
+
+
 
 
 

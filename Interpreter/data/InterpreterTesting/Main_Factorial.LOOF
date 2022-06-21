@@ -1,0 +1,14 @@
+function Factorial  -> Input
+	returnIf (Input == 1), Input
+	
+	error "test", {"test"}
+	call Factorial, Input - 1  -> NextResult
+	return Input * NextResult
+	
+end
+
+
+
+call Factorial, 10  -> Result
+:print Result
+:exit

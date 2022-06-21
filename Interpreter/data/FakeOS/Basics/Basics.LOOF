@@ -11,6 +11,8 @@ $link BasicFunctions.LOOF as Basics
 #replaceMultiLine "\nfunction " "\nskip true\n$function "
 #replaceMultiLine "\ncall " "\ncall $"
 #replaceMultiLine "\ncall_ " "\ncall "
+#replaceMultiLine "\ntry " "\ntry $"
+#replaceMultiLine "\ntry_ " "\ntry "
 #replace "  -> " "\npop ARGS, "
 #replace "  throwsErrors " "\nsetPassedErrors "
 
