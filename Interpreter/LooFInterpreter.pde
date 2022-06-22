@@ -42,7 +42,7 @@ class LooFInterpreter {
     
     if (Environment.IncLineNumber) IncrementEnvironmentLineNumber (Environment);
     Environment.IncLineNumber = true;
-    
+      
   }
   
   
@@ -117,32 +117,35 @@ class LooFInterpreter {
   void HandleEnvironmentException (LooFInterpreterException CurrentException, LooFEnvironment Environment) throws LooFInterpreterException  {
     ArrayList <String> StackTracePages = new ArrayList <String> ();
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
-    boolean CanPassErrors = true;
-    
-    StackTracePages.add(Environment.CurrentPageName);
-    StackTraceLines.add(Environment.CurrentLineNumber);
+    boolean PassingErrors = true;
     
     while (Environment.CallStackPageNames.size() > 0) {
       
-      String CurrentPageName = LastItemOf (Environment.CallStackPageNames);
-      int CurrentLineNumber = LastItemOf (Environment.CallStackLineNumbers);
-      String[] CurrentErrorTypesToPass = LastItemOf (Environment.CallStackErrorTypesToPass);
-      boolean AttemptErrorCatch = LastItemOf (Environment.CallStackAttemptErrorCatches);
+      String[] ErrorTypesToPass = LastItemOf (Environment.CallStackErrorTypesToPass);
+      String[] ErrorTypesToCatch = LastItemOf (Environment.CallStackErrorTypesToCatch);
+      int ExpectedGeneralStackSize = LastItemOf (Environment.CallStackExpectedGeneralStackSizes);
+      
+      PassingErrors = PassingErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, ErrorTypesToPass);
+      if (!PassingErrors) {
+        StackTracePages.add(Environment.CurrentPageName);
+        StackTraceLines.add(Environment.CurrentLineNumber);
+      }
+      
+      while (Environment.GeneralStack.size() > ExpectedGeneralStackSize) RemoveLastItem (Environment.GeneralStack);
       
       ReturnFromFunction (Environment);
       
-      if (!(CanPassErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, CurrentErrorTypesToPass))) {
-        CanPassErrors = false;
-        StackTracePages.add(CurrentPageName);
-        StackTraceLines.add(CurrentLineNumber);
+      if (ErrorTypesToCatch.length == 0) continue;
+      if (ErrorTypesToCatch[0].equals("all") || AnyItemsMatch (ErrorTypesToCatch, CurrentException.ErrorTypeTags)) {
+        
+        return;
       }
       
-      if (AttemptErrorCatch) {
-        LooFStatement CallingStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber - 1];
-        boolean ErrorWasCaught = CallingStatement.Function.AttemptErrorCatch(CurrentException, CallingStatement, Environment);
-        if (ErrorWasCaught) return;
-      }
-      
+    }
+    
+    if (!PassingErrors) {
+      StackTracePages.add(Environment.CurrentPageName);
+      StackTraceLines.add(Environment.CurrentLineNumber);
     }
     
     throw (new LooFInterpreterException (CurrentException, StackTracePages, StackTraceLines, Environment));
@@ -158,14 +161,14 @@ class LooFInterpreter {
   
   
   
-  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int ExpectedGeneralStackSize, boolean AttemptErrorCatch) {
+  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int ExpectedGeneralStackSize, String[] ErrorTypesToCatch) {
     if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
     
     // add call stack data
     Environment.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
     Environment.CallStackPageNames.add(Environment.CurrentPageName);
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
-    Environment.CallStackAttemptErrorCatches.add(AttemptErrorCatch);
+    Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
     Environment.CallStackErrorTypesToPass.add(new String [0]);
     Environment.CallStackExpectedGeneralStackSizes.add(ExpectedGeneralStackSize);
     Environment.CallStackInitialLockedValuesSizes.add(Environment.CallStackLockedValues.size());
@@ -200,7 +203,7 @@ class LooFInterpreter {
     RemoveLastItem (Environment.VariableListsStack);
     String NewPageName = RemoveLastItem (Environment.CallStackPageNames);
     int NewLineNumber = RemoveLastItem (Environment.CallStackLineNumbers);
-    RemoveLastItem (Environment.CallStackAttemptErrorCatches);
+    RemoveLastItem (Environment.CallStackErrorTypesToCatch);
     RemoveLastItem (Environment.CallStackErrorTypesToPass);
     RemoveLastItem (Environment.CallStackExpectedGeneralStackSizes);
     int InitialLockedValuesSize = RemoveLastItem (Environment.CallStackInitialLockedValuesSizes);

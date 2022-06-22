@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 06/21/22
+// Last updated 06/22/22
 
 
 
@@ -56,7 +56,7 @@ void setup() {
   println("Program output:");
   int StartMillis = millis();
   try {
-    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000000);
+    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 1000000000);
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
     throw e;

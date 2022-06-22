@@ -1350,6 +1350,7 @@ class LooFCompiler {
       if (CurrentLine.startsWith("$function ")) {
         
         String FunctionName = CurrentLine.substring(10);
+        if (!FunctionNameIsValid (FunctionName)) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "invalid funciton name."));
         if (FunctionLineNumbers.get(FunctionName) != null) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "function \"" + FunctionName + "\" already exists."));
         
         Code.remove(i);
@@ -1361,6 +1362,17 @@ class LooFCompiler {
         i --;
       }
     }
+  }
+  
+  
+  
+  boolean FunctionNameIsValid (String FunctionName) {
+    char[] FunctionNameChars = FunctionName.toCharArray();
+    for (int i = 0; i < FunctionNameChars.length; i ++) {
+      char CurrChar = FunctionNameChars[i];
+      if (CharIsWhitespace (CurrChar) || CharStartsNewToken (CurrChar)) return false;
+    }
+    return true;
   }
   
   
@@ -1971,7 +1983,7 @@ class LooFCompiler {
   
   
   void EnsureFormulaTokensAreValid (LooFTokenBranch[] FormulaChildren, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    if (FormulaChildren.length == 0) return;
+    if (FormulaChildren.length == 0) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "empty formulas are not allowed."));
     
     LooFTokenBranch FirstToken = FormulaChildren[0];
     switch (FirstToken.TokenType) {

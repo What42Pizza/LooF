@@ -1,5 +1,5 @@
-function FunctionThatCrashes
-	error "nothing", {"TestErrorTag"}
+function FunctionThatCrashes  throwsErrors {"TestErrorTag"}
+	error "this error is a test", {"TestErrorTag"}
 end
 
 
@@ -13,7 +13,7 @@ end
 
 
 
-try TestFunctionThatCrashes, {"all"}  -> Success, ErrorData
+try TestFunctionThatCrashes, {"none"}  -> Success, ErrorData
 
 :print Success, toString ErrorData
 :exit

@@ -52,10 +52,6 @@ class LooFInterpreterFunction {
     throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "this LooFInterpreterFunction does not have an overridden FinishStatement()."));
   }
   
-  public boolean AttemptErrorCatch (LooFInterpreterException CurrentException, LooFStatement Statement, LooFEnvironment Environment) {
-    throw (new LooFInterpreterException (Environment, "this LooFInterpreterFunction does not have an overridden AttemptErrorCatch().", new String[] {"InvalidInterpreterFunction"}));
-  }
-  
   public int GetBlockLevelChange() {
     return 0;
   }
@@ -164,7 +160,7 @@ class LooFEnvironment {
   
   ArrayList <String> CallStackPageNames = new ArrayList <String> ();
   ArrayList <Integer> CallStackLineNumbers = new ArrayList <Integer> ();
-  ArrayList <Boolean> CallStackAttemptErrorCatches = new ArrayList <Boolean> ();
+  ArrayList <String[]> CallStackErrorTypesToCatch = new ArrayList <String[]> ();
   ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
   ArrayList <LooFDataValue[]> CallStackLockedValues = new ArrayList <LooFDataValue[]> ();
   ArrayList <Integer> CallStackExpectedGeneralStackSizes = new ArrayList <Integer> ();

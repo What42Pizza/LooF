@@ -7,6 +7,10 @@ $link BasicFunctions.LOOF as Basics
 
 
 
+// multi-line code
+#replace ";" "\n"
+#replaceMultiLine "\n`" ""
+
 // functions
 #replaceMultiLine "\nfunction " "\nskip true\n$function "
 #replaceMultiLine "\ncall " "\ncall $"
@@ -18,10 +22,6 @@ $link BasicFunctions.LOOF as Basics
 
 // if statements
 #replaceMultiLine " then\n" ", true\nskip\n"
-
-// multi-line code
-#replace ";" "\n"
-#replaceMultiLine "\n`" ""
 
 // calls to Basics
 #replaceMultiLine "\n:" "\ncall $Basics."
