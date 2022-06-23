@@ -1349,7 +1349,7 @@ class LooFCompiler {
       String CurrentLine = Code.get(i);
       if (CurrentLine.startsWith("$function ")) {
         
-        String FunctionName = CurrentLine.substring(10);
+        String FunctionName = CurrentLine.substring(10).trim();
         if (!FunctionNameIsValid (FunctionName)) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "invalid funciton name."));
         if (FunctionLineNumbers.get(FunctionName) != null) throw (new LooFCompilerException (CodeData, AllCodeDatas, i, "function \"" + FunctionName + "\" already exists."));
         

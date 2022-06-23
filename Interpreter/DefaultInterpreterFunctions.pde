@@ -351,11 +351,47 @@ class LooFAdditionalEndStatementData extends LooFAdditionalStatementData {
 LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalData;
+    if (Args.length == 0) return;
+    
+    LooFDataValue ValueVarValue = LooFInterpreter.GetVariableValue (Args[0].StringValue, Environment, true);
+    
+    if (ValueVarValue.ValueType == DataValueType_Null) {
+      if (Args.length == 2) {
+        LooFInterpreter.SetVariableValue (Args[0].StringValue, new LooFDataValue (0), Environment);
+        return;
+      }
+      LooFDataValue LoopStartValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+      LooFInterpreter.SetVariableValue (Args[0].StringValue, LoopStartValue, Environment);
+      return;
+    }
+    
+    int LoopEndArgIndex = (Args.length == 2) ? 1 : 2;
+    LooFDataValue LoopEndValue = LooFInterpreter.EvaluateFormula (Args[LoopEndArgIndex], Environment, null, null);
+    
+    LooFDataValue IncrementValue = (Args.length == 4) ? LooFInterpreter.EvaluateFormula (Args[3], Environment, null, null) : new LooFDataValue (1);
+    LooFDataValue NextValueVarValue = Operation_Add.HandleOperation (ValueVarValue, IncrementValue, Environment, null, null);
+    
+    Result <Boolean> IncrementSignResult = GetDataValueSign (IncrementValue);
+    if (IncrementSignResult.Err) throw (new LooFInterpreterException (Environment, "the increment arg has to be of type int or float, but the arg was of type " + DataValueTypeNames[IncrementValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    LooFEvaluatorOperation OperationToUse = IncrementSignResult.Some ? Operation_LessThanOrEqual : Operation_GreaterThanOrEqual;
+    
+    LooFDataValue ContinueLoopValue = OperationToUse.HandleOperation (NextValueVarValue, LoopEndValue, Environment, null, null);
+    
+    if (!ContinueLoopValue.BoolValue) {
+      Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
+      Environment.IncLineNumber = false;
+      LooFInterpreter.SetVariableValue (Args[0].StringValue, new LooFDataValue(), Environment);
+      return;
+    }
+    
+    LooFInterpreter.SetVariableValue (Args[0].StringValue, NextValueVarValue, Environment);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 0, 4, CodeData, AllCodeDatas, LineNumber);
     LooFTokenBranch[] Args = CurrentStatement.Args;
+    if (Args.length == 1) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "'loop' statements cannot take a single arg."));
     if (Args.length > 0) LooFCompiler.SimplifySingleOutputVar (CurrentStatement, 0, CodeData, AllCodeDatas, LineNumber);
     int MatchingRepeatStatementIndex = LooFCompiler.FindStatementOnSameLevel (new String[] {"repeat", "repeatIf"}, LineNumber, +1, CodeData.Statements, CodeData, AllCodeDatas);
     CurrentStatement.AdditionalData = new LooFAdditionalLoopingStatementData (MatchingRepeatStatementIndex);
@@ -377,6 +413,40 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
 LooFInterpreterFunction InterpreterFunction_ForEach = new LooFInterpreterFunction() {
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalData;
+    
+    LooFDataValue TableToLoopValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+    if (!(TableToLoopValue.ValueType == DataValueType_Table || TableToLoopValue.ValueType == DataValueType_ByteArray)) throw (new LooFInterpreterException (Environment, "the table arg has to be of type table or byteArray, but the arg was of type " + DataValueTypeNames[TableToLoopValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    int TableLength = (int) Function_LengthOf.HandleFunctionCall (TableToLoopValue, Environment, null, null).IntValue;
+    
+    String IndexVarName = (Args.length == 3) ? Args[2].StringValue : (Args[0].StringValue + "_INDEX");
+    LooFDataValue IndexVarValue = LooFInterpreter.GetVariableValue (IndexVarName, Environment, true);
+    
+    if (IndexVarValue.ValueType == DataValueType_Null) {
+      if (TableLength == 0) {
+        Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
+        Environment.IncLineNumber = false;
+        return;
+      }
+      LooFInterpreter.SetVariableValue (IndexVarName, new LooFDataValue (0), Environment);
+      LooFDataValue FirstTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, new LooFDataValue (0), false, Environment);
+      LooFInterpreter.SetVariableValue (Args[0].StringValue, FirstTableValue, Environment);
+      return;
+    }
+    
+    if (IndexVarValue.ValueType != DataValueType_Int) throw (new LooFInterpreterException (Environment, "the var containing the table index (\"" + IndexVarName + "\") must be an int or null, bu the var held a value of type " + DataValueTypeNames[IndexVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    
+    IndexVarValue.IntValue ++;
+    
+    if (IndexVarValue.IntValue >= TableLength) {
+      Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
+      Environment.IncLineNumber = false;
+      LooFInterpreter.SetVariableValue (IndexVarName, new LooFDataValue(), Environment);
+      return;
+    }
+    
+    LooFDataValue NextTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, IndexVarValue, false, Environment);
+    LooFInterpreter.SetVariableValue (Args[0].StringValue, NextTableValue, Environment);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -577,7 +647,7 @@ LooFInterpreterFunction InterpreterFunction_Break = new LooFInterpreterFunction(
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalData;
     
-    Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex;
+    Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
     Environment.IncLineNumber = false;
     
   }
@@ -606,7 +676,7 @@ LooFInterpreterFunction InterpreterFunction_BreakIf = new LooFInterpreterFunctio
     boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
     
     if (Condition) {
-      Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex;
+      Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
       Environment.IncLineNumber = false;
     }
     

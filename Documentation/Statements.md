@@ -96,20 +96,20 @@
 
 - **loop**
   - Effectively nop; only useful because of repeat
-- **loop VarName, End (int or float)**
-  - Same as statement `loop VarName, 0, End, 1`
-- **loop VarName, Start (int or float), End (int or float)**
-  - Same as statement `loop VarName, Start, End, 1`
-- **loop VarName, Start (int or float), End (int or float), Increment (int or float)**
-  - If VarName is null:   Sets VarName to Start
-  - If VarName plus Increment is less than or equal to End:   Increments VarName by Increment
-  - If VarName plus Increment is greater than End:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
+- **loop ValueVarName, End (int or float)**
+  - Same as statement `loop IndexVarName, 0, End, 1`
+- **loop ValueVarName, Start (int or float), End (int or float)**
+  - Same as statement `loop IndexVarName, Start, End, 1`
+- **loop ValueVarName, Start (int or float), End (int or float), Increment (int or float)**
+  - If ValueVarName is null:   Sets ValueVarName to Start
+  - If ValueVarName plus Increment is less than or equal to End:   Increments ValueVarName by Increment
+  - If ValueVarName plus Increment is greater than End:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level and sets ValueVarName to null. Errors if no suitable 'repeat' statement is found or if VarName is neither null nor an int
 - **forEach ValueVarName, TableToLoop (table)**
-  - Same as statement `forEach ValueVarName, TableToLoop, IncrementVarName` but with IncrementVarName being ValueVarName Proceeded by an underscore
+  - Same as statement `forEach ValueVarName, TableToLoop, IncrementVarName` but with IncrementVarName being ValueVarName follow by an "_INDEX"
 - **forEach ValueVarName, TableToLoop (table), IndexVarName**
-  - If IndexVarName is null:  Sets IndexVarName to 0 and ValueVarName to TableToLoop indexed with IndexVarName. Errors if TableToLoop is not a table
-  - If IncrementVarName plus 2 is less than the length of TableToLoop:  Increments IndexVarName and sets ValueVarName to TableToLoop indexed with IndexVarName
-  - If IndexVarName plus 2 is not less than the length of TableToLoop:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
+  - If IndexVarName is null:  Sets IndexVarName to 0 and ValueVarName to TableToLoop indexed with IndexVarName. Errors if TableToLoop is not a table or byteArray
+  - If IncrementVarName plus 1 is less than the length of TableToLoop:  Increments IndexVarName and sets ValueVarName to TableToLoop indexed with IndexVarName
+  - If IndexVarName plus 1 is not less than the length of TableToLoop:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level and sets IndexVarName to null. Errors if no suitable 'repeat' statement is found
 - **while Condition**
   - If Condition is truthy:  Effectively nop; only useful because of the other while conditions
   - If Condition is falsey:  Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found

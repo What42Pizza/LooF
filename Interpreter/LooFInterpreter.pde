@@ -42,7 +42,7 @@ class LooFInterpreter {
     
     if (Environment.IncLineNumber) IncrementEnvironmentLineNumber (Environment);
     Environment.IncLineNumber = true;
-      
+    
   }
   
   

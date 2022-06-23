@@ -1,19 +1,16 @@
-function FunctionThatCrashes  throwsErrors {"TestErrorTag"}
-	error "this error is a test", {"TestErrorTag"}
-end
+Array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 
 
-function TestFunctionThatCrashes
-	try FunctionThatCrashes, {"all"}  -> Success1, ErrorData1
-	try FunctionThatCrashes, {"TestErrorTag"}  -> Success2, ErrorData2
-	try FunctionThatCrashes, {"NotTestErrorTag"}  -> Success3, ErrorData3
-	return
-end
+:print "Forwards:"
+forEach Num, Array, i
+	:print i, ": ", Num
+repeat
 
+:print
+:print "Backwards:"
+loop i, endOf Array, 0, -1
+	:print i, ": ", Array[i]
+repeat
 
-
-try TestFunctionThatCrashes, {"none"}  -> Success, ErrorData
-
-:print Success, toString ErrorData
 :exit

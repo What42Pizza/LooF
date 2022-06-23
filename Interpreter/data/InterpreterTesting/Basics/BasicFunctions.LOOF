@@ -8,6 +8,10 @@
 
 function print  throwsErrors {"InvalidArgType", "InvalidArgsLength"}
 	pop ValuesToPrint
+	if ValuesToPrint == null then
+		callOutside "Console", "print", {"\n"}
+		return
+	end
 	errorIf (typeOf ValuesToPrint != "table"), "the function 'print' must pull a table from the general stack.", {"InvalidArgType"}
 	if lengthOf ValuesToPrint == 0 then
 		ValuesToPrint[0] = ""

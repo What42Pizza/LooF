@@ -1,0 +1,19 @@
+function FunctionThatCrashes  throwsErrors {"TestErrorTag"}
+	error "this error is a test", {"TestErrorTag"}
+end
+
+
+
+function TestFunctionThatCrashes
+	try FunctionThatCrashes, {"all"}  -> Success1, ErrorData1
+	try FunctionThatCrashes, {"TestErrorTag"}  -> Success2, ErrorData2
+	try FunctionThatCrashes, {"NotTestErrorTag"}  -> Success3, ErrorData3
+	return
+end
+
+
+
+try TestFunctionThatCrashes, {"none"}  -> Success, ErrorData
+
+:print Success, toString ErrorData
+:exit

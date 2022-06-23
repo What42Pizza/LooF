@@ -787,6 +787,25 @@ boolean GetDataValueTruthiness (LooFDataValue Input, LooFEnvironment Environment
 
 
 
+Result <Boolean> GetDataValueSign (LooFDataValue Input) {
+  switch (Input.ValueType) {
+    
+    case (DataValueType_Int):
+       return new Result <Boolean> (Input.IntValue >= 0);
+    
+    case (DataValueType_Float):
+       return new Result <Boolean> (Input.FloatValue >= 0);
+    
+    default:
+      return new Result();
+    
+  }
+}
+
+
+
+
+
 
 
 

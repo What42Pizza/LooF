@@ -612,19 +612,12 @@ LooFEvaluatorFunction Function_Sqrt = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_Sign = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    switch (Input.ValueType) {
-      
-      case (DataValueType_Int):
-         return new LooFDataValue (Input.IntValue >= 0 ? 1 : -1);
-      
-      case (DataValueType_Float):
-         return new LooFDataValue (Input.FloatValue >= 0 ? 1 : -1);
-      
-      default:
-        ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
-        throw new AssertionError();
-      
-    }
+    Result <Boolean> InputSign = GetDataValueSign (Input);
+    
+    if (InputSign.Err) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    return new LooFDataValue (InputSign.Some ? 1 : -1);
+    
   }
 };
 

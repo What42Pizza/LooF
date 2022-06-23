@@ -915,3 +915,23 @@ class FloatIntPairComparator implements Comparator <FloatIntPair> {
   }
   
 }
+
+
+
+
+
+class Result <T> {
+  
+  T Some;
+  boolean Err;
+  
+  public Result (T Some) {
+    this.Some = Some;
+    this.Err = false;
+  }
+  
+  public Result() {
+    this.Err = true;
+  }
+  
+}
