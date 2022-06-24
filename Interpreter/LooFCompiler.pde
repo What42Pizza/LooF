@@ -1868,7 +1868,7 @@ class LooFCompiler {
       
       case ("MATH_NEGATIVE_INFINITY"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NEGATIVE_INFINITY);
       
-      case ("MATH_FLOAT_NAN"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NaN);
+      case ("MATH_NAN_FLOAT"): return new LooFTokenBranch (TokenIndex, CurrentToken, Double.NaN);
       
       // Type_Bool
       case ("true"): return new LooFTokenBranch (TokenIndex, CurrentToken, true);

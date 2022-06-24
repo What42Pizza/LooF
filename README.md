@@ -14,6 +14,14 @@
 <br>
 <br>
 
+## I highly suggest checking out LooFDocumentation/Guide.md to get started with leaning this language.
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
 ## The goals I have for this language (in order of importance):
 
 <br>

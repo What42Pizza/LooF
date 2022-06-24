@@ -309,6 +309,27 @@ FunctionValueToPass = $this.ExampleFunction
 <br>
 <br>
 
+## Constants:
+
+<br>
+
+- **null**
+- **true**
+- **false**
+- **MATH_PI**
+- **MATH_E**
+- **MATH_MAX_INT**
+- **MATH_MIN_INT**
+- **MATH_MAX_FLOAT**
+- **MATH_MIN_FLOAT**
+- **MATH_POSITIVE_INFINITY**
+- **MATH_NEGATIVE_INFINITY**
+- **MATH_NAN_FLOAT**
+
+<br>
+<br>
+<br>
+
 ## Conversion details:
 
 <br>
