@@ -21,7 +21,7 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
     LooFTokenBranch[] Args = Statement.Args;
     
     // if there's no value to pop
-    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) {
+    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackInitialGeneralStackSizes)) {
       for (int i = 0; i < Args.length; i ++) {
         LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
       }
@@ -63,27 +63,35 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
     LooFTokenBranch[] Args = Statement.Args;
     LooFAdditionalCallStatementData AdditionalData = (LooFAdditionalCallStatementData) Statement.AdditionalData;
     
-    int ExpectedGeneralStackSize = Environment.GeneralStack.size();
+    int InitialGeneralStackSize = Environment.GeneralStack.size();
+    int InitialLockedValuesSize = Environment.CallStackLockedValues.size();
     
     // push args
     if (Args.length > 1) {
       ArrayList <LooFDataValue> ArgsToPush = new ArrayList <LooFDataValue> ();
+      LooFDataValue[] LockedValues = new LooFDataValue [Args.length - 2];
       for (int i = 1; i < Args.length; i ++) {
-        ArgsToPush.add(LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null));
+        LooFDataValue CurrentArg = LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null);
+        ArgsToPush.add(CurrentArg);
+        if (i != 1) {
+          IncreaseDataValueLock (CurrentArg);
+          LockedValues[i - 2] = CurrentArg;
+        }
       }
       LooFDataValue ValueToPush = new LooFDataValue (ArgsToPush, new HashMap <String, LooFDataValue> ());
       Environment.GeneralStack.add(ValueToPush);
+      if (LockedValues.length > 0) Environment.CallStackLockedValues.add(LockedValues);
     }
     
     // pre-evaluated
     if (AdditionalData.NewIPLineNumber != null) {
-      LooFInterpreter.JumpToFunction (Environment, AdditionalData.NewIPPageName, AdditionalData.NewIPLineNumber, ExpectedGeneralStackSize, new String [0]);
+      LooFInterpreter.JumpToFunction (Environment, AdditionalData.NewIPPageName, AdditionalData.NewIPLineNumber, InitialGeneralStackSize, InitialLockedValuesSize, new String [0]);
       return;
     }
     
     LooFDataValue FunctionToCall = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     if (FunctionToCall.ValueType != DataValueType_Function) throw (new LooFInterpreterException (Environment, "'call' statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FunctionToCall.ValueType] + ".", new String[] {"InvalidArgType"}));
-    LooFInterpreter.JumpToFunction (Environment, FunctionToCall.FunctionPageValue, FunctionToCall.FunctionLineValue, ExpectedGeneralStackSize, new String [0]);
+    LooFInterpreter.JumpToFunction (Environment, FunctionToCall.FunctionPageValue, FunctionToCall.FunctionLineValue, InitialGeneralStackSize, InitialLockedValuesSize, new String [0]);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -134,7 +142,7 @@ LooFInterpreterFunction InterpreterFunction_Return = new LooFInterpreterFunction
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
-    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
     if (Args.length > 0) {
       LooFDataValue ValueToPush = GetReturnStatementValueToPush (Args, 0, Environment);
@@ -158,7 +166,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnRaw = new LooFInterpreterFunct
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFTokenBranch[] Args = Statement.Args;
     
-    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
     LooFDataValue ValueToPush = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
@@ -183,7 +191,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFuncti
     LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
     
-    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
     if (Args.length > 1) {
       LooFDataValue ValueToPush = GetReturnStatementValueToPush (Args, 1, Environment);
@@ -210,7 +218,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnRawIf = new LooFInterpreterFun
     LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
     
-    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackExpectedGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
+    if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
     LooFDataValue ValueToPush = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
     if (ValueToPush != null) Environment.GeneralStack.add(ValueToPush);
@@ -863,27 +871,32 @@ LooFInterpreterFunction InterpreterFunction_Try = new LooFInterpreterFunction() 
     
     String[] ErrorTypesToCatch = AdditionalData.ErrorTypesToCatch;
     if (ErrorTypesToCatch == null) ErrorTypesToCatch = GetStatementErrorTypeTags (Args[1], Environment, "try", "second");
-    int ExpectedGeneralStackSize = Environment.GeneralStack.size();
+    int InitialGeneralStackSize = Environment.GeneralStack.size();
+    int InitialLockedValuesSize = Environment.CallStackLockedValues.size();
     
     // push args
     if (Args.length > 2) {
       ArrayList <LooFDataValue> ArgsToPush = new ArrayList <LooFDataValue> ();
+      LooFDataValue[] LockedValues = new LooFDataValue [Args.length - 3];
       for (int i = 2; i < Args.length; i ++) {
-        ArgsToPush.add(LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null));
+        LooFDataValue CurrentArg = LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null);
+        ArgsToPush.add(CurrentArg);
+        if (i != 2) LockedValues[i - 3] = CurrentArg;
       }
       LooFDataValue ValueToPush = new LooFDataValue (ArgsToPush, new HashMap <String, LooFDataValue> ());
       Environment.GeneralStack.add(ValueToPush);
+      if (LockedValues.length > 0) Environment.CallStackLockedValues.add(LockedValues);
     }
     
     // pre-evaluated
     if (AdditionalData.NewIPLineNumber != null) {
-      LooFInterpreter.JumpToFunction (Environment, AdditionalData.NewIPPageName, AdditionalData.NewIPLineNumber, ExpectedGeneralStackSize, ErrorTypesToCatch);
+      LooFInterpreter.JumpToFunction (Environment, AdditionalData.NewIPPageName, AdditionalData.NewIPLineNumber, InitialGeneralStackSize, InitialLockedValuesSize, ErrorTypesToCatch);
       return;
     }
     
     LooFDataValue FunctionToCall = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
     if (FunctionToCall.ValueType != DataValueType_Function) throw (new LooFInterpreterException (Environment, "'try' statements must take a function as its first arg, but the first arg was of type " + DataValueTypeNames[FunctionToCall.ValueType] + ".", new String[] {"InvalidArgType"}));
-    LooFInterpreter.JumpToFunction (Environment, FunctionToCall.FunctionPageValue, FunctionToCall.FunctionLineValue, ExpectedGeneralStackSize, ErrorTypesToCatch);
+    LooFInterpreter.JumpToFunction (Environment, FunctionToCall.FunctionPageValue, FunctionToCall.FunctionLineValue, InitialGeneralStackSize, InitialLockedValuesSize, ErrorTypesToCatch);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {

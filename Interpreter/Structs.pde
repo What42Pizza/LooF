@@ -163,7 +163,7 @@ class LooFEnvironment {
   ArrayList <String[]> CallStackErrorTypesToCatch = new ArrayList <String[]> ();
   ArrayList <String[]> CallStackErrorTypesToPass = new ArrayList <String[]> ();
   ArrayList <LooFDataValue[]> CallStackLockedValues = new ArrayList <LooFDataValue[]> ();
-  ArrayList <Integer> CallStackExpectedGeneralStackSizes = new ArrayList <Integer> ();
+  ArrayList <Integer> CallStackInitialGeneralStackSizes = new ArrayList <Integer> ();
   ArrayList <Integer> CallStackInitialLockedValuesSizes = new ArrayList <Integer> ();
   
   
@@ -175,7 +175,7 @@ class LooFEnvironment {
     this.CurrentCodeData = AllCodeDatas.get(CurrentPageName);
     this.CurrentLineNumber = 0;
     this.VariableListsStack.add(new HashMap <String, LooFDataValue> ());
-    CallStackExpectedGeneralStackSizes.add(0);
+    CallStackInitialGeneralStackSizes.add(0);
   }
   
   

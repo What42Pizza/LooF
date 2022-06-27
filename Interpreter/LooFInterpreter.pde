@@ -119,11 +119,18 @@ class LooFInterpreter {
     ArrayList <Integer> StackTraceLines = new ArrayList <Integer> ();
     boolean PassingErrors = true;
     
+    StackTracePages.add(Environment.CurrentPageName);
+    StackTraceLines.add(Environment.CurrentLineNumber);
+    
     while (Environment.CallStackPageNames.size() > 0) {
       
       String[] ErrorTypesToPass = LastItemOf (Environment.CallStackErrorTypesToPass);
       String[] ErrorTypesToCatch = LastItemOf (Environment.CallStackErrorTypesToCatch);
-      int ExpectedGeneralStackSize = LastItemOf (Environment.CallStackExpectedGeneralStackSizes);
+      int InitialGeneralStackSize = LastItemOf (Environment.CallStackInitialGeneralStackSizes);
+      
+      while (Environment.GeneralStack.size() > InitialGeneralStackSize) RemoveLastItem (Environment.GeneralStack);
+      
+      ReturnFromFunction (Environment);
       
       PassingErrors = PassingErrors && AnyItemsMatch (CurrentException.ErrorTypeTags, ErrorTypesToPass);
       if (!PassingErrors) {
@@ -131,21 +138,12 @@ class LooFInterpreter {
         StackTraceLines.add(Environment.CurrentLineNumber);
       }
       
-      while (Environment.GeneralStack.size() > ExpectedGeneralStackSize) RemoveLastItem (Environment.GeneralStack);
-      
-      ReturnFromFunction (Environment);
-      
       if (ErrorTypesToCatch.length == 0) continue;
       if (ErrorTypesToCatch[0].equals("all") || AnyItemsMatch (ErrorTypesToCatch, CurrentException.ErrorTypeTags)) {
         
         return;
       }
       
-    }
-    
-    if (!PassingErrors) {
-      StackTracePages.add(Environment.CurrentPageName);
-      StackTraceLines.add(Environment.CurrentLineNumber);
     }
     
     throw (new LooFInterpreterException (CurrentException, StackTracePages, StackTraceLines, Environment));
@@ -161,7 +159,7 @@ class LooFInterpreter {
   
   
   
-  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int ExpectedGeneralStackSize, String[] ErrorTypesToCatch) {
+  void JumpToFunction (LooFEnvironment Environment, String NewPageName, int NewLineNumber, int InitialGeneralStackSize, int InitialLockedValuesSize, String[] ErrorTypesToCatch) {
     if (NewLineNumber < 0) throw (new LooFInterpreterException (Environment, "the function being jumped to has a negative line number.", new String[] {"JumpToFunctionError", "NegativeLineNumber"}));
     
     // add call stack data
@@ -170,8 +168,8 @@ class LooFInterpreter {
     Environment.CallStackLineNumbers.add(Environment.CurrentLineNumber);
     Environment.CallStackErrorTypesToCatch.add(ErrorTypesToCatch);
     Environment.CallStackErrorTypesToPass.add(new String [0]);
-    Environment.CallStackExpectedGeneralStackSizes.add(ExpectedGeneralStackSize);
-    Environment.CallStackInitialLockedValuesSizes.add(Environment.CallStackLockedValues.size());
+    Environment.CallStackInitialGeneralStackSizes.add(InitialGeneralStackSize);
+    Environment.CallStackInitialLockedValuesSizes.add(InitialLockedValuesSize);
     
     // set current page
     if (NewPageName != null) {
@@ -205,7 +203,7 @@ class LooFInterpreter {
     int NewLineNumber = RemoveLastItem (Environment.CallStackLineNumbers);
     RemoveLastItem (Environment.CallStackErrorTypesToCatch);
     RemoveLastItem (Environment.CallStackErrorTypesToPass);
-    RemoveLastItem (Environment.CallStackExpectedGeneralStackSizes);
+    RemoveLastItem (Environment.CallStackInitialGeneralStackSizes);
     int InitialLockedValuesSize = RemoveLastItem (Environment.CallStackInitialLockedValuesSizes);
     
     // set current page
@@ -217,8 +215,7 @@ class LooFInterpreter {
     }
     
     // set current line
-    Environment.CurrentLineNumber = NewLineNumber + 1;
-    Environment.IncLineNumber = false;
+    Environment.CurrentLineNumber = NewLineNumber;
     
     // unlock args
     UnlockCallStackValues (Environment, InitialLockedValuesSize);
@@ -233,7 +230,7 @@ class LooFInterpreter {
     while (LockedValues.size() > InitialLockedValuesSize) {
       LooFDataValue[] ValuesToUnlock = RemoveLastItem (LockedValues);
       for (LooFDataValue CurrentValue : ValuesToUnlock) {
-        DecreaseDataValueLockLevel (CurrentValue);
+        DecreaseDataValueLock (CurrentValue);
       }
     }
     

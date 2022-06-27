@@ -811,25 +811,25 @@ Result <Boolean> GetDataValueSign (LooFDataValue Input) {
 
 
 
-void IncreaseDataValueLockLevel (LooFDataValue DataValue) {
+void IncreaseDataValueLock (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   int CurrentLockLevel = LastItemOf (LockLevels);
   LockLevels.add(CurrentLockLevel + 1);
   if (DataValue.ValueType != DataValueType_Table) return;
-  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) IncreaseDataValueLockLevel (CurrentDataValue);
+  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) IncreaseDataValueLock (CurrentDataValue);
   Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
-  for (String CurrentKey : HashMapKeys) IncreaseDataValueLockLevel (DataValue.HashMapValue.get(CurrentKey));
+  for (String CurrentKey : HashMapKeys) IncreaseDataValueLock (DataValue.HashMapValue.get(CurrentKey));
 }
 
 
 
-void DecreaseDataValueLockLevel (LooFDataValue DataValue) {
+void DecreaseDataValueLock (LooFDataValue DataValue) {
   ArrayList <Integer> LockLevels = DataValue.LockLevels;
   RemoveLastItem (LockLevels);
   if (DataValue.ValueType != DataValueType_Table) return;
-  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) DecreaseDataValueLockLevel (CurrentDataValue);
+  for (LooFDataValue CurrentDataValue : DataValue.ArrayValue) DecreaseDataValueLock (CurrentDataValue);
   Set <String> HashMapKeys = DataValue.HashMapValue.keySet();
-  for (String CurrentKey : HashMapKeys) DecreaseDataValueLockLevel (DataValue.HashMapValue.get(CurrentKey));
+  for (String CurrentKey : HashMapKeys) DecreaseDataValueLock (DataValue.HashMapValue.get(CurrentKey));
 }
 
 
