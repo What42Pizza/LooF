@@ -3,10 +3,10 @@
 
 
 
-//String FolderToCompile = "/BallBlastClone";
+String FolderToCompile = "/BallBlastClone";
 //String FolderToCompile = "/CustomSwitchStatement";
 //String FolderToCompile = "/FakeOS/Entry";
-String FolderToCompile = "/InterpreterTesting";
+//String FolderToCompile = "/InterpreterTesting";
 
 
 

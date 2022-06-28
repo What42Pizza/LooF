@@ -6,6 +6,6 @@ end
 
 
 
-call Factorial, 10  -> FactorialResult
-:print FactorialResult
-:exit
+loop
+	call Factorial, 1000  -> FactorialResult
+repeat

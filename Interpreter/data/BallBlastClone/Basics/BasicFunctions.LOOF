@@ -28,38 +28,8 @@ end
 
 
 
-function addItem  -> Table, Item  throwsErrors {"InvalidTypeIndexed"}
-	Table[lengthOf Table] = Item
-	return
-end
-
-
-
-function removeIndex  -> Table, Index  throwsErrors {"InvalidTypeIndexed"}
-	ValueToReturn = Table[Index]
-	loop i, Index, endOf Table - 1
-		Table[i] = Table[i + 1]
-	repeat
-	Table[endOf Table] = null
-	return ValueToReturn
-end
-
-
-
-function addAll  -> TargetTable, SourceTable  throwsErrors {"InvalidArgType"}
-	call ensureArgTypesAreCorrect, Args, {"table", "table"}, "Basics.addAll"
-	forEach Item, SourceTable
-		Table[lengthOf Table] = Item
-	repeat
-	return
-end
-
-
-
-
-
 function ensureArgTypesAreCorrect  -> Args, ArgTypes, FunctionName  throwsErrors {"InvalidArgType"}
-	FunctionName defaultsTo "unnamed"
+	FunctionName <defaultsTo "unnamed"
 	loop i, endOf ArgsTypes
 		errorIf (typeOf Args[i] != ArgTypes[i]), ("Arg " .. i .. " of function \"" .. FunctionName .. "\" must be of type " .. ArgTypes[i] .. ", not type " .. typeOf Args[i] .. "."), {"InvalidArgType"}
 	repeat

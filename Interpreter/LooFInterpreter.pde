@@ -78,7 +78,7 @@ class LooFInterpreter {
     
     LooFDataValue TargetTable = GetTargetTableForStatement (CurrentStatement, Environment);
     LooFDataValue IndexValue = EvaluateFormula (LastItemOf (IndexQueries), Environment, null, null);
-    LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, true, Environment);
+    LooFDataValue OldVarValue = GetDataValueIndex (TargetTable, IndexValue, Environment);
     LooFDataValue NewVarValue = StatementAssignment.GetNewVarValue (OldVarValue, NewValueFormula, Environment);
     SetDataValueIndex (TargetTable, IndexValue, NewVarValue, Environment);
     
@@ -91,7 +91,7 @@ class LooFInterpreter {
     LooFTokenBranch[] IndexQueries = CurrentStatement.IndexQueries;
     for (int i = 0; i < IndexQueries.length - 1; i ++) {
       LooFDataValue ValueToIndexWith = EvaluateFormula (IndexQueries[i], Environment, null, null);
-      TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, false, Environment);
+      TargetTable = GetDataValueIndex (TargetTable, ValueToIndexWith, Environment);
     }
     return TargetTable;
   }
@@ -302,7 +302,7 @@ class LooFInterpreter {
     // evaluate indexes
     for (int CurrentTokenIndex : IndexQueryIndexes) {
       LooFDataValue IndexValue = EvaluateFormula (FormulaTokens.get(CurrentTokenIndex), Environment, CodeData, AllCodeDatas);
-      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), IndexValue, false, Environment);
+      LooFDataValue NewValue = GetDataValueIndex (FormulaValues.get(CurrentTokenIndex - 1), IndexValue, Environment);
       FormulaTokens.remove(CurrentTokenIndex);
       FormulaValues.remove(CurrentTokenIndex);
       FormulaValues.set(CurrentTokenIndex - 1, NewValue);
@@ -427,7 +427,7 @@ class LooFInterpreter {
   
   
   
-  LooFDataValue GetDataValueIndex (LooFDataValue SourceTable, LooFDataValue IndexValue, boolean AllowIndexOfArrayLength, LooFEnvironment Environment) {
+  LooFDataValue GetDataValueIndex (LooFDataValue SourceTable, LooFDataValue IndexValue, LooFEnvironment Environment) {
     
     int CaseToUse = 0;
     
@@ -464,10 +464,9 @@ class LooFInterpreter {
         if (IndexIntValue < 0) ThrowLooFException (Environment, null, null, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"IndexOutOfBounds", "NegativeIndex", "IndexError"});
         if (IndexIntValue > ArrayValue.size()) ThrowLooFException (Environment, null, null, "index (" + IndexIntValue + ") is out of bounds (too large). (remember that indexes start at 0)", new String[] {"IndexOutOfBounds", "TooLargeIndex", "IndexError"});
         if (IndexIntValue == ArrayValue.size()) {
-          if (!AllowIndexOfArrayLength) ThrowLooFException (Environment, null, null, "index (" + IndexIntValue + ") is out of bounds (equal to table length). (remember that indexes start at 0)", new String[] {"IndexOutOfBounds", "TooLargeIndex", "IndexError"});
           return new LooFDataValue();
         }
-        return ArrayValue.get((int) IndexIntValue);
+        return (IndexIntValue < ArrayValue.size()) ? ArrayValue.get((int) IndexIntValue) : new LooFDataValue();
       
       case (1): // table[string]
         HashMap <String, LooFDataValue> HashMapValue = SourceTable.HashMapValue;
@@ -526,12 +525,7 @@ class LooFInterpreter {
       case (0): // table[int]
         if (IndexIntValue < 0) ThrowLooFException (Environment, null, null, "index (" + IndexIntValue + ") is out of bounds (negative).", new String[] {"NegativeIndex", "IndexError"});
         ArrayList <LooFDataValue> ArrayValue = TargetTable.ArrayValue;
-        int TargetTableSize = ArrayValue.size();
-        if (IndexIntValue > TargetTableSize) ThrowLooFException (Environment, null, null, "index (" + IndexIntValue + ") is out of bounds (too large; index has to be less than the length of the array to set an item or equal to add an item). (remember that indexes start at 0)", new String[] {"TooLargeIndex", "IndexError"});
-        if (IndexIntValue == TargetTableSize) {
-          ArrayValue.add(NewVarValue);
-          return;
-        }
+        for (int i = ArrayValue.size(); i <= IndexIntValue; i ++) ArrayValue.add(new LooFDataValue());
         ArrayValue.set(IndexIntValue, NewVarValue);
         return;
       

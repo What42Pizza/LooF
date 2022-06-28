@@ -36,7 +36,4 @@ $link BasicFunctions.LOOF as Basics
 // fixing calls to Basics
 #replace "$Basics.print " "$Basics.print, "
 #replace "$Basics.exit " "$Basics.exit, "
-#replace "$Basics.addItem " "$Basics.addItem, "
-#replace "$Basics.removeIndex " "$Basics.removeIndex, "
-#replace "$Basics.addAll " "$Basics.addAll, "
 #replace "$Basics.ensureArgTypesAreCorrect " "$Basics.ensureArgTypesAreCorrect, "

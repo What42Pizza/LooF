@@ -217,7 +217,6 @@ class LooFCompiler {
     if (!CompileSettings.AddDefaultInterpreterAssignments) return InterpreterAssignments;
     
     InterpreterAssignments.putIfAbsent("=", Assignment_Equals);
-    InterpreterAssignments.putIfAbsent("defaultsTo", Assignment_DefaultsTo);
     InterpreterAssignments.putIfAbsent("+=", Assignment_PlusEquals);
     InterpreterAssignments.putIfAbsent("-=", Assignment_MinusEquals);
     InterpreterAssignments.putIfAbsent("*=", Assignment_TimesEquals);
@@ -225,12 +224,16 @@ class LooFCompiler {
     InterpreterAssignments.putIfAbsent("^=", Assignment_PowerEquals);
     InterpreterAssignments.putIfAbsent("%=", Assignment_ModuloEquals);
     InterpreterAssignments.putIfAbsent("..=", Assignment_ConcatEquals);
-    InterpreterAssignments.putIfAbsent("push=", Assignment_PushEquals);
+    InterpreterAssignments.putIfAbsent("<defaultsTo", Assignment_SetDefaultsTo);
+    InterpreterAssignments.putIfAbsent("<add", Assignment_SetAdd);
+    InterpreterAssignments.putIfAbsent("<addAtIndex", Assignment_SetAddAtIndex);
+    InterpreterAssignments.putIfAbsent("<addAll", Assignment_SetAddAll);
+    InterpreterAssignments.putIfAbsent("<removeIndex", Assignment_SetRemoveIndex);
     
     InterpreterAssignments.putIfAbsent("++", Assignment_PlusPlus);
     InterpreterAssignments.putIfAbsent("--", Assignment_MinusMinus);
     InterpreterAssignments.putIfAbsent("!!", Assignment_NotNot);
-    InterpreterAssignments.putIfAbsent("getClone", Assignment_GetClone);
+    InterpreterAssignments.putIfAbsent("<clone", Assignment_GetClone);
     
     return InterpreterAssignments;
   }

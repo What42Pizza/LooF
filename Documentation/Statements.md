@@ -4,8 +4,6 @@
 
 - **VarName = Value**
   - Sets VarName to Value
-- **VarName defaultsTo Value**
-  - If VarName is null, sets VarName to Value
 - **VarName += Value (int or string)**
   - Adds Value to VarName
 - **VarName -= Value (int or string)**
@@ -18,9 +16,22 @@
   - Takes VarName to the power of Value
 - **VarName %= Value (int or string)**
   - Modulo-s VarName by Value
-- **VarName ..= Value (string)**
-  - Concatenates Value to VarName
-- **VarName push= Value **
+- **VarName ..= Value**
+  - Casts Value to a string and concatenates it to the end of VarName
+- **VarName <defaultsTo Value**
+  - If VarName is null, sets VarName to Value
+- **VarName <add Value **
+  - Adds Value to the end of VarName
+  - Errors if VarName is not a table
+- **VarName <addAtIndex Input (table {Index (int), Item (any)})**
+  - Shifts all values past Index and sets Index to Item
+  - Errors if VarName is not a table
+- **VarName <addAll Value (table)**
+  - Adds all the items in the array part and hashmap part of Value to VarName
+  - Errors if VarName is not a table
+- **VarName <removeIndex Index (int)**
+  - Removes the value at Index and shifts the remaining values
+  - Errors if VarName is not a table
 
 <br>
 
@@ -30,8 +41,8 @@
   - Decrements VarName
 - **VarName !!**
   - Toggles VarName
-- **VarName getClone**
-  - Sets VarName to `clone VarName`
+- **VarName <clone**
+  - Sets VarName to a clone of VarName
 
 <br>
 <br>

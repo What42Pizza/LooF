@@ -448,7 +448,7 @@ LooFInterpreterFunction InterpreterFunction_ForEach = new LooFInterpreterFunctio
         return;
       }
       LooFInterpreter.SetVariableValue (IndexVarName, new LooFDataValue (0), Environment);
-      LooFDataValue FirstTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, new LooFDataValue (0), false, Environment);
+      LooFDataValue FirstTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, new LooFDataValue (0), Environment);
       LooFInterpreter.SetVariableValue (Args[0].StringValue, FirstTableValue, Environment);
       return;
     }
@@ -464,7 +464,7 @@ LooFInterpreterFunction InterpreterFunction_ForEach = new LooFInterpreterFunctio
       return;
     }
     
-    LooFDataValue NextTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, IndexVarValue, false, Environment);
+    LooFDataValue NextTableValue = LooFInterpreter.GetDataValueIndex(TableToLoopValue, IndexVarValue, Environment);
     LooFInterpreter.SetVariableValue (Args[0].StringValue, NextTableValue, Environment);
     
   }

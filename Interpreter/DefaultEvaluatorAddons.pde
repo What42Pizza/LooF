@@ -142,11 +142,6 @@ LooFEvaluatorOperation Operation_Modulo = new LooFEvaluatorOperation() {
 LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
   @Override public LooFDataValue HandleOperation (LooFDataValue LeftValue, LooFDataValue RightValue, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
-    if (LeftValue.ValueType == DataValueType_String && RightValue.ValueType == DataValueType_String) {
-      String NewStringValue = LeftValue.StringValue + RightValue.StringValue;
-      return new LooFDataValue (NewStringValue);
-    }
-    
     if (LeftValue.ValueType == DataValueType_Table && RightValue.ValueType == DataValueType_Table) {
       ArrayList <LooFDataValue> NewArrayValue = new ArrayList <LooFDataValue> ();
       NewArrayValue.addAll(LeftValue.ArrayValue);
@@ -157,8 +152,9 @@ LooFEvaluatorOperation Operation_Concat = new LooFEvaluatorOperation() {
       return new LooFDataValue (NewArrayValue, NewHashMapValue);
     }
     
-    ThrowLooFException (Environment, CodeData, AllCodeDatas, "the operation \"..\" can only concatenate two strings or two tables, not " + DataValueTypeNames_PlusA[LeftValue.ValueType] + " and " + DataValueTypeNames_PlusA[RightValue.ValueType] + ".", new String[] {"InvalidArgType"});
-    throw new AssertionError();
+    String LeftValueString  = Function_ToString.HandleFunctionCall (LeftValue , Environment, CodeData, AllCodeDatas).StringValue;
+    String RightValueString = Function_ToString.HandleFunctionCall (RightValue, Environment, CodeData, AllCodeDatas).StringValue;
+    return new LooFDataValue (LeftValueString + RightValueString);
     
   }
   @Override public float GetOrder() {return 3.0;}
@@ -632,7 +628,7 @@ LooFEvaluatorFunction Function_Min = new LooFEvaluatorFunction() {
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function min can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function min cannot be called with an empty table.", new String[] {"TableIsEmpty", "InvalidArgType"});
+    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function min cannot be called with an empty table.", new String[] {"TableIsEmpty", "IncorrectNumOfArgs", "InvalidArgType"});
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
@@ -677,7 +673,7 @@ LooFEvaluatorFunction Function_Max = new LooFEvaluatorFunction() {
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function max can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
-    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function max cannot be called with an empty table.", new String[] {"TableIsEmpty", "InvalidArgType"});
+    if (InputItemsSize == 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function max cannot be called with an empty table.", new String[] {"TableIsEmpty", "IncorrectNumOfArgs", "InvalidArgType"});
     
     // ensure table contains only ints and floats
     boolean[] DataValueTypesInInput = GetDataValueTypesFoundInList (InputItems);
