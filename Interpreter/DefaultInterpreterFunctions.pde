@@ -363,20 +363,31 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
     if (Args.length == 0) return;
     
     LooFDataValue ValueVarValue = LooFInterpreter.GetVariableValue (Args[0].StringValue, Environment, true);
+    boolean IncrementValueVarValue = true;
     
-    if (ValueVarValue.ValueType == DataValueType_Null) {
-      if (Args.length == 2) {
-        LooFInterpreter.SetVariableValue (Args[0].StringValue, new LooFDataValue (0), Environment);
-        return;
-      }
-      LooFDataValue LoopStartValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
-      LooFInterpreter.SetVariableValue (Args[0].StringValue, LoopStartValue, Environment);
-      return;
+    switch (ValueVarValue.ValueType) {
+      
+      case (DataValueType_Null):
+        LooFDataValue LoopStartValue = (Args.length > 2) ? LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null) : new LooFDataValue (0);
+        ValueVarValue = LoopStartValue;
+        LooFInterpreter.SetVariableValue (Args[0].StringValue, LoopStartValue, Environment);
+        IncrementValueVarValue = false;
+        break;
+      
+      case (DataValueType_Int):
+      case (DataValueType_Float):
+        break;
+      
+      default:
+        throw (new LooFInterpreterException (Environment, "'loop' statements have to take null, int, or float as its first arg if args are present, but the first arg was of type " + DataValueTypeNames[ValueVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+      
     }
     
+    // get end value
     int LoopEndArgIndex = (Args.length == 2) ? 1 : 2;
     LooFDataValue LoopEndValue = LooFInterpreter.EvaluateFormula (Args[LoopEndArgIndex], Environment, null, null);
     
+    // get next loop value
     LooFDataValue IncrementValue = (Args.length == 4) ? LooFInterpreter.EvaluateFormula (Args[3], Environment, null, null) : new LooFDataValue (1);
     LooFDataValue NextValueVarValue = Operation_Add.HandleOperation (ValueVarValue, IncrementValue, Environment, null, null);
     
@@ -393,7 +404,7 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
       return;
     }
     
-    LooFInterpreter.SetVariableValue (Args[0].StringValue, NextValueVarValue, Environment);
+    if (IncrementValueVarValue) LooFInterpreter.SetVariableValue (Args[0].StringValue, NextValueVarValue, Environment);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {

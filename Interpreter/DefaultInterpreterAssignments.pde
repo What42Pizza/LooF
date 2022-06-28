@@ -125,16 +125,22 @@ LooFInterpreterAssignment Assignment_ModuloEquals = new LooFInterpreterAssignmen
 
 LooFInterpreterAssignment Assignment_ConcatEquals = new LooFInterpreterAssignment() {
   @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
-    if (!(OldVarValue.ValueType == DataValueType_String || OldVarValue.ValueType == DataValueType_Table)) throw (new LooFInterpreterException (Environment, "the assignment '..=' only works on a var with an string or table value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (OldVarValue.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the assignment '..=' only works on a var with a string value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null, null);
-    if (OldVarValue.ValueType == DataValueType_String) {
-      if (InputFormulaResult.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the assignment '..=' can only concat a string when the var is of type string, but the value to concat was of type " + DataValueTypeNames[InputFormulaResult.ValueType] + ".", new String[] {"InvalidArgType"}));
-      return new LooFDataValue (OldVarValue.StringValue + InputFormulaResult.StringValue);
-    }
-    if (InputFormulaResult.ValueType == DataValueType_Table) {
-      OldVarValue.ArrayValue.addAll(InputFormulaResult.ArrayValue);
-      return OldVarValue;
-    }
+    LooFDataValue InputAsString = Function_ToString.HandleFunctionCall (InputFormulaResult, Environment, null, null);
+    return new LooFDataValue (OldVarValue.StringValue + InputAsString.StringValue);
+  }
+  @Override public boolean AddToCombinedTokens() {return true;}
+};
+
+
+
+
+
+LooFInterpreterAssignment Assignment_PushEquals = new LooFInterpreterAssignment() {
+  @Override public LooFDataValue GetNewVarValue (LooFDataValue OldVarValue, LooFTokenBranch InputValueFormula, LooFEnvironment Environment) {
+    if (OldVarValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the assignment 'psuh=' only works on a var with a table value, but the var was of type " + DataValueTypeNames[OldVarValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    LooFDataValue InputFormulaResult = LooFInterpreter.EvaluateFormula (InputValueFormula, Environment, null, null);
     OldVarValue.ArrayValue.add(InputFormulaResult);
     return OldVarValue;
   }

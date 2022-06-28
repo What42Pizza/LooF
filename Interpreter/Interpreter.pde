@@ -1,12 +1,12 @@
 // Started 04/02/22
-// Last updated 06/27/22
+// Last updated 06/28/22
 
 
 
 //String FolderToCompile = "/BallBlastClone";
-String FolderToCompile = "/InterpreterTesting";
-//String FolderToCompile = "/FakeOS/Entry";
 //String FolderToCompile = "/CustomSwitchStatement";
+//String FolderToCompile = "/FakeOS/Entry";
+String FolderToCompile = "/InterpreterTesting";
 
 
 

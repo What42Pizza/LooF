@@ -1,14 +1,11 @@
-function AddItem  -> ItemIn, TableIn
-	TableIn[lengthOf TableIn] = ItemIn // this should crash
-	return
+function Factorial  -> Input
+	returnIf (Input == 1), 1
+	call Factorial, Input - 1  -> NextResult
+	return Input * NextResult
 end
 
 
 
-//error "test", {}
-
-TestTable = {1, 2, 3}
-call AddItem, 4, TestTable
-
-:print TestTable
-:exit
+loop
+	call Factorial, 1000  -> FactorialResult
+repeat

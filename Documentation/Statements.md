@@ -18,9 +18,9 @@
   - Takes VarName to the power of Value
 - **VarName %= Value (int or string)**
   - Modulo-s VarName by Value
-- **VarName ..= Value (VarName is string: string; VarName is table: any)**
+- **VarName ..= Value (string)**
   - Concatenates Value to VarName
-  - `VarName (table) ..= Value (table)` adds all the items in the array part of Value to VarName. If you want it Value to be added as a single item, you can do `VarName (table) ..= {Value (table)}`.
+- **VarName push= Value **
 
 <br>
 
@@ -101,9 +101,11 @@
 - **loop ValueVarName, Start (int or float), End (int or float)**
   - Same as statement `loop IndexVarName, Start, End, 1`
 - **loop ValueVarName, Start (int or float), End (int or float), Increment (int or float)**
-  - If ValueVarName is null:   Sets ValueVarName to Start
+  - If ValueVarName is null and End >= Start:   Sets ValueVarName to Start
+  - If ValueVarName is null amd End < Start:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level. Errors if no suitable 'repeat' statement is found
   - If ValueVarName plus Increment is less than or equal to End:   Increments ValueVarName by Increment
-  - If ValueVarName plus Increment is greater than End:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level and sets ValueVarName to null. Errors if no suitable 'repeat' statement is found or if VarName is neither null nor an int
+  - If ValueVarName plus Increment is greater than End:   Jumps execution to after the first 'repeat' statement it can find that is on the same code block level and sets ValueVarName to null. Errors if no suitable 'repeat' statement is found
+  - Errors if VarName is neither null, int, nor float
 - **forEach ValueVarName, TableToLoop (table)**
   - Same as statement `forEach ValueVarName, TableToLoop, IncrementVarName` but with IncrementVarName being ValueVarName follow by an "_INDEX"
 - **forEach ValueVarName, TableToLoop (table), IndexVarName**

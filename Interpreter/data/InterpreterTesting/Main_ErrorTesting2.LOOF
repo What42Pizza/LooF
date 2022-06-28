@@ -1,0 +1,14 @@
+function AddItem  -> ItemIn, TableIn
+	TableIn[lengthOf TableIn] = ItemIn // this should crash
+	return
+end
+
+
+
+//error "test", {}
+
+TestTable = {1, 2, 3}
+call AddItem, 4, TestTable
+
+:print TestTable
+:exit

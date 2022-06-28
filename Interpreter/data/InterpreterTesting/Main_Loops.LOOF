@@ -13,4 +13,8 @@ loop i, endOf Array, 0, -1
 	:print i, ": ", Array[i]
 repeat
 
+loop i, 0, -1
+	:print "This shouldn't print"
+repeat
+
 :exit

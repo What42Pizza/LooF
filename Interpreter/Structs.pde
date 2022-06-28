@@ -228,8 +228,10 @@ class LooFCompileSettings {
   boolean AddDefaultInterpreterFunctions = true;
   
   HashMap <String, LooFInterpreterModule> CustomModules = new HashMap <String, LooFInterpreterModule> ();
-  HashMap <String, LooFEvaluatorOperation> CustomOperations = new HashMap <String, LooFEvaluatorOperation> ();
-  HashMap <String, LooFEvaluatorFunction> CustomFunctions = new HashMap <String, LooFEvaluatorFunction> ();
+  HashMap <String, LooFInterpreterAssignment> CustomInterprererAssignments = new HashMap <String, LooFInterpreterAssignment> ();
+  HashMap <String, LooFInterpreterFunction> CustomInterpreterFunctions = new HashMap <String, LooFInterpreterFunction> ();
+  HashMap <String, LooFEvaluatorOperation> CustomEvaluatorOperations = new HashMap <String, LooFEvaluatorOperation> ();
+  HashMap <String, LooFEvaluatorFunction> CustomEvaluatorFunctions = new HashMap <String, LooFEvaluatorFunction> ();
   
   boolean PrintPreProcessedLooF = false;
   boolean PrintLinkedLooF = false;
