@@ -1,0 +1,16 @@
+#include Basics.LOOF
+
+
+
+// TestCode:
+TestVar = 5
+call_ lamba   -> Input; :print Input
+:exit
+
+TestCode = {
+`	{"TestVar", "=", "5"},
+`	{"call", "lamda", "{"},
+`	{"pop", "ARGS", ",", "Input"},
+`	{"call", "newFunction", "{", "1", "Basics.LOOF", "}", ",", "Input", "}"},
+`	{"call", "newFunction", "{", "13", "Basics.LOOF", "}"},
+`}

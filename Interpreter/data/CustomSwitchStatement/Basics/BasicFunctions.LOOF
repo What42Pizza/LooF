@@ -21,7 +21,6 @@ end
 
 function exit
 	callOutside "Interpreter", "stop"
-	return
 end
 
 

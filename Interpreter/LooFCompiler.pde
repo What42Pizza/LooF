@@ -544,14 +544,12 @@ class LooFCompiler {
   void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents, ArrayList <LooFCompilerException> AllExceptions) {
     HashMap <String, boolean[]> CharsInQuotesCache = new HashMap <String, boolean[]> ();
     
-    if (HeaderFileContents.length > 0) {
-      InsertHeader (CodeData, HeaderFileContents);
-    }
+    InsertHeader (CodeData, HeaderFileContents);
     AddPaddingLines (CodeData);
     RemoveComments (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveInitialTrim (CodeData);
     ProcessIfStatements (CodeData, AllCodeDatas, AllExceptions);
-    ProcessIncludes (CodeData, AllCodeDatas, HeaderFileContents.length, CharsInQuotesCache, AllExceptions);
+    ProcessIncludes (CodeData, AllCodeDatas, CharsInQuotesCache, AllExceptions);
     ProcessReplaces (CodeData, CharsInQuotesCache, AllCodeDatas, AllExceptions);
     RemoveExcessWhitespace (CodeData);
     CheckForIncorrectPreProcessorStatements (CodeData, AllCodeDatas, AllExceptions);
@@ -573,15 +571,13 @@ class LooFCompiler {
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     
     // process #ignore_header
-    if (Code.get(0).equals("#ignore_header")) {
-      CodeData.IncludesHeader = false;
+    CodeData.IncludesHeader = !Code.get(0).equals("#ignore_header");
+    if (!CodeData.IncludesHeader) {
       Code.remove(0);
       LineNumbers.remove(0);
       LineFileOrigins.remove(0);
       return;
     }
-    
-    CodeData.IncludesHeader = true;
     
     // insert header
     int HeaderFileLength = HeaderFileContents.length;
@@ -914,7 +910,7 @@ class LooFCompiler {
       int LineNumber = LineNumbers.remove(i);
       String LineFileOrigin = LineFileOrigins.remove(i);
       for (int k = 0; k < NewLine.length; k ++) {
-        Code.add(i + k, NewLine[k]);
+        Code.add(i + k, NewLine[k].trim());
         LineNumbers.add(i + k, LineNumber);
         LineFileOrigins.add(i + k, LineFileOrigin);
       }
@@ -943,6 +939,11 @@ class LooFCompiler {
     for (int i = 0; i < Code.size() - ReplaceBefore.length + 1; i ++) {
       if (!MultiLineReplaceMatchesLine (Code, i, ReplaceBefore)) continue;
       ReplaceMultiLineString (CodeData, i, ReplaceBefore, ReplaceAfter);
+      println();
+      println();
+      println();
+      println ("Code:");
+      if (CodeData.OriginalFileName.equals("Main.LOOF")) for (String S : CodeData.CodeArrayList) println (S);
       i += LinesToJump;
     }
   }
@@ -1005,8 +1006,8 @@ class LooFCompiler {
     // multi-line replacement
     ReplacedAreaStart += ReplaceAfter[0];
     ReplacedAreaEnd = LastItemOf (ReplaceAfter) + ReplacedAreaEnd;
-    Code.set(LineNumber, ReplacedAreaStart);
-    Code.set(AreaEndIndex, ReplacedAreaEnd);
+    Code.set(LineNumber, ReplacedAreaStart.trim());
+    Code.set(AreaEndIndex, ReplacedAreaEnd.trim());
     
     for (int i = 1; i < ReplaceAfter.length - 1; i ++) {
       Code.add(i + LineNumber, ReplaceAfter[i]);
@@ -1025,13 +1026,13 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
+  void ProcessIncludes (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       try {
         String CurrentLine = Code.get(i);
         if (!CurrentLine.startsWith("#include ")) continue;
-        ProcessIncludesForLine (CodeData, CurrentLine, i, AllCodeDatas, HeaderLength, CharsInQuotesCache, AllExceptions);
+        ProcessIncludesForLine (CodeData, CurrentLine, i, AllCodeDatas, CharsInQuotesCache, AllExceptions);
         i --; // for if the included file starts with an #include
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
@@ -1041,7 +1042,7 @@ class LooFCompiler {
   
   
   
-  void ProcessIncludesForLine (LooFCodeData CodeData, String CurrentLine, int LineNumber, HashMap <String, LooFCodeData> AllCodeDatas, int HeaderLength, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
+  void ProcessIncludesForLine (LooFCodeData CodeData, String CurrentLine, int LineNumber, HashMap <String, LooFCodeData> AllCodeDatas, HashMap <String, boolean[]> CharsInQuotesCache, ArrayList <LooFCompilerException> AllExceptions) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
@@ -1055,7 +1056,6 @@ class LooFCompiler {
     // get code to include and data about it
     String[] FileToIncludeContents = FileToInclude.OriginalCode;
     String FileToIncludeName = FileToInclude.OriginalFileName;
-    int LineNumberOffset = FileToInclude.IncludesHeader ? -HeaderLength : 0;
     int InsertionStartIndex = LineNumber - 1;
     
     // remove #include (has to be done here to not mess up the error messages)
@@ -1068,7 +1068,7 @@ class LooFCompiler {
     for (int i = FileToIncludeStartIndex; i < FileToIncludeContents.length; i ++) {
       String LineToInsert = FileToIncludeContents[i];
       Code.add(InsertionStartIndex + i, LineToInsert);
-      LineNumbers.add(InsertionStartIndex + i, i + LineNumberOffset);
+      LineNumbers.add(InsertionStartIndex + i, i);
       LineFileOrigins.add(InsertionStartIndex + i, FileToIncludeName);
     }
     
@@ -1211,7 +1211,6 @@ class LooFCompiler {
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     for (int i = Code.size() - 1; i >= 0; i --) {
       String CurrentLine = Code.get(i);
-      String OriginalCurrentLine = CurrentLine;
       
       // remove leading and trailing whitespace
       CurrentLine = CurrentLine.trim();
@@ -1224,10 +1223,7 @@ class LooFCompiler {
         continue;
       }
       
-      // replace if line has changed
-      if (!CurrentLine.equals(OriginalCurrentLine)) {
-        Code.set(i, CurrentLine);
-      }
+      Code.set(i, CurrentLine);
       
     }
   }

@@ -3,10 +3,11 @@
 
 
 
-String FolderToCompile = "/BallBlastClone";
+//String FolderToCompile = "/BallBlastClone";
 //String FolderToCompile = "/CustomSwitchStatement";
 //String FolderToCompile = "/FakeOS/Entry";
 //String FolderToCompile = "/InterpreterTesting";
+String FolderToCompile = "/PossibleMacros";
 
 
 
@@ -34,7 +35,7 @@ void setup() {
   CompileSettings.FinalOutputPath = dataPath("") + "/CompilerOutputs";
   CompileSettings.PrintPreProcessedLooF = false;
   CompileSettings.PrintLinkedLooF = false;
-  CompileSettings.PrintLexedLooF = false;
+  CompileSettings.PrintLexedLooF = true;
   CompileSettings.PrintParsedLooF = false;
   CompileSettings.PrintFinalLooF = true;
   

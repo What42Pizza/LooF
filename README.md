@@ -77,8 +77,7 @@ I'm also doing my best to make the error messages informative, easy to read, and
 
 
 function Factorial  -> In
-	if In == 1
-		return 1
+	reutrnIf (In == 1), 1
 	call Factorial, In - 1  -> NextProduct
 	return In * NextProduct
 end
@@ -101,14 +100,14 @@ call Factorial, 10  -> FactorialResult
 
 function ConvertTableToString  -> TableIn, Seperator  throwsErrors {"InvalidArgType"}
 	errorIf (typeOf TableIn != "table"), "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
-	Seperator defaultsTo ", "
+	Seperator <defaultsTo ", "
 	errorIf (typeOf Seperator != "string"), "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}
 	
 	returnIf (lengthOf TableIn == 0), ""
 	
 	StringOut = toString TableIn[0]
 	loop i, 1, endOf TableIn
-		StringOut ..= Sepeator .. toString TableIn[i]
+		StringOut ..= Sepeator .. TableIn[i]
 	repeat
 	
 	return StringOut
