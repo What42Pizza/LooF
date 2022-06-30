@@ -1,13 +1,13 @@
 // Started 04/02/22
-// Last updated 06/28/22
+// Last updated 06/30/22
 
 
 
 //String FolderToCompile = "/BallBlastClone";
 //String FolderToCompile = "/CustomSwitchStatement";
 //String FolderToCompile = "/FakeOS/Entry";
-//String FolderToCompile = "/InterpreterTesting";
-String FolderToCompile = "/PossibleMacros";
+String FolderToCompile = "/InterpreterTesting";
+//String FolderToCompile = "/PossibleMacros";
 
 
 
@@ -44,7 +44,7 @@ void setup() {
   // compile
   LooFEnvironment TestEnvironment = null;
   try {
-    TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
+      TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFCompilerException (e)) e.printStackTrace();
     throw e;
@@ -57,7 +57,10 @@ void setup() {
   println("Program output:");
   int StartMillis = millis();
   try {
-    LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, 10000000);
+    while (!TestEnvironment.Stopped) {
+      LooFInterpreter.ExecuteNextEnvironmentStatements(TestEnvironment, Integer.MAX_VALUE);
+      delay (1);
+    }
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
     throw e;

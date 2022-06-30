@@ -858,6 +858,16 @@ double GetDataValueNumber_Unsafe (LooFDataValue DataValueIn, LooFEnvironment Env
 
 
 
+Result <Long> GetDataValueInt (LooFDataValue DataValueIn) {
+  switch (DataValueIn.ValueType) {
+    case (DataValueType_Int): return new Result <Long> (DataValueIn.IntValue);
+    case (DataValueType_Float): return new Result <Long> ((long) DataValueIn.FloatValue);
+    default: return new Result();
+  }
+}
+
+
+
 boolean ValueIsNumber (LooFDataValue Input) {
   return Input.ValueType == DataValueType_Int || Input.ValueType == DataValueType_Float;
 }

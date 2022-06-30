@@ -1,11 +1,7 @@
-function Factorial  -> Input
-	returnIf (Input == 1), 1
-	call Factorial, Input - 1  -> NextResult
-	return Input * NextResult
-end
+callOutside "Interpreter", "pause until", 1
 
-
-
-call Factorial, 10  -> FactorialResult
-:print FactorialResult
-:exit
+loop
+	callOutside "Interpreter", "pause", 0.1
+	:print timeSince 0
+	if timeSince 0 >= 3; :exit
+repeat

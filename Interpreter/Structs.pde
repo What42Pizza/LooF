@@ -150,6 +150,8 @@ class LooFEnvironment {
   
   
   boolean Stopped = false;
+  boolean Paused = false;
+  long PauseEndMillis = 0;
   String CurrentPageName;
   LooFCodeData CurrentCodeData;
   int CurrentLineNumber;

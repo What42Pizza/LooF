@@ -13,10 +13,18 @@ class LooFInterpreter {
   
   void ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) throws LooFInterpreterException  {
     if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
+    
+    if (Environment.Paused) {
+      long CurrentTimeMillis = System.currentTimeMillis();
+      if (CurrentTimeMillis < Environment.PauseEndMillis) return;
+      Environment.Paused = false;
+    }
+    
     for (int i = 0; i < NumOfStatements; i ++) {
       ExecuteNextStatement (Environment);
-      if (Environment.Stopped) return;
+      if (Environment.Stopped || Environment.Paused) return;
     }
+    
   }
   
   
@@ -290,7 +298,7 @@ class LooFInterpreter {
   
   
   LooFDataValue EvaluateFormula (LooFTokenBranch Formula, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    if (Formula.TokenType == TokenBranchType_PreEvaluatedFormula) return Formula.Result;
+    if (Formula.TokenType == TokenBranchType_PreEvaluatedFormula) return Formula.Result.clone();
     ArrayList <LooFTokenBranch> FormulaTokens = ArrayToArrayList (Formula.Children);
     if (FormulaTokens.size() == 0) return new LooFDataValue();
     ArrayList <LooFDataValue> FormulaValues = GetFormulaValuesFromTokens (FormulaTokens, Environment, CodeData, AllCodeDatas);

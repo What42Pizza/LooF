@@ -13,12 +13,10 @@
 
 ### Interpreter:
 
-- **"pause", Time (int or float)**
-  - Pauses execution for Time seconds.
-- **"pause until", EndTime (int or float)**
-  - Pauses until timeSince 0 >= EndTime.
-- **"get start time"**
-  - Pushes the approximate time the program finished compilation, according to System.currentTimeMillis().
+- **"pause", TotalPausedTime (int or float)**
+  - Pauses execution for TotalPausedTime seconds.
+- **"pause until", PauseEndTime (int or float)**
+  - Pauses until timeSince 0 >= PauseEndTime.
 - **"stop"**
   - Stops execution.
 - **"add page from file", FilePath (string or table {string, ...}), CompileSettings (table)**

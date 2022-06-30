@@ -9,16 +9,32 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
     if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Interpreter module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
     switch (FirstArg.StringValue) {
       
-      case ("get start time"):
-        if (Args.length > 1) throw (new LooFInterpreterException (Environment, "the message \"get start time\" cannot take any extra arguments.", new String[] {"InvalidArgsLength"}));
-        LooFDataValue StartTime = new LooFDataValue (ModuleData.StartTime);
-        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {StartTime}, Environment);
-        return;
-      
       case ("stop"):
         if (Args.length > 1) throw (new LooFInterpreterException (Environment, "the message \"stop\" cannot take any extra arguments.", new String[] {"InvalidArgsLength"}));
         Environment.Stopped = true;
         return;
+      
+      case ("pause"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"pause\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue PauseTimeValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        PauseTimeValue.IntValue *= 1000; PauseTimeValue.FloatValue *= 1000;
+        Result <Long> PauseTimeLongResult = GetDataValueInt (PauseTimeValue);
+        if (PauseTimeLongResult.Err) throw (new LooFInterpreterException (Environment, "the message \"pause\" must take an int or float as its first arg, but the first arg was of type " + DataValueTypeNames[PauseTimeValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+        long PauseTimeLong = PauseTimeLongResult.Some;
+        Environment.Paused = true;
+        Environment.PauseEndMillis = System.currentTimeMillis() + PauseTimeLong;
+      return;}
+      
+      case ("pause until"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"pause\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue PauseEndTimeValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        PauseEndTimeValue.IntValue *= 1000; PauseEndTimeValue.FloatValue *= 1000;
+        Result <Long> PauseEndTimeLongResult = GetDataValueInt (PauseEndTimeValue);
+        if (PauseEndTimeLongResult.Err) throw (new LooFInterpreterException (Environment, "the message \"pause\" must take an int or float as its first arg, but the first arg was of type " + DataValueTypeNames[PauseEndTimeValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+        long PauseEndTimeLong = PauseEndTimeLongResult.Some;
+        Environment.Paused = true;
+        Environment.PauseEndMillis = ModuleData.StartMillis + PauseEndTimeLong;
+      return;}
       
       default:
         throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
@@ -30,7 +46,7 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
   
   @Override
   public LooFModuleData CreateModuleData (LooFEnvironment Environment) {
-    double StartTime = System.currentTimeMillis();
+    long StartTime = System.currentTimeMillis();
     return new LooFInterpreterModuleData (StartTime);
   }
   
@@ -40,10 +56,10 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
 
 class LooFInterpreterModuleData extends LooFModuleData {
   
-  double StartTime;
+  long StartMillis;
   
-  public LooFInterpreterModuleData (double StartTime) {
-    this.StartTime = StartTime;
+  public LooFInterpreterModuleData (long StartMillis) {
+    this.StartMillis = StartMillis;
   }
   
 }

@@ -1651,3 +1651,24 @@ LooFEvaluatorFunction Function_CloneValue = new LooFEvaluatorFunction() {
     return Input.clone();
   }
 };
+
+
+
+
+
+LooFEvaluatorFunction Function_TimeSince = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    LooFInterpreterModule InterpreterModule = Environment.AddonsData.InterpreterModules.getOrDefault("Interpreter", null);
+    if (InterpreterModule == null) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot call timeSince without the Interpreter module.", new String[] {"MissingInterpreterModule"});
+    LooFInterpreterModuleData InterpreterModuleData = (LooFInterpreterModuleData) Environment.ModuleDatas.get(InterpreterModule);
+    
+    double InputAsNum = GetDataValueNumber_Unsafe (Input, Environment, CodeData, AllCodeDatas, "timeSince");
+    long ProgramStartMillis = InterpreterModuleData.StartMillis;
+    long CurrentProgramRunTime = System.currentTimeMillis() - ProgramStartMillis;
+    double TimeSinceInput_Millis = (double) CurrentProgramRunTime - InputAsNum;
+    
+    return new LooFDataValue (TimeSinceInput_Millis / 1000.0);
+    
+  }
+  @Override public boolean CanBePreEvaluated() {return false;}
+};

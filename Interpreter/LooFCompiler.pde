@@ -417,7 +417,7 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("newByteArray", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("timeSince", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("timeSince", Function_TimeSince);
     EvaluatorFunctions.putIfAbsent("switch", NullEvaluatorFunction);
     
     return EvaluatorFunctions;
@@ -939,11 +939,6 @@ class LooFCompiler {
     for (int i = 0; i < Code.size() - ReplaceBefore.length + 1; i ++) {
       if (!MultiLineReplaceMatchesLine (Code, i, ReplaceBefore)) continue;
       ReplaceMultiLineString (CodeData, i, ReplaceBefore, ReplaceAfter);
-      println();
-      println();
-      println();
-      println ("Code:");
-      if (CodeData.OriginalFileName.equals("Main.LOOF")) for (String S : CodeData.CodeArrayList) println (S);
       i += LinesToJump;
     }
   }
