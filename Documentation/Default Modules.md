@@ -49,8 +49,8 @@
   - Return data: {Exists (bool), Size (int), IsFolder (bool), IsFile (bool), LastModified (int; uses Java's File.LastModified()), CanRead (bool), CanWrite (bool)}.
 - **"check file exists", FilePath (string or table {string, ...})**
   - Pushes an array containing a bool for whether the file at FilePath exists to the general stack.
-- **"get folder contents", FolderPath (string or table {string, ...})**
-  - Pushes a table containing the names (as arrays of strings) of the files and folders inside the folder at FolderPath to the general stack.
+- **"get files in dir", FolderPath (string or table {string, ...})**
+  - Pushes a table (an array of strings) to the general stack containing the names of the files and folders inside the folder at FolderPath.
   - Errors if the file at FolderPath is not a folder.
 - **"read file as strings", FilePath (string or table {string, ...})**
   - Pushes the contents of the file at FilePath to the general stack as an array of strings.
@@ -58,8 +58,13 @@
 - **"read file as byteArray", FilePath (string or table {string, ...})**
   - Pushes the contents of the file at FilePath to the general stack as a byteArray.
   - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
+- **read file as image, FilePath (string or table {string, ...})**
+  - Pushes the decompressed image (depending on the file extension) of the file at FilePath to the general stack as a byteArray.
+  - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
 - **"write to file", FilePath (string or table {string, ...}), Contents (table {string, ...} or byteArray)**
   - Writes the data of Contents to the file at FilePath (which is created if necessary).
+- **"write to file as image", FilePath (string or table {string, ...}), Image (byteArray)**
+  - Writes the compressed version of Contents (depending of the file extension) to the file at FilePath (which is created if necessary).
 - **"delete file", FilePath (string or table {string, ...})**
   - Deletes the file at FilePath.
   - Errors if the file at FilePath cannot be found.

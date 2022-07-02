@@ -2027,9 +2027,9 @@ class LooFCompiler {
       LooFTokenBranch CurrentToken = FormulaChildren[i];
       if (CurrentToken.TokenType != TokenBranchType_EvaluatorOperation) continue;
       LooFTokenBranch PrevToken = FormulaChildren[i - 1];
-      if (!PrevToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator operation where the left token is of type " + TokenBranchTypeNames[PrevToken.TokenType] + "."));
+      if (!PrevToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator operation (" + CurrentToken.OriginalString + ") where the left token (" + PrevToken.OriginalString + ") is of type " + TokenBranchTypeNames[PrevToken.TokenType] + "."));
       LooFTokenBranch NextToken = FormulaChildren[i + 1];
-      if (!NextToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator operation where the right token is of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
+      if (!NextToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator operation (" + CurrentToken.OriginalString + ") where the right token (" + NextToken.OriginalString + ") is of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
     }
     
     // ensure evaluator functions are valid
@@ -2037,7 +2037,7 @@ class LooFCompiler {
       LooFTokenBranch CurrentToken = FormulaChildren[i];
       if (CurrentToken.TokenType != TokenBranchType_EvaluatorFunction) continue;
       LooFTokenBranch NextToken = FormulaChildren[i + 1];
-      if (!NextToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator function on a token of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
+      if (!NextToken.ConvertsToDataValue) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, CurrentToken.OriginalTokenIndex, "cannot perform an evaluator function (" + CurrentToken.OriginalString + ") on a token of type " + TokenBranchTypeNames[NextToken.TokenType] + "."));
     }
     
     // ensure no double non-action tokens

@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 07/01/22
+// Last updated 07/02/22
 
 
 
@@ -14,6 +14,7 @@ String FolderToCompile = "/InterpreterTesting";
 import java.util.*;
 import java.lang.reflect.Array;
 import java.nio.file.*;
+import java.nio.channels.FileChannel;
 
 
 
@@ -54,16 +55,19 @@ void setup() {
   
   // interpret
   println();
+  println();
+  println();
   println("Program output:");
+  println();
   int StartMillis = millis();
-  try {
+  //try {
     while (!TestEnvironment.Stopped) {
       LooFInterpreter.ExecuteStatementsUntilBreak(TestEnvironment);
     }
-  } catch (RuntimeException e) {
-    if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
-    throw e;
-  }
+  //} catch (RuntimeException e) {
+  //  if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
+  //  throw e;
+  //}
   println();
   println ("Execution time: " + (millis() - StartMillis) + " ms");
   

@@ -1,77 +1,17 @@
-loop i, 1, 3
-	
-	:print "Creating list..."
-	call CreateRandomList, 10000  -> ListToSort
-	
-	:print "Sorting list..."
-	StartMillis = timeSince 0
-	call BubbleSort, ListToSort
-	:print "Time to sort: ", timeSince 0 - StartMillis
-	
-	:print "Checking list..."
-	call CheckListIsSorted, ListToSort
-	
+callOutside "Files", "get program path"  -> ProgramFolder
+callOutside "Files", "get file properties", ProgramFolder .. {"Main.LOOF"}  -> FileProperties
+callOutside "Files", "get files in dir", ProgramFolder  -> ProgramFiles
+
+:print "Program folder: " .. ProgramFolder
+:print "Program folder properties: " .. FileProperties
+:print "Program folder contents: " .. ProgramFiles
+
+:print "\n\n\nMain file contents:\n"
+callOutside "Files", "read file as strings", ProgramFolder .. {"Main.LOOF"}  -> MainFileContents
+ToPrint = ""
+forEach CurrentString, MainFileContents
+	ToPrint ..= CurrentString .. "\n"
 repeat
+:print ToPrint
 
 :exit
-
-
-
-
-
-/*
-// un-optimized
-function BubbleSort  -> ListToSort
-	loop PassNum, endOf ListToSort
-		loop i, endOf ListToSort - 1
-			continueIf ListToSort[i] <= ListToSort[i + 1]
-			Temp = ListToSort[i]
-			ListToSort[i] = ListToSort[i + 1]
-			ListToSort[i + 1] = Temp
-		repeat
-		if PassNum % 100 == 0
-			:print 100 * PassNum / endOf ListToSort .. "%"
-	repeat
-	return
-end
-*/
-
-
-
-///*
-// optimized
-function BubbleSort  -> ListToSort
-	loop PassNum, endOf ListToSort
-		loop i, endOf ListToSort - 1 - PassNum
-			CurrentItem = ListToSort[i]
-			NextItem = ListToSort[i + 1]
-			continueIf CurrentItem <= NextItem
-			ListToSort[i] = NextItem
-			ListToSort[i + 1] = NextItem
-		repeat
-		if PassNum % 250 == 0
-			:print 100 * PassNum / endOf ListToSort .. "%"
-	repeat
-	return
-end
-//*/
-
-
-
-function CreateRandomList  -> ListSize
-	Output = {}
-	loop i, ListSize
-		Output[i] = random 1000000
-	repeat
-	return Output
-end
-
-
-
-function CheckListIsSorted  -> ListToSort
-	forEach Item, ListToSort, i
-		returnIf i == endOf ListToSort
-		errorIf (Item > ListToSort[i + 1]), "List is not sorted", {"ListNotSorted"}
-	repeat
-	return // needed for if ListToSort is empty
-end
