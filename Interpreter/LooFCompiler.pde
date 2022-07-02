@@ -18,6 +18,13 @@ class LooFCompiler {
     if (!CodeFolder.isDirectory()) throw (new LooFCompilerException ("AddNewEnvironment must take a folder as its argument. (File is not a folder)."));
     if (CompileSettings == null) throw (new LooFCompilerException ("AddNewEnvironment cannot take a null LoofCompileSettings object. Either pass a new LooFCompileSettings object or call AddNewEvironment with no LooFCompileSettings argument."));
     
+    String CodeFolderPath;
+    try {
+      CodeFolderPath = CodeFolder.getCanonicalPath();
+    } catch (IOException e) {
+      throw (new LooFCompilerException ("IOException while determining the code folder's path: " + e.getMessage()));
+    }
+    
     long StartMillis = System.currentTimeMillis();
     
     ClearCompilerOutputs (CompileSettings);
@@ -130,18 +137,16 @@ class LooFCompiler {
     
     
     // create environement
-    LooFEnvironment NewEnvironment = new LooFEnvironment (AllCodeDatas, AddonsData);
     
-    
-    
-    // create ModuleData-s
-    HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas = NewEnvironment.ModuleDatas;
+    HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas = new HashMap <LooFInterpreterModule, LooFModuleData> ();
     HashMap <String, LooFInterpreterModule> InterpreterModules = AddonsData.InterpreterModules;
     Set <String> InterpreterModuleNames = InterpreterModules.keySet();
     for (String CurrentModuleName : InterpreterModuleNames) {
       LooFInterpreterModule CurrentModule = InterpreterModules.get(CurrentModuleName);
-      ModuleDatas.put(CurrentModule, CurrentModule.CreateModuleData (NewEnvironment));
+      ModuleDatas.put(CurrentModule, CurrentModule.CreateModuleData());
     }
+    
+    LooFEnvironment NewEnvironment = new LooFEnvironment (CodeFolderPath, AllCodeDatas, AddonsData, ModuleDatas);
     
     
     
@@ -202,8 +207,8 @@ class LooFCompiler {
     
     InterpreterModules.putIfAbsent("Interpreter", InterpreterModule_Interpreter);
     InterpreterModules.putIfAbsent("Console", InterpreterModule_Console);
-    InterpreterModules.putIfAbsent("Files", NullInterpreterModule);
-    InterpreterModules.putIfAbsent("Graphics", NullInterpreterModule);
+    InterpreterModules.putIfAbsent("Files", InterpreterModule_Files);
+    //InterpreterModules.putIfAbsent("Graphics", NullInterpreterModule);
     
     return InterpreterModules;
   }
@@ -360,9 +365,9 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("chance", Function_Chance);
     
     EvaluatorFunctions.putIfAbsent("lengthOf", Function_LengthOf);
-    EvaluatorFunctions.putIfAbsent("isEmpty", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("isEmpty", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("totalLengthOf", Function_TotalLengthOf);
-    EvaluatorFunctions.putIfAbsent("lengthOfHashMap", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("lengthOfHashMap", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("endOf", Function_EndOf);
     EvaluatorFunctions.putIfAbsent("lastItemOf", Function_LastItemOf);
     EvaluatorFunctions.putIfAbsent("keysOf", Function_KeysOf);
@@ -372,34 +377,34 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("randomByteArrayItem", Function_RandomHashmapItem);
     EvaluatorFunctions.putIfAbsent("firstIndexOfItem", Function_FirstIndexOfItem);
     EvaluatorFunctions.putIfAbsent("lastIndexOfItem", Function_LastIndexOfItem);
-    EvaluatorFunctions.putIfAbsent("allIndexesOfItem", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("tableContainsItem", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("arrayContainsItem", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("hashmapContainsItem", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("byteArrayContainsItems", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("removeDuplicateItems", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("deepCloneTable", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("createFilledTable", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("createFilledByteArray", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("getSubArray", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("replaceSubArray", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("splitArray", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("allIndexesOfItem", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("tableContainsItem", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("arrayContainsItem", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("hashmapContainsItem", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("byteArrayContainsItems", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("removeDuplicateItems", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("deepCloneTable", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("createFilledTable", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("createFilledByteArray", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("getSubArray", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("replaceSubArray", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("splitArray", NullEvaluatorFunction);
     
     EvaluatorFunctions.putIfAbsent("getChar", Function_GetChar);
     EvaluatorFunctions.putIfAbsent("getCharInts", Function_GetCharInts);
     EvaluatorFunctions.putIfAbsent("getCharByes", Function_GetCharBytes);
     EvaluatorFunctions.putIfAbsent("getSubString", Function_GetSubString);
-    EvaluatorFunctions.putIfAbsent("replaceSubString", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("replaceStrings", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("firstIndexOfString", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("lastIndexOfString", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("allIndexesOfString", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("splitString", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("stringStartsWith", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("stringEndsWith", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("toLowerCase", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("toUpperCase", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("trimString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("replaceSubString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("replaceStrings", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("firstIndexOfString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("lastIndexOfString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("allIndexesOfString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("splitString", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("stringStartsWith", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("stringEndsWith", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("toLowerCase", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("toUpperCase", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("trimString", NullEvaluatorFunction);
     
     EvaluatorFunctions.putIfAbsent("toInt", Function_ToInt);
     EvaluatorFunctions.putIfAbsent("toFloat", Function_ToFloat);
@@ -407,18 +412,18 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("toBool", Function_ToBool);
     
     EvaluatorFunctions.putIfAbsent("newFunction", Function_NewFunction);
-    EvaluatorFunctions.putIfAbsent("getFunctionLine", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("getFunctionFile", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("getFunctionLine", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("getFunctionFile", NullEvaluatorFunction);
     
     EvaluatorFunctions.putIfAbsent("typeOf", Function_TypeOf);
-    EvaluatorFunctions.putIfAbsent("isNumber", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("isLocked", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("isNumber", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("isLocked", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("cloneValue", Function_CloneValue);
-    EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("newByteArray", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("newByteArray", NullEvaluatorFunction);
     EvaluatorFunctions.putIfAbsent("timeSince", Function_TimeSince);
-    EvaluatorFunctions.putIfAbsent("switch", NullEvaluatorFunction);
+    //EvaluatorFunctions.putIfAbsent("switch", NullEvaluatorFunction);
     
     return EvaluatorFunctions;
   }

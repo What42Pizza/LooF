@@ -496,32 +496,6 @@ String EnsureStringLength (String StringIn, int NeededLength, char FillChar) {
 
 
 
-HashMap <String, Integer> TimerCounts = new HashMap <String, Integer> ();
-HashMap <String, Integer> TimerStartMilliss = new HashMap <String, Integer> ();
-
-void StartTimer (String TimerName) {
-  TimerStartMilliss.put(TimerName, millis());
-}
-
-void StopTimer (String TimerName) {
-  int PrevTime = TimerCounts.getOrDefault(TimerName, 0);
-  int NewTime = PrevTime + (millis() - TimerStartMilliss.get(TimerName));
-  TimerCounts.put(TimerName, NewTime);
-}
-
-int GetTimerMillis (String TimerName) {
-  return TimerCounts.get(TimerName);
-}
-
-
-
-
-
-
-
-
-
-
 String ConvertLooFStatementToString (LooFStatement Statement) {
   switch (Statement.StatementType) {
     
@@ -892,4 +866,17 @@ boolean[] GetDataValueTypesFoundInList (ArrayList <LooFDataValue> ListIn) {
     DataTypesOut[CurrentDataValue.ValueType] = true;
   }
   return DataTypesOut;
+}
+
+
+
+Result <String[]> GetStringArrayFromDataValue (LooFDataValue DataValueIn) {
+  ArrayList <LooFDataValue> ArrayIn = DataValueIn.ArrayValue;
+  String[] Output = new String [ArrayIn.size()];
+  for (int i = 0; i < Output.length; i ++) {
+    LooFDataValue CurrentValue = ArrayIn.get(i);
+    if (CurrentValue.ValueType != DataValueType_String) return new Result();
+    Output[i] = CurrentValue.StringValue;
+  }
+  return new Result (Output);
 }

@@ -1,4 +1,4 @@
-LooFInterpreterModule NullInterpreterModule = new LooFInterpreterModule();
+//LooFInterpreterModule NullInterpreterModule = new LooFInterpreterModule();
 
 class LooFInterpreterModule {
   
@@ -6,7 +6,7 @@ class LooFInterpreterModule {
     throw (new LooFInterpreterException (Environment, "this LooFInterpreterModule does not have an overridden HandleCall().", new String[] {"InvalidInterpreterModule"}));
   }
   
-  public LooFModuleData CreateModuleData (LooFEnvironment Environment) {
+  public LooFModuleData CreateModuleData() {
     return new LooFModuleData();
   }
   
@@ -95,7 +95,7 @@ class LooFEvaluatorOperation {
 
 
 
-LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
+//LooFEvaluatorFunction NullEvaluatorFunction = new LooFEvaluatorFunction();
 
 class LooFEvaluatorFunction {
   
@@ -141,11 +141,13 @@ class LooFEnvironment {
   
   
   
+  String ProgramFilePath;
+  
   HashMap <String, LooFCodeData> AllCodeDatas;
   
   LooFAddonsData AddonsData;
   
-  HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas = new HashMap <LooFInterpreterModule, LooFModuleData> ();
+  HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas;
   
   
   
@@ -170,9 +172,11 @@ class LooFEnvironment {
   
   
   
-  public LooFEnvironment (HashMap <String, LooFCodeData> AllCodeDatas, LooFAddonsData AddonsData) {
+  public LooFEnvironment (String ProgramFilePath, HashMap <String, LooFCodeData> AllCodeDatas, LooFAddonsData AddonsData, HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas) {
+    this.ProgramFilePath = ProgramFilePath;
     this.AllCodeDatas = AllCodeDatas;
     this.AddonsData = AddonsData;
+    this.ModuleDatas = ModuleDatas;
     this.CurrentPageName = "Main.LOOF";
     this.CurrentCodeData = AllCodeDatas.get(CurrentPageName);
     this.CurrentLineNumber = 0;
@@ -928,6 +932,7 @@ class Result <T> {
   
   T Some;
   boolean Err;
+  String ErrCause = null;
   
   public Result (T Some) {
     this.Some = Some;
@@ -936,6 +941,11 @@ class Result <T> {
   
   public Result() {
     this.Err = true;
+  }
+  
+  public Result SetCause (String ErrCause) {
+    this.ErrCause = ErrCause;
+    return this;
   }
   
 }

@@ -29,6 +29,21 @@ class LooFInterpreter {
   
   
   
+  void ExecuteStatementsUntilBreak (LooFEnvironment Environment) throws LooFInterpreterException {
+    if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
+    
+    if (Environment.Paused) {
+      long CurrentTimeMillis = System.currentTimeMillis();
+      if (CurrentTimeMillis < Environment.PauseEndMillis) return;
+      Environment.Paused = false;
+    }
+    
+    while (!(Environment.Stopped || Environment.Paused))  ExecuteNextStatement (Environment);
+    
+  }
+  
+  
+  
   void ExecuteNextStatement (LooFEnvironment Environment) throws LooFInterpreterException {
     LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
     

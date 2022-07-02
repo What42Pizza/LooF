@@ -42,10 +42,11 @@
 
 ### Files:
 
+- **get program path**
+  - Pushes the path of the folder containing the Main.LOOF file to the general stack as a table of strings.
 - **"get file properties", FilePath (string or table {string, ...})**
   - Pushes data relating to the file at FilePath to the general stack.
-  - Return data: {Name (string), Path (table {string, ...}), IsFolder (bool), CanRead (bool), CanWrite (bool)}.
-  - Errors if the file at FilePath does not exist.
+  - Return data: {Exists (bool), Size (int), IsFolder (bool), IsFile (bool), LastModified (int; uses Java's File.LastModified()), CanRead (bool), CanWrite (bool)}.
 - **"check file exists", FilePath (string or table {string, ...})**
   - Pushes an array containing a bool for whether the file at FilePath exists to the general stack.
 - **"get folder contents", FolderPath (string or table {string, ...})**
@@ -72,6 +73,8 @@
 
 - **"set properties", NewProperties (table)**
   - Sets the internal data about the graphics to NewProperties.
+- **"get properties"**
+  - Pushes data about the graphics / screen data to the general stack.
 - **"set frame", NewFrame (byteArray)**
   - Sets the current frame being displayed to NewFrame.
   - Errors if lengthOf NewFrame is not data.Width * data.Height * 3.

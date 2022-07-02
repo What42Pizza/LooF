@@ -45,7 +45,7 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
   
   
   @Override
-  public LooFModuleData CreateModuleData (LooFEnvironment Environment) {
+  public LooFModuleData CreateModuleData() {
     long StartTime = System.currentTimeMillis();
     return new LooFInterpreterModuleData (StartTime);
   }
@@ -83,7 +83,7 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
       
       
       
-      case ("print"):
+      case ("print"): {
         if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"print\" must take 2 arguments, \"print\" and a table for the value to print.", new String[] {"InvalidArgsLength"}));
         
         LooFDataValue ValuesToPrintTable = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
@@ -98,7 +98,7 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
         }
         print (ToPrint);
         
-        return;
+      return;}
       
       
       
@@ -109,3 +109,141 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
   }
   
 };
+
+
+
+
+
+
+
+
+
+
+LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
+  
+  @Override
+  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
+    LooFDataValue FirstArg = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Files module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
+    switch (FirstArg.StringValue) {
+      
+      
+      
+      case ("get program path"): {
+        String ProgramFilePath = Environment.ProgramFilePath;
+        String[] ProgramFilePathArray = ProgramFilePath.split("\\");
+        ArrayList <LooFDataValue> ProgramFilePathValues = new ArrayList <LooFDataValue> ();
+        for (String S : ProgramFilePathArray) {
+          ProgramFilePathValues.add(new LooFDataValue (S));
+        }
+        LooFDataValue TableToPush = new LooFDataValue (ProgramFilePathValues, new HashMap <String, LooFDataValue> ());
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+      return;}
+      
+      
+      
+      case ("get file properties"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"get file properties\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <File> FileToReadResult = GetFileFromDataValue (FileToReadValue);
+        if (FileToReadResult.Err) {
+          switch (FileToReadResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not read file: " + FileToReadResult.ErrCause, new String[] {"FileReadError"}));
+          }
+        }
+        File FileToRead = FileToReadResult.Some;
+        
+        HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
+        try {
+          
+          boolean Exists = FileToRead.exists();
+          if (!Exists) {
+            TableToPushItems.put("Exists", new LooFDataValue (false));
+            LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
+            LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+            return;
+          }
+          
+          long Size = FileToRead.length(); // this seems like a janky way to do this, but I'm pretty sure it's the intended way
+          boolean IsFolder = FileToRead.isDirectory();
+          long LastModified = FileToRead.lastModified();
+          boolean CanRead = FileToRead.canRead();
+          boolean CanWrite = FileToRead.canWrite();
+          
+          TableToPushItems.put("Size"        , new LooFDataValue (Size        ));
+          TableToPushItems.put("IsFolder"    , new LooFDataValue (IsFolder    ));
+          TableToPushItems.put("IsFiel"      , new LooFDataValue (!IsFolder   ));
+          TableToPushItems.put("LastModified", new LooFDataValue (LastModified));
+          TableToPushItems.put("CanRead"     , new LooFDataValue (CanRead     ));
+          TableToPushItems.put("CanWrite"    , new LooFDataValue (CanWrite    ));
+          LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
+          LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+          
+        } catch (SecurityException e) {
+          throw (new LooFInterpreterException (Environment, "SecurityException while reading file data: " + e.getMessage(), new String[] {"FileReadError"}));
+        }
+        
+      return;}
+      
+      
+      
+      case ("check file exists"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"get file properties\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <File> FileToReadResult = GetFileFromDataValue (FileToReadValue);
+        if (FileToReadResult.Err) {
+          switch (FileToReadResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"get file properties\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not read file: " + FileToReadResult.ErrCause, new String[] {"FileReadError"}));
+          }
+        }
+        File FileToRead = FileToReadResult.Some;
+        
+        boolean FileExists = FileToRead.exists();
+        
+        ArrayList <LooFDataValue> TableToPushItems = new ArrayList <LooFDataValue> ();
+        TableToPushItems.add(new LooFDataValue (FileExists));
+        LooFDataValue TableToPush = new LooFDataValue (TableToPushItems, new HashMap <String, LooFDataValue> ());
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+        
+      return;}
+      
+      
+      
+      default:
+        throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
+      
+    }
+  }
+  
+};
+
+
+
+
+
+Result <File> GetFileFromDataValue (LooFDataValue DataValueIn) {
+  switch (DataValueIn.ValueType) {
+    
+    case (DataValueType_String):
+      return new Result (new File (DataValueIn.StringValue));
+    
+    case (DataValueType_Table):
+      if (DataValueIn.ArrayValue.size() == 0) return (new Result <File> ()).SetCause("EmptyTable");
+      Result <String[]> PathArrayResult = GetStringArrayFromDataValue (DataValueIn);
+      if (PathArrayResult.Err) return (new Result <File> ()).SetCause("NonStringItem");
+      String[] PathArray = PathArrayResult.Some;
+      return new Result (new File (CombineStringsWithSeperator (PathArray, "/")));
+    
+    default:
+      return (new Result <File> ()).SetCause("InvalidArgType");
+    
+  }
+}

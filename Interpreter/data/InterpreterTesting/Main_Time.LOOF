@@ -1,0 +1,7 @@
+callOutside "Interpreter", "pause until", 1
+
+loop
+	callOutside "Interpreter", "pause", 0.1
+	:print timeSince 0
+	if timeSince 0 >= 3; :exit
+repeat
