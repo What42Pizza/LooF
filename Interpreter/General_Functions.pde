@@ -259,6 +259,14 @@ String RemoveFileExtention (String FileNameIn) {
 
 
 
+String GetFileExtention (String FileNameIn) {
+  int PeriodIndex = FileNameIn.lastIndexOf('.');
+  if (PeriodIndex == -1) throw (new RuntimeException ("Could not remove the extention of the file name \"" + FileNameIn + "\"."));
+  return FileNameIn.substring(PeriodIndex + 1);
+}
+
+
+
 
 
 
@@ -875,7 +883,7 @@ Result <String[]> GetStringArrayFromDataValue (LooFDataValue DataValueIn) {
   String[] Output = new String [ArrayIn.size()];
   for (int i = 0; i < Output.length; i ++) {
     LooFDataValue CurrentValue = ArrayIn.get(i);
-    if (CurrentValue.ValueType != DataValueType_String) return new Result();
+    if (CurrentValue.ValueType != DataValueType_String) return (new Result()).SetErrCause(DataValueTypeNames[CurrentValue.ValueType]);
     Output[i] = CurrentValue.StringValue;
   }
   return new Result (Output);

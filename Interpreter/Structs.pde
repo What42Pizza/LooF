@@ -296,7 +296,7 @@ String GetCompilerErrorMessage (LooFCodeData CodeData, HashMap <String, LooFCode
   return
     Message +
     "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, OriginalFileName) + " line " + OriginalLineNumber + ":" +
-    "\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, AllCodeDatas, LineNumber, TokenIndex);
+    "\n" + ErrorMessage_GetLineOfCodeToShow (CodeData, AllCodeDatas, LineNumber, TokenIndex, true);
 }
 
 
@@ -308,13 +308,13 @@ String ErrorMessage_GetFileNameToShow (String FileName, String OriginalFileName)
 
 
 
-String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, Integer TokenIndex) {
-  String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, AllCodeDatas, LineNumber);
+String ErrorMessage_GetLineOfCodeToShow (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, Integer TokenIndex, boolean IsCompilerException) {
+  String LineOfCodeToShow = ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, AllCodeDatas, LineNumber, IsCompilerException);
   LineOfCodeToShow += (TokenIndex == null) ? "" : "\nToken number " + TokenIndex + " `" + CodeData.CodeTokens.get(LineNumber).get(TokenIndex) + "`";
   return LineOfCodeToShow;
 }
 
-String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, boolean IsCompilerException) {
   int OriginalLineNumber    = CodeData.LineNumbers.get(LineNumber);
   String LineOfCode         = CodeData.CodeArrayList.get(LineNumber);
   String LineFileOrigin     = CodeData.LineFileOrigins.get(LineNumber);
@@ -326,7 +326,10 @@ String ErrorMessage_GetLineOfCodeToShow_WithoutToken (LooFCodeData CodeData, Has
   if (OriginalLineOfCode.length() > 150) OriginalLineOfCode = OriginalLineOfCode.substring(0, 150) + " ...";
   if (LineOfCode.length() > 150) LineOfCode = LineOfCode.substring(0, 150) + " ...";
   
-  if (LineHasChanged) return "Original line of code:                    `" + OriginalLineOfCode + "`\nAfter (or during) pre-processor & linker: `" + LineOfCode + "`";
+  if (LineHasChanged) {
+    if (IsCompilerException) return "Original line of code:                     `" + OriginalLineOfCode + "`\nAfter (or during) pre-processor & linker:  `" + LineOfCode + "`";
+    return "Original line of code:  `" + OriginalLineOfCode + "`\nAfter compiling:        `" + LineOfCode + "`";
+  }
   return "Line of code:  `" + LineOfCode + "`";
   
 }
@@ -402,7 +405,7 @@ String GetInterpreterErrorMessage (LooFEnvironment Environment, String Message, 
     Message +
     "\nTags: " + CombineStringsWithSeperator (ErrorTypeTags, ", ") +
     "\n\nFile " + ErrorMessage_GetFileNameToShow (FileName, LineFileOrigin) + " line " + CodeData.LineNumbers.get(LineNumber) + ":" +
-    "\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber);
+    "\n" + ErrorMessage_GetLineOfCodeToShow_WithoutToken (CodeData, Environment.AllCodeDatas, LineNumber, false);
 }
 
 
@@ -943,7 +946,7 @@ class Result <T> {
     this.Err = true;
   }
   
-  public Result SetCause (String ErrCause) {
+  public Result SetErrCause (String ErrCause) {
     this.ErrCause = ErrCause;
     return this;
   }

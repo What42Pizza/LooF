@@ -1,0 +1,17 @@
+callOutside "Files", "get program path"  -> ProgramFolder
+callOutside "Files", "get file properties", ProgramFolder .. {"Main.LOOF"}  -> FileProperties
+callOutside "Files", "get files in dir", ProgramFolder  -> ProgramFiles
+
+:print "Program folder: " .. ProgramFolder
+:print "Program folder properties: " .. FileProperties
+:print "Program folder contents: " .. ProgramFiles
+
+:print "\n\n\nMain file contents:\n"
+callOutside "Files", "read file as strings", ProgramFolder .. {"Main.LOOF"}  -> MainFileContents
+ToPrint = ""
+forEach CurrentString, MainFileContents
+	ToPrint ..= CurrentString .. "\n"
+repeat
+:print ToPrint
+
+:exit

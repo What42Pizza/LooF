@@ -28,8 +28,8 @@
 - **"add page from strings", PageName (string), PageCode (table {string, ...}), CompileSettings (table)**
   - Compiles and adds a new page from the given code.
   - Errors if there is already a page names PageName.
-- **"get page function locations", PageName (string)**
-  - Pushes a table containing a table containing all the function locations in the page PageName.
+- **"get page functions", PageName (string)**
+  - Pushes a table containing a table containing all the functions in the page PageName.
   - Function locations are stored as ints in the hashmap part of the inner returned table with the function names as the keys.
   - Errors if no page named PageName exists
 - **"get all pages"**
@@ -58,13 +58,15 @@
 - **"read file as byteArray", FilePath (string or table {string, ...})**
   - Pushes the contents of the file at FilePath to the general stack as a byteArray.
   - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
-- **read file as image, FilePath (string or table {string, ...})**
+- **load image, FilePath (string or table {string, ...})**
   - Pushes the decompressed image (depending on the file extension) of the file at FilePath to the general stack as a byteArray.
+  - Uses Java's ImageIO.read().
   - Errors if the file at FilePath does not exist or if the file at FilePath is a folder.
 - **"write to file", FilePath (string or table {string, ...}), Contents (table {string, ...} or byteArray)**
   - Writes the data of Contents to the file at FilePath (which is created if necessary).
-- **"write to file as image", FilePath (string or table {string, ...}), Image (byteArray)**
+- **"save image", FilePath (string or table {string, ...}), Image (byteArray)**
   - Writes the compressed version of Contents (depending of the file extension) to the file at FilePath (which is created if necessary).
+  - Errors if lengthOf Image is not width * height * 4 + 4.
 - **"delete file", FilePath (string or table {string, ...})**
   - Deletes the file at FilePath.
   - Errors if the file at FilePath cannot be found.
@@ -82,4 +84,12 @@
   - Pushes data about the graphics / screen data to the general stack.
 - **"set frame", NewFrame (byteArray)**
   - Sets the current frame being displayed to NewFrame.
-  - Errors if lengthOf NewFrame is not data.Width * data.Height * 3.
+  - Errors if lengthOf NewFrame is not data.Width * data.Height * 4 + 4.
+
+<br>
+<br>
+<br>
+
+### INFORMATION ABOUT IMAGES
+
+Images in LooF are stored as byteArrays. The first four bytes in the byteArray describe the width and height of the image. The first two bytes describe the width (low byte first), and the second two bytes describe the height (again, low byte first). In a 1080p image, the first four bytes would be 56, 4, 128, 7 (56 + 4 * 256 = 1080, 128 + 7 * 256 = 1920). The remaining bytes are the describe the pixels in the ABGR format. This means a 1x1 image with a single fully red, fully opaque pixel would be stored as 1, 0, 1, 0, 255, 0, 0, 255.

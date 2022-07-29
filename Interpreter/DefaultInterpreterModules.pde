@@ -1,3 +1,49 @@
+LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
+  
+  @Override
+  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
+    LooFDataValue FirstArg = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Console module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
+    switch (FirstArg.StringValue) {
+      
+      
+      
+      case ("print"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"print\" must take 2 arguments, \"print\" and a table for the value to print.", new String[] {"InvalidArgsLength"}));
+        
+        LooFDataValue ValuesToPrintTable = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        if (ValuesToPrintTable.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the message \"print\" must take a table as its additional arg, but the first additional arg was of type " + DataValueTypeNames[ValuesToPrintTable.ValueType] + ".", new String[] {"InvalidArgsLength"}));
+        ArrayList <LooFDataValue> ValuesToPrintArray = ValuesToPrintTable.ArrayValue;
+        
+        if (ValuesToPrintArray.size() == 0) throw (new LooFInterpreterException (Environment, "the message \"print\" cannot take an empty table as its additional arg.", new String[] {"InvalidArgsLength"}));
+        
+        String ToPrint = Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(0), Environment, null, null).StringValue;
+        for (int i = 1; i < ValuesToPrintArray.size(); i ++) {
+          ToPrint += " " + Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(i), Environment, null, null).StringValue;
+        }
+        print (ToPrint);
+        
+      return;}
+      
+      
+      
+      default:
+        throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
+      
+    }
+  }
+  
+};
+
+
+
+
+
+
+
+
+
+
 LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule() {
   
   
@@ -63,52 +109,6 @@ class LooFInterpreterModuleData extends LooFModuleData {
   }
   
 }
-
-
-
-
-
-
-
-
-
-
-LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
-  
-  @Override
-  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
-    LooFDataValue FirstArg = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Console module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
-    switch (FirstArg.StringValue) {
-      
-      
-      
-      case ("print"): {
-        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"print\" must take 2 arguments, \"print\" and a table for the value to print.", new String[] {"InvalidArgsLength"}));
-        
-        LooFDataValue ValuesToPrintTable = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
-        if (ValuesToPrintTable.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the message \"print\" must take a table as its additional arg, but the first additional arg was of type " + DataValueTypeNames[ValuesToPrintTable.ValueType] + ".", new String[] {"InvalidArgsLength"}));
-        ArrayList <LooFDataValue> ValuesToPrintArray = ValuesToPrintTable.ArrayValue;
-        
-        if (ValuesToPrintArray.size() == 0) throw (new LooFInterpreterException (Environment, "the message \"print\" cannot take an empty table as its additional arg.", new String[] {"InvalidArgsLength"}));
-        
-        String ToPrint = Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(0), Environment, null, null).StringValue;
-        for (int i = 1; i < ValuesToPrintArray.size(); i ++) {
-          ToPrint += " " + Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(i), Environment, null, null).StringValue;
-        }
-        print (ToPrint);
-        
-      return;}
-      
-      
-      
-      default:
-        throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
-      
-    }
-  }
-  
-};
 
 
 
@@ -332,6 +332,206 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
       
       
       
+      case ("load image"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"load image\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <Tuple2 <File, String>> FileToReadResult = GetFileFromDataValue (FileToReadValue);
+        if (FileToReadResult.Err) {
+          switch (FileToReadResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"load image\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"load image\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"load image\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not read file: " + FileToReadResult.ErrCause, new String[] {"FileReadError"}));
+          }
+        }
+        File FileToRead = FileToReadResult.Some.Value1;
+        
+        boolean FileExists = FileToRead.exists();
+        if (!FileExists) throw (new LooFInterpreterException (Environment, "could not find the file at " + FileToReadResult.Some.Value2 + ".", new String[] {"FileNotFound", "FileReadError"}));
+        if (!FileToRead.isFile()) throw (new LooFInterpreterException (Environment, "the path at " + FileToReadResult.Some.Value2 + " is not a file.", new String[] {"FileNotFound", "FileReadError"}));
+        
+        String FileExtention = GetFileExtention (FileToRead.getName());
+        switch (FileExtention) {
+          case ("png"):
+          case ("jpeg"):
+          case ("bmp"):
+          case ("wbmp"):
+          case ("gif"):
+            break;
+          default:
+            throw (new LooFInterpreterException (Environment, "cannot load image of type \"" + FileExtention + "\".", new String[] {"InvalidFileType", "FileReadError"}));
+        }
+        
+        BufferedImage ImageIn;
+        try {
+          ImageIn = ImageIO.read(FileToRead);
+        } catch (IOException e) {
+          throw (new LooFInterpreterException (Environment, "error while reading file data: " + e.toString(), new String[] {"FileReadError"}));
+        }
+        
+        byte[] ImageInPixels = ((DataBufferByte) ImageIn.getRaster().getDataBuffer()).getData(); // from StackOverflow: https://stackoverflow.com/a/29280741/13325385
+        byte[] ImageInData = new byte [ImageInPixels.length + 4];
+        int ImageInWidth = ImageIn.getWidth();
+        int ImageInHeight = ImageIn.getHeight();
+        ImageInData[0] = (byte) ( ImageInWidth  & 0xFF  );
+        ImageInData[1] = (byte) ((ImageInWidth  & 0xFF00) >> 8);
+        ImageInData[2] = (byte) ( ImageInHeight & 0xFF  );
+        ImageInData[3] = (byte) ((ImageInHeight & 0xFF00) >> 8);
+        System.arraycopy(ImageInPixels, 0, ImageInData, 4, ImageInPixels.length);
+        
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {new LooFDataValue (ImageInData)}, Environment);
+        
+      return;}
+      
+      
+      
+      
+      
+      case ("write to file"): {
+        if (Args.length != 3) throw (new LooFInterpreterException (Environment, "the message \"write to file\" can only take 2 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <String> FileNameResult = GetFileNameFromDataValue (FileToReadValue);
+        if (FileNameResult.Err) {
+          switch (FileNameResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"write to file\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"write to file\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"write to file\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not write file: " + FileNameResult.ErrCause, new String[] {"FileWriteError"}));
+          }
+        }
+        String FileName = FileNameResult.Some;
+        
+        // convert value to bytes
+        byte[] BytesToWrite = null;
+        LooFDataValue ValueToWrite = LooFInterpreter.EvaluateFormula (Args[2], Environment, null, null);
+        switch (ValueToWrite.ValueType) {
+          
+          case (DataValueType_Table):
+            
+            // get strings
+            Result <String[]> TableStringsResult = GetStringArrayFromDataValue (ValueToWrite);
+            if (TableStringsResult.Err) throw (new LooFInterpreterException (Environment, "the message \"write to file\" cannot take a table with non-string items as its second arg.", new String[] {"InvalidArgType"}));
+            String[] TableStrings = TableStringsResult.Some;
+            
+            // get string bytes
+            byte[][] TableStringBytes = new byte [TableStrings.length] [];
+            int TotalBytesSize = 0;
+            for (int i = 0; i < TableStrings.length; i ++) {
+              byte[] CurrentStringBytes = (TableStrings[i] + '\n').getBytes();
+              TableStringBytes[i] = CurrentStringBytes;
+              TotalBytesSize += CurrentStringBytes.length;
+            }
+            
+            // put bytes in BytesToWrite
+            BytesToWrite = new byte [TotalBytesSize];
+            int Index = 0;
+            for (int i = 0; i < TableStringBytes.length; i ++) {
+              byte[] CurrentBytes = TableStringBytes[i];
+              for (int j = 0; j < CurrentBytes.length; j ++) {
+                BytesToWrite[Index + j] = CurrentBytes[j];
+              }
+              Index += CurrentBytes.length;
+            }
+            
+            break;
+          
+          case (DataValueType_ByteArray):
+            BytesToWrite = ValueToWrite.ByteArrayValue;
+            break;
+          
+          default:
+            throw (new LooFInterpreterException (Environment, "the message \"write to file\" must take a table of strings or a byte array as its second arg, but the arg was of type " + DataValueTypeNames[ValueToWrite.ValueType] + ".", new String[] {"InvalidArgType"}));
+          
+        }
+        
+        try {
+          Files.write(Paths.get(FileName), BytesToWrite);
+        } catch (IOException e) {
+          throw (new LooFInterpreterException (Environment, "error while writing file data: " + e.toString(), new String[] {"FileWriteError"}));
+        }
+        
+      return;}
+      
+      
+      
+      
+      
+      case ("save image"): {
+        if (Args.length != 3) throw (new LooFInterpreterException (Environment, "the message \"save image\" can only take 2 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <String> FileNameResult = GetFileNameFromDataValue (FileToReadValue);
+        if (FileNameResult.Err) {
+          switch (FileNameResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"save image\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"save image\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"save image\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not write file: " + FileNameResult.ErrCause, new String[] {"FileWriteError"}));
+          }
+        }
+        String FileName = FileNameResult.Some;
+        
+        String FileExtention = GetFileExtention (FileName);
+        switch (FileExtention) {
+          case ("png"):
+          case ("jpeg"):
+          case ("bmp"):
+          case ("wbmp"):
+          case ("gif"):
+            break;
+          default:
+            throw (new LooFInterpreterException (Environment, "cannot load image of type \"" + FileExtention + "\".", new String[] {"InvalidFileType", "FileWriteError"}));
+        }
+        
+        LooFDataValue ImageOutValue = LooFInterpreter.EvaluateFormula (Args[2], Environment, null, null);
+        if (ImageOutValue.ValueType != DataValueType_ByteArray) throw (new LooFInterpreterException (Environment, "", new String[] {"InvalidArgType"}));
+        byte[] ImageOutData = ImageOutValue.ByteArrayValue;
+        
+        byte[] ImageOutPixels = new byte [ImageOutData.length - 4];
+        System.arraycopy(ImageOutData, 4, ImageOutPixels, 0, ImageOutPixels.length);
+        int ImageOutWidth = ImageOutData[0] + (ImageOutData[1] << 8);
+        int ImageOutHeight = ImageOutData[2] + (ImageOutData[3] << 8);
+        
+        BufferedImage ImageOut = new BufferedImage(ImageOutWidth, ImageOutHeight, BufferedImage.TYPE_4BYTE_ABGR); // from StackOverflow: https://stackoverflow.com/a/29428561/13325385
+        ImageOut.setData(Raster.createRaster(ImageOut.getSampleModel(), new DataBufferByte(ImageOutPixels, ImageOutPixels.length), new Point()));
+        try {
+          ImageIO.write(ImageOut, FileExtention, new File (FileName));
+        } catch (IOException e) {
+          throw (new LooFInterpreterException (Environment, "error while reading file data: " + e.toString(), new String[] {"FileReadError"}));
+        }
+        
+      return;}
+      
+      
+      
+      
+      
+      case ("delete file"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"delete file\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        LooFDataValue FileToReadValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        
+        Result <Tuple2 <File, String>> FileToDeleteResult = GetFileFromDataValue (FileToReadValue);
+        if (FileToDeleteResult.Err) {
+          switch (FileToDeleteResult.ErrCause) {
+            case ("InvalidArgType"): throw (new LooFInterpreterException (Environment, "the message \"delete file\" must take a string or table of strings as its first arg, but the first arg was of type " + DataValueTypeNames[FileToReadValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+            case ("NonStringItem"): throw (new LooFInterpreterException (Environment, "the message \"delete file\" must take a string or table of strings as its first arg, but the first arg was a table that contained a non-string item.", new String[] {"InvalidArgType"}));
+            case ("EmptyTable"): throw (new LooFInterpreterException (Environment, "the message \"delete file\" must take a string or table of strings as its first arg, but the first arg was an empty table.", new String[] {"InvalidArgType"}));
+            default: throw (new LooFInterpreterException (Environment, "could not read file: " + FileToDeleteResult.ErrCause, new String[] {"FileReadError"}));
+          }
+        }
+        File FileToDelete = FileToDeleteResult.Some.Value1;
+        
+        if (!FileToDelete.exists()) throw (new LooFInterpreterException (Environment, "could not find the file at " + FileToDeleteResult.Some.Value2 + ".", new String[] {"FileNotFound", "FileReadError"}));
+        FileToDelete.delete();
+        
+      return;}
+      
+      
+      
+      
+      
       default:
         throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
       
@@ -344,28 +544,36 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
 
 
 
-Result <Tuple2 <File, String>> GetFileFromDataValue (LooFDataValue DataValueIn) {
+Result <String> GetFileNameFromDataValue (LooFDataValue DataValueIn) {
   switch (DataValueIn.ValueType) {
     
     case (DataValueType_String): {
       String FileName = DataValueIn.StringValue;
-      Tuple2 Output = new Tuple2 (new File (FileName), FileName);
-      return new Result (Output);
+      return new Result (FileName);
     }
     
     case (DataValueType_Table): {
-      if (DataValueIn.ArrayValue.size() == 0) return (new Result()).SetCause("EmptyTable");
+      if (DataValueIn.ArrayValue.size() == 0) return (new Result()).SetErrCause("EmptyTable");
       Result <String[]> PathArrayResult = GetStringArrayFromDataValue (DataValueIn);
-      if (PathArrayResult.Err) return (new Result()).SetCause("NonStringItem");
+      if (PathArrayResult.Err) return (new Result()).SetErrCause("NonStringItem");
       String[] PathArray = PathArrayResult.Some;
       String FileName = CombineStringsWithSeperator (PathArray, "/");
-      Tuple2 Output = new Tuple2 (new File (FileName), FileName);
-      return new Result (Output);
+      return new Result (FileName);
     }
     
     default: {
-      return (new Result()).SetCause("InvalidArgType");
+      return (new Result()).SetErrCause("InvalidArgType");
     }
     
   }
+}
+
+
+
+Result <Tuple2 <File, String>> GetFileFromDataValue (LooFDataValue DataValueIn) {
+  Result <String> FileNameResult = GetFileNameFromDataValue (DataValueIn);
+  if (FileNameResult.Err) return (new Result()).SetErrCause(FileNameResult.ErrCause);
+  String FileName = FileNameResult.Some;
+  Tuple2 Output = new Tuple2 (new File (FileName), FileName);
+  return new Result (Output);
 }

@@ -1,0 +1,13 @@
+callOutside "Files", "get program path"  -> ProgramFolder
+
+// read and print bytes of TestFile.txt
+callOutside "Files", "read file as byteArray", ProgramFolder .. {"TestFile.txt"}  -> TestFileBytes
+forEach CurrentByte, TestFileBytes
+	:print CurrentByte
+repeat
+
+// write "hello, world!" to TestOutput.txt
+StringsToWrite = {"hello, world!"}
+callOutside "Files", "write to file", ProgramFolder .. {"TestOutput.txt"}, StringsToWrite
+
+:exit
