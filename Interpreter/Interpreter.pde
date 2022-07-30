@@ -63,14 +63,14 @@ void setup() {
   println("Program output:");
   println();
   int StartMillis = millis();
-  //try {
+  try {
     while (!TestEnvironment.Stopped) {
       LooFInterpreter.ExecuteStatementsUntilBreak(TestEnvironment);
     }
-  //} catch (RuntimeException e) {
-  //  if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
-  //  throw e;
-  //}
+  } catch (RuntimeException e) {
+    if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
+    throw e;
+  }
   println();
   println ("Execution time: " + (millis() - StartMillis) + " ms");
   

@@ -518,7 +518,7 @@ class LooFInterpreter {
   void SetDataValueIndex (LooFDataValue TargetTable, LooFDataValue IndexValue, LooFDataValue NewVarValue, LooFEnvironment Environment) {
     int CaseToUse = 0;
     
-    if (LastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, null, null, "cannot set the index of a locked data value.", new String[] {"LockedValueSetAttempted"});
+    if (LastItemOf (TargetTable.LockLevels) > 0) ThrowLooFException (Environment, null, null, "value is locked but attempted to reasign an index.", new String[] {"LockedValueSetAttempted"});
     
     switch (IndexValue.ValueType) {
       case (DataValueType_Int):

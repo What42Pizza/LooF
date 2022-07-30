@@ -466,7 +466,7 @@ class LooFCompiler {
     }
     
     CombinedTokens.sort(new StringComparator_ShortestToLongest());
-    return ListToArray (CombinedTokens, String.class);
+    return ArrayListToArray (CombinedTokens, String.class);
   }
   
   
@@ -500,7 +500,7 @@ class LooFCompiler {
       if (CurrentFileName.equals("Header.LOOF")) HeaderFileContents = ReadFileAsStrings (AllFilesRaw.remove(i));
     }
     
-    AllFiles = ListToArray (AllFilesRaw, File.class);
+    AllFiles = ArrayListToArray (AllFilesRaw, File.class);
     
     
     
@@ -1805,7 +1805,7 @@ class LooFCompiler {
       PossibleIndexIndex = IndexEndIndex + 2;
     }
     
-    return ListToArray (IndexQueriesList, LooFTokenBranch.class);
+    return ArrayListToArray (IndexQueriesList, LooFTokenBranch.class);
   }
   
   
@@ -1844,7 +1844,7 @@ class LooFCompiler {
       int BlockEnd = BlockEnds.get(i);
       if (BlockEnd != -1) i = BlockEnd;
     }
-    LooFTokenBranch[] FormulaChildren = ListToArray (FormulaChildrenList, LooFTokenBranch.class);
+    LooFTokenBranch[] FormulaChildren = ArrayListToArray (FormulaChildrenList, LooFTokenBranch.class);
     EnsureFormulaTokensAreValid (FormulaChildren, CodeData, AllCodeDatas, LineNumber);
     LooFTokenBranch ParsedFormula = new LooFTokenBranch (FormulaBlockStart - 1, "(", FormulaChildren);
     FillFormulaTokenEvaluationOrders (ParsedFormula);
@@ -2092,8 +2092,8 @@ class LooFCompiler {
     Arrays.sort(OperationIndexesAndOrders, new FloatIntPairComparator());
     
     // fill orders
-    FormulaToken.IndexQueryIndexes = ToPrimitive (ListToArray (IndexQueryIndexes, Integer.class));
-    FormulaToken.FunctionIndexes = ToPrimitive (ListToArray (FunctionIndexes, Integer.class));
+    FormulaToken.IndexQueryIndexes = ToPrimitive (ArrayListToArray (IndexQueryIndexes, Integer.class));
+    FormulaToken.FunctionIndexes = ToPrimitive (ArrayListToArray (FunctionIndexes, Integer.class));
     FormulaToken.OperationIndexes = OperationIndexesAndOrders;
     
     ShiftAllFormulaTokenEvaluationOrders (FormulaToken);
@@ -2206,7 +2206,7 @@ class LooFCompiler {
     if (PrevNextCommaIndex != TableBlockEnd)
       PasrseAndAddTableItem (CurrentLineTokens, PrevNextCommaIndex + 1, TableBlockEnd, ArrayItems, HashMapItems, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
     
-    LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", ListToArray (ArrayItems, LooFTokenBranch.class), HashMapItems);
+    LooFTokenBranch ParsedTable = new LooFTokenBranch (TableBlockStart - 1, "{", ArrayListToArray (ArrayItems, LooFTokenBranch.class), HashMapItems);
     FillTokenBranchCanBePreEvaluated (ParsedTable);
     return ParsedTable;
   }

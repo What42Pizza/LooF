@@ -63,7 +63,7 @@ loop
 	
 	call UpdateAll, GameData, BallsData, BulletsData
 	
-	callOutside "Interpreter", "pause until", (PrevFrameSecond + Settings["TargetFrameDelta"])
+	callOutside "Interpreter", "pause until", PrevFrameSecond + TargetFrameDelta
 	PrevFrameSecond = timeSince 0
 	//callOutside "Graphics", "render frame"
 repeat

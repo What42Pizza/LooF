@@ -1,0 +1,23 @@
+callOutside "Files", "get program path"  -> ProgramFolder
+
+callOutside "Files", "load image", ProgramFolder .. {"TestImage.png"}  -> TestImage
+call SetPixel, TestImage, 0, 0, 255, 0, 0
+callOutside "Files", "save image", ProgramFolder .. {"TestImageAltered.png"}, TestImage
+
+:exit
+
+
+
+function SetPixel  -> Image, PixelX, PixelY, Red, Green, Blue, Alpha
+	Alpha <defaultsTo 255
+	ImageWidth = Image[0] + Image[1] << 8
+	PixelIndex = PixelX + PixelY * ImageWidth
+	PixelIndex = PixelIndex * 4 + 4
+	
+	Image[PixelIndex] = Alpha
+	Image[PixelIndex + 1] = Blue
+	Image[PixelIndex + 2] = Green
+	Image[PixelIndex + 3] = Red
+	
+	return
+end

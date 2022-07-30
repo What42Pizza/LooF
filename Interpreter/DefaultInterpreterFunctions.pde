@@ -36,14 +36,26 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
     
     // pop into rest of args
     if (PoppedValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "attempted to pop table values into vars, but the popped value was of type " + DataValueTypeNames[PoppedValue.ValueType] + ".", new String[] {"NonTableValueOnGeneralStack", "InvalidArgType"}));
+    ArrayList <LooFDataValue> ValuesToLock = new ArrayList <LooFDataValue> ();
     ArrayList <LooFDataValue> PoppedValueItems = PoppedValue.ArrayValue;
     int EndIndex = Math.min (PoppedValueItems.size() + 1, Args.length);
     for (int i = 1; i < EndIndex; i ++) {
-      LooFInterpreter.SetVariableValue (Args[i].StringValue, PoppedValueItems.get(i - 1), Environment);
+      String VarName = Args[i].StringValue;
+      LooFDataValue VarValue = PoppedValueItems.get(i - 1);
+      if (VarName.startsWith("mut_"))  VarName = VarName.substring(4);
+        else  ValuesToLock.add(VarValue);
+      LooFInterpreter.SetVariableValue (VarName, VarValue, Environment);
     }
+    
+    // fill remaining args with null
     for (int i = EndIndex; i < Args.length; i ++) {
       LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
     }
+    
+    // lock values
+    if (ValuesToLock.size() == 0) return;
+    for (LooFDataValue CurrentValue : ValuesToLock) IncreaseDataValueLock (CurrentValue);
+    Environment.CallStackLockedValues.add(ArrayListToArray (ValuesToLock, LooFDataValue.class));
     
   }
   
@@ -69,18 +81,12 @@ LooFInterpreterFunction InterpreterFunction_Call = new LooFInterpreterFunction()
     // push args
     if (Args.length > 1) {
       ArrayList <LooFDataValue> ArgsToPush = new ArrayList <LooFDataValue> ();
-      LooFDataValue[] LockedValues = new LooFDataValue [Args.length - 2];
       for (int i = 1; i < Args.length; i ++) {
         LooFDataValue CurrentArg = LooFInterpreter.EvaluateFormula (Args[i], Environment, null, null);
         ArgsToPush.add(CurrentArg);
-        if (i != 1) {
-          IncreaseDataValueLock (CurrentArg);
-          LockedValues[i - 2] = CurrentArg;
-        }
       }
       LooFDataValue ValueToPush = new LooFDataValue (ArgsToPush, new HashMap <String, LooFDataValue> ());
       Environment.GeneralStack.add(ValueToPush);
-      if (LockedValues.length > 0) Environment.CallStackLockedValues.add(LockedValues);
     }
     
     // pre-evaluated

@@ -7,7 +7,7 @@
   return new ArrayList <T> (Arrays.asList (Input));
 }
 
-<T> T[] ListToArray (List <T> Input, Class OutputClass) {
+<T> T[] ArrayListToArray (List <T> Input, Class OutputClass) {
   return Input.toArray((T[]) Array.newInstance(OutputClass, Input.size()));
 }
 
@@ -237,7 +237,7 @@ void DeleteAllFilesOfType (String FolderPath, String TypeToRemove) {
 
 String[] ReadFileAsStrings (File FileToRead) throws IOException {
   List <String> FileContents = Files.readAllLines(FileToRead.toPath());
-  return ListToArray (FileContents, String.class);
+  return ArrayListToArray (FileContents, String.class);
 }
 
 
