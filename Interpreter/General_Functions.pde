@@ -153,6 +153,22 @@ double CorrectModulo (double A, double B) {
 
 
 
+long ByteToLong (byte ByteIn) {
+  long Output = (long) ByteIn;
+  Output += 256;
+  Output %= 256;
+  return Output;
+}
+
+int ByteToInt (byte ByteIn) {
+  int Output = (int) ByteIn;
+  Output += 256;
+  Output %= 256;
+  return Output;
+}
+
+
+
 
 
 // from stack overflow: https://stackoverflow.com/questions/21092086/get-random-element-from-collection by Peter Lawrey https://stackoverflow.com/users/57695/peter-lawrey

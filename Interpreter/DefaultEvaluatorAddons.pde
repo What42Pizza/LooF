@@ -1656,6 +1656,19 @@ LooFEvaluatorFunction Function_CloneValue = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_NewByteArray = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newByteArray takes an int as its first argument, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    return new LooFDataValue (new byte [(int) Input.IntValue]);
+    
+  }
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_TimeSince = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     LooFInterpreterModule InterpreterModule = Environment.AddonsData.InterpreterModules.getOrDefault("Interpreter", null);

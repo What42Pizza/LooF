@@ -1,0 +1,10 @@
+function TestFunc  -> mut_TableToEdit
+	TableToEdit[0] = 10
+	return
+end
+
+
+
+call TestFunc, {0}
+
+:exit

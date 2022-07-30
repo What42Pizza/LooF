@@ -151,8 +151,8 @@ class LooFEnvironment {
   
   
   
-  boolean Stopped = false;
-  boolean Paused = false;
+  boolean IsStopped = false;
+  boolean IsPaused = false;
   long PauseEndMillis = 0;
   String CurrentPageName;
   LooFCodeData CurrentCodeData;
@@ -367,6 +367,12 @@ class LooFInterpreterException extends RuntimeException {
   String[] ErrorTypeTags;
   ArrayList <String> StackTracePages;
   ArrayList <Integer> StackTraceLines;
+  
+  public LooFInterpreterException (String Message, String[] ErrorTypeTags) {
+    super ("    " + Message);
+    this.Message = Message;
+    this.ErrorTypeTags = ErrorTypeTags;
+  }
   
   public LooFInterpreterException (LooFEnvironment Environment, String Message, String[] ErrorTypeTags) {
     super ("    " + GetInterpreterErrorMessage (Environment, Message, ErrorTypeTags));

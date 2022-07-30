@@ -33,6 +33,8 @@ class LooFCompiler {
     
     ArrayList <LooFCompilerException> AllExceptions = new ArrayList <LooFCompilerException> ();
     
+    HashMap <String, boolean[]> CharsInQuotesCache = new HashMap <String, boolean[]> ();
+    
     
     
     // get default addons
@@ -58,7 +60,7 @@ class LooFCompiler {
     
     // pre-process CodeData-s
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
-      PreProcessCodeData (CodeData, AllCodeDatas, HeaderFileContents, AllExceptions);
+      PreProcessCodeData (CodeData, AllCodeDatas, HeaderFileContents, AllExceptions, CharsInQuotesCache);
     }
     
     if (AllExceptions.size() > 0) {
@@ -208,7 +210,7 @@ class LooFCompiler {
     InterpreterModules.putIfAbsent("Interpreter", InterpreterModule_Interpreter);
     InterpreterModules.putIfAbsent("Console", InterpreterModule_Console);
     InterpreterModules.putIfAbsent("Files", InterpreterModule_Files);
-    //InterpreterModules.putIfAbsent("Graphics", NullInterpreterModule);
+    InterpreterModules.putIfAbsent("Graphics", InterpreterModule_Graphics);
     
     return InterpreterModules;
   }
@@ -315,8 +317,8 @@ class LooFCompiler {
     EvaluatorOperations.putIfAbsent("&&", Operation_BitwiseAnd);
     EvaluatorOperations.putIfAbsent("||", Operation_BitwiseOr);
     EvaluatorOperations.putIfAbsent("^^", Operation_BitwiseXor);
-    EvaluatorOperations.putIfAbsent("<<", Operation_ShiftRight);
-    EvaluatorOperations.putIfAbsent(">>", Operation_ShiftLeft);
+    EvaluatorOperations.putIfAbsent("<<", Operation_ShiftLeft);
+    EvaluatorOperations.putIfAbsent(">>", Operation_ShiftRight);
     
     return EvaluatorOperations;
   }
@@ -421,7 +423,7 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("cloneValue", Function_CloneValue);
     //EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
-    //EvaluatorFunctions.putIfAbsent("newByteArray", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("newByteArray", Function_NewByteArray);
     EvaluatorFunctions.putIfAbsent("timeSince", Function_TimeSince);
     //EvaluatorFunctions.putIfAbsent("switch", NullEvaluatorFunction);
     
@@ -528,7 +530,9 @@ class LooFCompiler {
     
     // create CodeData-s
     for (int i = 0; i < AllFiles.length; i ++) {
-      AllCodeDatas.put(AllFullFileNames[i], new LooFCodeData (AllFileContents[i], AllFullFileNames[i]));
+      String FullFileName = AllFullFileNames[i];
+      String[] FileContents = AllFileContents[i];
+      AllCodeDatas.put(FullFileName, new LooFCodeData (FileContents, FullFileName));
     }
     
     
@@ -546,8 +550,8 @@ class LooFCompiler {
   
   
   
-  void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents, ArrayList <LooFCompilerException> AllExceptions) {
-    HashMap <String, boolean[]> CharsInQuotesCache = new HashMap <String, boolean[]> ();
+  void PreProcessCodeData (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, String[] HeaderFileContents, ArrayList <LooFCompilerException> AllExceptions, HashMap <String, boolean[]> CharsInQuotesCache) {
+    if (CodeData.OriginalCode.length == 0) return;
     
     InsertHeader (CodeData, HeaderFileContents);
     AddPaddingLines (CodeData);

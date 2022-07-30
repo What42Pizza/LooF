@@ -12,17 +12,17 @@ class LooFInterpreter {
   
   
   void ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) throws LooFInterpreterException  {
-    if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
+    if (Environment.IsStopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     
-    if (Environment.Paused) {
+    if (Environment.IsPaused) {
       long CurrentTimeMillis = System.currentTimeMillis();
       if (CurrentTimeMillis < Environment.PauseEndMillis) return;
-      Environment.Paused = false;
+      Environment.IsPaused = false;
     }
     
     for (int i = 0; i < NumOfStatements; i ++) {
       ExecuteNextStatement (Environment);
-      if (Environment.Stopped || Environment.Paused) return;
+      if (Environment.IsStopped || Environment.IsPaused) return;
     }
     
   }
@@ -30,22 +30,24 @@ class LooFInterpreter {
   
   
   void ExecuteStatementsUntilBreak (LooFEnvironment Environment) throws LooFInterpreterException {
-    if (Environment.Stopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
+    if (Environment.IsStopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     
-    if (Environment.Paused) {
+    if (Environment.IsPaused) {
       long CurrentTimeMillis = System.currentTimeMillis();
       if (CurrentTimeMillis < Environment.PauseEndMillis) return;
-      Environment.Paused = false;
+      Environment.IsPaused = false;
     }
     
-    while (!(Environment.Stopped || Environment.Paused))  ExecuteNextStatement (Environment);
+    while (!(Environment.IsStopped || Environment.IsPaused))  ExecuteNextStatement (Environment);
     
   }
   
   
   
   void ExecuteNextStatement (LooFEnvironment Environment) throws LooFInterpreterException {
-    LooFStatement CurrentStatement = Environment.CurrentCodeData.Statements[Environment.CurrentLineNumber];
+    LooFStatement[] Statements = Environment.CurrentCodeData.Statements;
+    if (Statements.length == 0) throw (new LooFInterpreterException ("cannot execute in an empty file (" + Environment.CurrentCodeData.OriginalFileName + ").", new String[] {"ReachedEndOfFile"}));
+    LooFStatement CurrentStatement = Statements[Environment.CurrentLineNumber];
     
     try {
       switch (CurrentStatement.StatementType) {
@@ -73,7 +75,7 @@ class LooFInterpreter {
   void IncrementEnvironmentLineNumber (LooFEnvironment Environment) {
     
     Environment.CurrentLineNumber ++;
-    if (Environment.Stopped) return;
+    if (Environment.IsStopped) return;
     
     int StatementsLength = Environment.CurrentCodeData.Statements.length;
     if (Environment.CurrentLineNumber < StatementsLength) return;

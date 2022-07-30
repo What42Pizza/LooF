@@ -9,13 +9,13 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
       
       
       case ("print"): {
-        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"print\" must take 2 arguments, \"print\" and a table for the value to print.", new String[] {"InvalidArgsLength"}));
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"print\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
         
         LooFDataValue ValuesToPrintTable = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
-        if (ValuesToPrintTable.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the message \"print\" must take a table as its additional arg, but the first additional arg was of type " + DataValueTypeNames[ValuesToPrintTable.ValueType] + ".", new String[] {"InvalidArgsLength"}));
+        if (ValuesToPrintTable.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "the message \"print\" must take a table as its first arg, but the first arg was of type " + DataValueTypeNames[ValuesToPrintTable.ValueType] + ".", new String[] {"InvalidArgsLength"}));
         ArrayList <LooFDataValue> ValuesToPrintArray = ValuesToPrintTable.ArrayValue;
         
-        if (ValuesToPrintArray.size() == 0) throw (new LooFInterpreterException (Environment, "the message \"print\" cannot take an empty table as its additional arg.", new String[] {"InvalidArgsLength"}));
+        if (ValuesToPrintArray.size() == 0) throw (new LooFInterpreterException (Environment, "the message \"print\" cannot take an empty table as its first arg.", new String[] {"InvalidArgsLength"}));
         
         String ToPrint = Function_ToString.HandleFunctionCall(ValuesToPrintArray.get(0), Environment, null, null).StringValue;
         for (int i = 1; i < ValuesToPrintArray.size(); i ++) {
@@ -46,8 +46,6 @@ LooFInterpreterModule InterpreterModule_Console = new LooFInterpreterModule() {
 
 LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule() {
   
-  
-  
   @Override
   public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
     LooFInterpreterModuleData ModuleData = (LooFInterpreterModuleData) ModuleDataIn;
@@ -55,10 +53,14 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
     if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Interpreter module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
     switch (FirstArg.StringValue) {
       
-      case ("stop"):
+      
+      
+      case ("stop"): {
         if (Args.length > 1) throw (new LooFInterpreterException (Environment, "the message \"stop\" cannot take any extra arguments.", new String[] {"InvalidArgsLength"}));
-        Environment.Stopped = true;
-        return;
+        Environment.IsStopped = true;
+      return;}
+      
+      
       
       case ("pause"): {
         if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"pause\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
@@ -67,9 +69,11 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
         Result <Long> PauseTimeLongResult = GetDataValueInt (PauseTimeValue);
         if (PauseTimeLongResult.Err) throw (new LooFInterpreterException (Environment, "the message \"pause\" must take an int or float as its first arg, but the first arg was of type " + DataValueTypeNames[PauseTimeValue.ValueType] + ".", new String[] {"InvalidArgType"}));
         long PauseTimeLong = PauseTimeLongResult.Some;
-        Environment.Paused = true;
+        Environment.IsPaused = true;
         Environment.PauseEndMillis = System.currentTimeMillis() + PauseTimeLong;
       return;}
+      
+      
       
       case ("pause until"): {
         if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"pause\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
@@ -78,17 +82,17 @@ LooFInterpreterModule InterpreterModule_Interpreter = new LooFInterpreterModule(
         Result <Long> PauseEndTimeLongResult = GetDataValueInt (PauseEndTimeValue);
         if (PauseEndTimeLongResult.Err) throw (new LooFInterpreterException (Environment, "the message \"pause\" must take an int or float as its first arg, but the first arg was of type " + DataValueTypeNames[PauseEndTimeValue.ValueType] + ".", new String[] {"InvalidArgType"}));
         long PauseEndTimeLong = PauseEndTimeLongResult.Some;
-        Environment.Paused = true;
+        Environment.IsPaused = true;
         Environment.PauseEndMillis = ModuleData.StartMillis + PauseEndTimeLong;
       return;}
+      
+      
       
       default:
         throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
       
     }
   }
-  
-  
   
   @Override
   public LooFModuleData CreateModuleData() {
@@ -491,8 +495,9 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
         
         byte[] ImageOutPixels = new byte [ImageOutData.length - 4];
         System.arraycopy(ImageOutData, 4, ImageOutPixels, 0, ImageOutPixels.length);
-        int ImageOutWidth = ImageOutData[0] + (ImageOutData[1] << 8);
-        int ImageOutHeight = ImageOutData[2] + (ImageOutData[3] << 8);
+        int ImageOutWidth = ByteToInt (ImageOutData[0]) + (ByteToInt (ImageOutData[1]) << 8);
+        int ImageOutHeight = ByteToInt (ImageOutData[2]) + (ByteToInt (ImageOutData[3]) << 8);
+        if (ImageOutData.length != ImageOutWidth * ImageOutHeight * 4 + 4) throw (new LooFInterpreterException (Environment, "incorrect byteArray length for image to save. Detected width: " + ImageOutWidth + ", detected height: " + ImageOutHeight + ", expected byteArray size: " + (ImageOutWidth * ImageOutHeight * 4 + 4) + ", given byteArray size: " + ImageOutData.length + ".", new String[] {"InvalidImageData"}));
         
         BufferedImage ImageOut = new BufferedImage(ImageOutWidth, ImageOutHeight, BufferedImage.TYPE_4BYTE_ABGR); // from StackOverflow: https://stackoverflow.com/a/29428561/13325385
         ImageOut.setData(Raster.createRaster(ImageOut.getSampleModel(), new DataBufferByte(ImageOutPixels, ImageOutPixels.length), new Point()));
@@ -577,3 +582,61 @@ Result <Tuple2 <File, String>> GetFileFromDataValue (LooFDataValue DataValueIn) 
   Tuple2 Output = new Tuple2 (new File (FileName), FileName);
   return new Result (Output);
 }
+
+
+
+
+
+
+
+
+
+
+LooFInterpreterModule InterpreterModule_Graphics = new LooFInterpreterModule() {
+  
+  @Override
+  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
+    LooFDataValue FirstArg = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Graphics module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
+    switch (FirstArg.StringValue) {
+      
+      
+      
+      case ("set frame"): {
+        if (Args.length != 2) throw (new LooFInterpreterException (Environment, "the message \"set frame\" can only take 1 argument, but " + (Args.length - 1) + " were found.", new String[] {"InvalidArgsLength"}));
+        
+        LooFDataValue ValuesToPrintTable = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
+        if (ValuesToPrintTable.ValueType != DataValueType_ByteArray) throw (new LooFInterpreterException (Environment, "the message \"set frame\" must take a byteArray as its first arg, but the first arg was of type " + DataValueTypeNames[ValuesToPrintTable.ValueType] + ".", new String[] {"InvalidArgsLength"}));
+        byte[] NewFrameData = ValuesToPrintTable.ByteArrayValue;
+        
+        int NewFrameWidth = ByteToInt (NewFrameData[0]) + (ByteToInt (NewFrameData[1]) << 8);
+        int NewFrameHeight = ByteToInt (NewFrameData[2]) + (ByteToInt (NewFrameData[3]) << 8);
+        if (NewFrameData.length != NewFrameWidth * NewFrameHeight * 4 + 4) throw (new LooFInterpreterException (Environment, "incorrect byteArray length for new frame. Detected width: " + NewFrameWidth + ", detected height: " + NewFrameHeight + ", expected byteArray size: " + (NewFrameWidth * NewFrameHeight * 4 + 4) + ", given byteArray size: " + NewFrameData.length + ".", new String[] {"InvalidImageData"}));
+        if (NewFrameWidth != width) throw (new LooFInterpreterException (Environment, "incorrect image width for new frame. Image width: " + NewFrameWidth + ", required width: " + width + ".", new String[] {"InvalidFrame"}));
+        if (NewFrameHeight != height) throw (new LooFInterpreterException (Environment, "incorrect image height for new frame. Image height: " + NewFrameHeight + ", required height: " + height + ".", new String[] {"InvalidFrame"}));
+        
+        pixels = new color [width * height];
+        int NewFrameIndex = 4;
+        for (int i = 0; i < pixels.length; i ++) {
+          byte Blue  = NewFrameData[NewFrameIndex + 1];
+          byte Green = NewFrameData[NewFrameIndex + 2];
+          byte Red   = NewFrameData[NewFrameIndex + 3];
+          int CurrentPixel = Red + (Green << 8) + (Blue << 16) + (0xFF000000);
+          pixels[i] = CurrentPixel;
+          NewFrameIndex += 4;
+        }
+        
+        g.pixels = pixels;
+        updatePixels();
+        
+      return;}
+      
+      
+      
+      default:
+        throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
+      
+    }
+  }
+  
+};

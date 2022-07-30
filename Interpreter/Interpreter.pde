@@ -1,13 +1,20 @@
 // Started 04/02/22
-// Last updated 07/29/22
+// Last updated 07/30/22
 
 
 
-//String FolderToCompile = "/BallBlastClone";
-//String FolderToCompile = "/CustomSwitchStatement";
-//String FolderToCompile = "/FakeOS/Entry";
-String FolderToCompile = "/InterpreterTesting";
-//String FolderToCompile = "/PossibleMacros";
+//final String FolderToCompile = "/BallBlastClone";
+//final String FolderToCompile = "/CustomSwitchStatement";
+//final String FolderToCompile = "/FakeOS/Entry";
+final String FolderToCompile = "/InterpreterTesting";
+//final String FolderToCompile = "/PossibleMacros";
+
+final boolean Windowed = true;
+final int WindowWidth = 512;
+final int WindowHeight = 288;
+final int TargetFramerate = 60;
+
+
 
 
 
@@ -21,7 +28,9 @@ import java.awt.Point;
 
 
 
-LooFCodeData TestCodeData = new LooFCodeData (new String[] {"not actual code"}, "TestCodeData");
+
+
+LooFEnvironment Environment = null;
 
 
 
@@ -30,6 +39,15 @@ LooFCodeData TestCodeData = new LooFCodeData (new String[] {"not actual code"}, 
 void setup() {
   
   
+  
+  // stuff that doesn't work in settings()
+  
+  frameRate (TargetFramerate);
+  background (255);
+  
+  
+  
+  // compile
   
   LooFCompileSettings CompileSettings = new LooFCompileSettings();
   CompileSettings.PreProcessorOutputPath = dataPath("") + "/CompilerOutputs";
@@ -43,19 +61,23 @@ void setup() {
   CompileSettings.PrintParsedLooF = false;
   CompileSettings.PrintFinalLooF = true;
   
-  
-  
-  // compile
-  LooFEnvironment TestEnvironment = null;
   try {
-      TestEnvironment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
+    Environment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
   } catch (RuntimeException e) {
-    if (!ExceptionIsLooFCompilerException (e)) e.printStackTrace();
     throw e;
   }
   
   
   
+  println();
+  println();
+  println();
+  println ("Running program...");
+  println();
+  
+  
+  
+  /*
   // interpret
   println();
   println();
@@ -64,8 +86,8 @@ void setup() {
   println();
   int StartMillis = millis();
   try {
-    while (!TestEnvironment.Stopped) {
-      LooFInterpreter.ExecuteStatementsUntilBreak(TestEnvironment);
+    while (!Environment.IsStopped) {
+      LooFInterpreter.ExecuteStatementsUntilBreak(Environment);
     }
   } catch (RuntimeException e) {
     if (!ExceptionIsLooFInterpreterException (e)) e.printStackTrace();
@@ -73,11 +95,12 @@ void setup() {
   }
   println();
   println ("Execution time: " + (millis() - StartMillis) + " ms");
+  */
   
   
   
-  // print vars
   /*
+  // print vars
   println ();
   println ();
   println ();
@@ -95,6 +118,38 @@ void setup() {
   
   
   
-  exit();
+}
+
+
+
+
+
+void settings() {
+  
+  if (Windowed) {
+    size (WindowWidth, WindowHeight);
+  } else {
+    fullScreen();
+  }
+  
+}
+
+
+
+
+
+void draw() {
+  
+  try {
+    LooFInterpreter.ExecuteStatementsUntilBreak(Environment);
+  } catch (RuntimeException e) {
+    throw e;
+  }
+  
+  if (Environment.IsStopped) {
+    println();
+    println ("Program stopped.");
+    exit();
+  }
   
 }

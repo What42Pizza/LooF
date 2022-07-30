@@ -78,13 +78,13 @@
 
 ### Graphics:
 
+- **"set frame", NewFrame (byteArray)**
+  - Sets the current frame being displayed to NewFrame.
+  - Errors if lengthOf NewFrame is not data.Width * data.Height * 4 + 4.
 - **"set properties", NewProperties (table)**
   - Sets the internal data about the graphics to NewProperties.
 - **"get properties"**
   - Pushes data about the graphics / screen data to the general stack.
-- **"set frame", NewFrame (byteArray)**
-  - Sets the current frame being displayed to NewFrame.
-  - Errors if lengthOf NewFrame is not data.Width * data.Height * 4 + 4.
 
 <br>
 <br>
