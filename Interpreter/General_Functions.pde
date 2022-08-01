@@ -843,6 +843,12 @@ void UnlockDataValue (LooFDataValue DataValue) {
 
 
 
+boolean ValueIsLocked (LooFDataValue DataValueIn) {
+  return LastItemOf (DataValueIn.LockLevels) > 0;
+}
+
+
+
 
 
 double GetDataValueNumber (LooFDataValue DataValueIn) {

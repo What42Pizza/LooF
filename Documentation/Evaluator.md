@@ -241,13 +241,13 @@ These use the value directly following the function. If the function takes in mu
 #### Functions:
 
 - **newFunction {LineNumber (int)}**
-  - returns a new value of type 'function' with LineNumber as the line to jump to and the current file as the file to jump to
-- **newFunction {LineNumber (int), FileName (string)}**
-  - returns a new value of type 'function' with LineNumber as the line to jump to and FileName as the file to jump to
+  - returns a new value of type 'function' with LineNumber as the line to jump to and the current file as the page to jump to
+- **newFunction {LineNumber (int), PageName (string)}**
+  - returns a new value of type 'function' with LineNumber as the line to jump to and PageName as the page to jump to
 - **getFunctionLine Function**
   - returns the line number of Function
-- **getFunctionFile Function**
-  - returns the file name of Function (returns null if the file name was not defined because it is assumed to jump to a function in the current file)
+- **getFunctionPage Function**
+  - returns the page name of Function (returns null if the page name was not defined because it is assumed to jump to a function in the current file)
 
 **NOTE:** Function values created with `newFunction InputArgs {LineNumber (int)}` (which includes `call FunctionName` / `call $FunctionName`) **should not be shared between files** since the file name will not be changed when calling functions created like that. Instead, you can do the following when you want to share a function value that points to a function in the current file:
 

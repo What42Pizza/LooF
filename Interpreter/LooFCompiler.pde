@@ -231,16 +231,16 @@ class LooFCompiler {
     InterpreterAssignments.putIfAbsent("^=", Assignment_PowerEquals);
     InterpreterAssignments.putIfAbsent("%=", Assignment_ModuloEquals);
     InterpreterAssignments.putIfAbsent("..=", Assignment_ConcatEquals);
-    InterpreterAssignments.putIfAbsent("<defaultsTo", Assignment_SetDefaultsTo);
-    InterpreterAssignments.putIfAbsent("<add", Assignment_SetAdd);
-    InterpreterAssignments.putIfAbsent("<addAtIndex", Assignment_SetAddAtIndex);
-    InterpreterAssignments.putIfAbsent("<addAll", Assignment_SetAddAll);
-    InterpreterAssignments.putIfAbsent("<removeIndex", Assignment_SetRemoveIndex);
+    InterpreterAssignments.putIfAbsent("<<defaultsTo", Assignment_SetDefaultsTo);
+    InterpreterAssignments.putIfAbsent("<<addItem", Assignment_SetAdd);
+    InterpreterAssignments.putIfAbsent("<<addAtIndex", Assignment_SetAddAtIndex);
+    InterpreterAssignments.putIfAbsent("<<addAll", Assignment_SetAddAll);
+    InterpreterAssignments.putIfAbsent("<<removeIndex", Assignment_SetRemoveIndex);
     
     InterpreterAssignments.putIfAbsent("++", Assignment_PlusPlus);
     InterpreterAssignments.putIfAbsent("--", Assignment_MinusMinus);
     InterpreterAssignments.putIfAbsent("!!", Assignment_NotNot);
-    InterpreterAssignments.putIfAbsent("<clone", Assignment_GetClone);
+    InterpreterAssignments.putIfAbsent("<<clone", Assignment_GetClone);
     
     return InterpreterAssignments;
   }
@@ -414,12 +414,12 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("toBool", Function_ToBool);
     
     EvaluatorFunctions.putIfAbsent("newFunction", Function_NewFunction);
-    //EvaluatorFunctions.putIfAbsent("getFunctionLine", NullEvaluatorFunction);
-    //EvaluatorFunctions.putIfAbsent("getFunctionFile", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("getFunctionLine", Function_GetFunctionLine);
+    EvaluatorFunctions.putIfAbsent("getFunctionFile", Function_GetFunctionFile);
     
     EvaluatorFunctions.putIfAbsent("typeOf", Function_TypeOf);
-    //EvaluatorFunctions.putIfAbsent("isNumber", NullEvaluatorFunction);
-    //EvaluatorFunctions.putIfAbsent("isLocked", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("isNumber", Function_IsNumber);
+    EvaluatorFunctions.putIfAbsent("isLocked", Function_IsLocked);
     EvaluatorFunctions.putIfAbsent("cloneValue", Function_CloneValue);
     //EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);

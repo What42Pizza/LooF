@@ -1,0 +1,36 @@
+#ignore_header
+
+#include Basics.LOOF
+
+
+
+
+
+function print  throwsErrors {"InvalidArgType", "InvalidArgsLength"}
+	pop ValuesToPrint
+	errorIf (typeOf ValuesToPrint != "table"), "the function 'print' must pull a table from the general stack.", {"InvalidArgType"}
+	if lengthOf ValuesToPrint == 0 then
+		ValuesToPrint[0] = ""
+	end
+	ValuesToPrint[endOf ValuesToPrint] = toString ValuesToPrint[endOf ValuesToPrint] .. "\n"
+	callOutside "Console", "print", ValuesToPrint
+	return
+end
+
+
+
+function exit
+	callOutside "Interpreter", "stop"
+end
+
+
+
+
+
+function ensureArgTypesAreCorrect  -> Args, ArgTypes, FunctionName  throwsErrors {"InvalidArgType"}
+	FunctionName <defaultsTo "unnamed"
+	loop i, endOf ArgsTypes
+		errorIf (typeOf Args[i] != ArgTypes[i]), ("Arg " .. i .. " of function \"" .. FunctionName .. "\" must be of type " .. ArgTypes[i] .. ", not type " .. typeOf Args[i] .. "."), {"InvalidArgType"}
+	repeat
+	return
+end

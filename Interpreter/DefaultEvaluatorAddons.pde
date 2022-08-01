@@ -1636,9 +1636,48 @@ LooFEvaluatorFunction Function_NewFunction = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_GetFunctionLine = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_Function) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getFunctionLine can only take a function, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    return new LooFDataValue (Input.FunctionLineValue);
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_GetFunctionFile = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_Function) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getFunctionFile can only take a function, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (Input.FunctionPageValue == null) return new LooFDataValue();
+    return new LooFDataValue (Input.FunctionPageValue);
+  }
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_TypeOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     return new LooFDataValue (DataValueTypeNames[Input.ValueType]);
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_IsNumber = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    return new LooFDataValue (ValueIsNumber (Input));
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_IsLocked = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    return new LooFDataValue (ValueIsLocked (Input));
   }
 };
 

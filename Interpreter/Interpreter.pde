@@ -1,12 +1,13 @@
 // Started 04/02/22
-// Last updated 07/30/22
+// Last updated 07/31/22
 
 
 
 //final String FolderToCompile = "/BallBlastClone";
 //final String FolderToCompile = "/CustomSwitchStatement";
 //final String FolderToCompile = "/FakeOS/Entry";
-final String FolderToCompile = "/InterpreterTesting";
+final String FolderToCompile = "/GraphicsTesting";
+//final String FolderToCompile = "/InterpreterTesting";
 //final String FolderToCompile = "/PossibleMacros";
 
 final boolean Windowed = true;

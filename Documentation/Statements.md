@@ -18,18 +18,18 @@
   - Modulo-s VarName by Value
 - **VarName ..= Value**
   - Casts Value to a string and concatenates it to the end of VarName
-- **VarName <defaultsTo Value**
+- **VarName <<defaultsTo Value**
   - If VarName is null, sets VarName to Value
-- **VarName <add Value **
+- **VarName <<addItem Value**
   - Adds Value to the end of VarName
   - Errors if VarName is not a table
-- **VarName <addAtIndex Input (table {Index (int), Item (any)})**
+- **VarName <<addAtIndex Input (table {Index (int), Item (any)})**
   - Shifts all values past Index and sets Index to Item
   - Errors if VarName is not a table
-- **VarName <addAll Value (table)**
+- **VarName <<addAll Value (table)**
   - Adds all the items in the array part and hashmap part of Value to VarName
   - Errors if VarName is not a table
-- **VarName <removeIndex Index (int)**
+- **VarName <<removeIndex Index (int)**
   - Removes the value at Index and shifts the remaining values
   - Errors if VarName is not a table
 
@@ -41,7 +41,7 @@
   - Decrements VarName
 - **VarName !!**
   - Toggles VarName
-- **VarName <clone**
+- **VarName <<clone**
   - Sets VarName to a clone of VarName
 
 <br>

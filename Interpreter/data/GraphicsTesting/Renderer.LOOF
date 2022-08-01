@@ -1,0 +1,32 @@
+function BuildGraph  -> AllData
+	
+	// start graph
+	Graph = {
+`		Properties: {
+`			Scaling: "square percent", // accepted values: "direct", "percent", "square percent"
+`		},
+`	}
+	
+	// add TestImage
+	TestImageImage = AllData["Images"]["TestImage"]
+	TestImageData = AllData["TestImageData"]
+	call AddImage, Graph, TestImageImage, TestImageData["XPos"], TestImageData["YPos"]
+	
+	return Graph
+	
+end
+
+
+
+
+
+function AddImage  -> mut_Graph, ImageToAdd, XPos, YPos
+	
+	Graph <<addItem {
+`		"image",
+`		XPos,
+`		YPos,
+`	}
+	
+	return
+end

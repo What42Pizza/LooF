@@ -1,0 +1,46 @@
+callOutside "Files", "get program path"  -> ProgramFolder
+callOutside "Graphics", "get properties"  -> GraphicsProperties
+
+callOutside "Files", "load image", ProgramFolder .. {"TestImage.png"}  -> TestImage
+
+
+Images = {
+	TestImage: TestImage,
+}
+
+TestImageData = {
+	XPos: 0.5,
+	YPos: 0.5,
+}
+
+
+AllData = {
+`	ProgramFolder: ProgramFolder,
+`	GraphicsProperties: GraphicsProperties,
+`	Images: Images,
+`	TestImageData: TestImageData,
+`}
+
+
+
+
+
+$link Updater.LOOF
+$link Renderer.LOOF
+
+
+
+
+
+// the code in this loop will be basically the same for all programs
+loop
+	StartTime = timeSince 0
+	
+	call Updater.UpdateAll, AllData
+	
+	call Renderer.BuildGraph, AllData  -> Graph
+	callOutside "Graphics", "render graph", Graph  -> NewFrame
+	callOutside "Graphics", "set frame", NewFrame
+	
+	callOutside "Interpreter", "pause until", StartTime + 1/60
+repeat

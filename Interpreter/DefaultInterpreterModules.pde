@@ -633,6 +633,24 @@ LooFInterpreterModule InterpreterModule_Graphics = new LooFInterpreterModule() {
       
       
       
+      
+      
+      case ("get properties"): {
+        if (Args.length != 1) throw (new LooFInterpreterException (Environment, "the message \"get properties\" does not take any arguments.", new String[] {"InvalidArgsLength"}));
+        
+        HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
+        TableToPushItems.put("Width"         , new LooFDataValue (width          ));
+        TableToPushItems.put("Height"        , new LooFDataValue (height         ));
+        TableToPushItems.put("IsWindow"      , new LooFDataValue (Windowed       ));
+        TableToPushItems.put("TargetFramrate", new LooFDataValue (TargetFramerate));
+        
+        LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+        
+      return;}
+      
+      
+      
       default:
         throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
       

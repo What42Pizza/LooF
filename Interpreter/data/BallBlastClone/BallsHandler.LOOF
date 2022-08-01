@@ -6,16 +6,16 @@ function UpdateAllBalls  -> BallsData, BulletsData
 	BallsToRemove = {}
 	forEach CurrentBall, AllBalls, i
 		call UpdateBall, CurrentBall, BallsData, BulletsData, NewBalls  -> BallIsDestroyed
-		if BallIsDestroyed;  BallsToRemove <add i
+		if BallIsDestroyed;  BallsToRemove <<addItem i
 	repeat
 	
 	// remove destroyed balls
 	forEach Index, BallsToRemove
-		AllBalls <removeIndex Index
+		AllBalls <<removeIndex Index
 	repeat
 	
 	// add new balls
-	AllBalls <addAll NewBalls
+	AllBalls <<addAll NewBalls
 	
 	return
 end
@@ -126,8 +126,8 @@ function SplitBall  -> Ball, BallsData, NewBalls
 	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel, NewYVel  -> Ball1
 	call GetNewBallStruct, "Normal", NewSize, NewHealth, NewXPos, NewYPos, NewXVel * -1, NewYVel  -> Ball2
 	
-	NewBalls <add Ball1
-	NewBalls <add Ball2
+	NewBalls <<addItem Ball1
+	NewBalls <<addItem Ball2
 	
 	return
 end
@@ -167,7 +167,7 @@ function SpawnNewBall  -> BallsData
 	StartingYPos = 0.75 + random 0.25
 	Size = randomInt (BallsData["MaxBallSize"])
 	call GetNewBallStruct, "normal", Size, BallsData["StartingHealth"], StartingXPos, StartingYPos, 0, 0  -> NewBall
-	BallsData["AllBalls"] <add NewBall
+	BallsData["AllBalls"] <<addItem NewBall
 	return
 end
 

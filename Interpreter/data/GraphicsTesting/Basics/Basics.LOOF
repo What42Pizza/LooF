@@ -1,0 +1,39 @@
+#ignore_header
+
+$link BasicFunctions.LOOF as Basics
+
+
+
+
+
+
+// multi-line code
+#replace ";" "\n"
+#replaceMultiLine "\n`" ""
+
+// functions
+#replaceMultiLine "\nfunction " "\nskip true\n$function "
+#replaceMultiLine "\ncall " "\ncall $"
+#replaceMultiLine "\ncall_ " "\ncall "
+#replaceMultiLine "\ntry " "\ntry $"
+#replaceMultiLine "\ntry_ " "\ntry "
+#replace "  -> " "\npop ARGS, "
+#replace "  throwsErrors " "\nsetPassedErrors "
+
+// if statements
+#replaceMultiLine " then\n" ", true\nskip\n"
+
+// calls to Basics
+#replaceMultiLine "\n:" "\ncall $Basics."
+
+// values in strings
+#replaceIgnoreQuotes "{`" "\" .. toString ("
+#replaceIgnoreQuotes "`}\"" ")"
+#replaceIgnoreQuotes "`}" ") .. \""
+
+
+
+// fixing calls to Basics
+#replace "$Basics.print " "$Basics.print, "
+#replace "$Basics.exit " "$Basics.exit, "
+#replace "$Basics.ensureArgTypesAreCorrect " "$Basics.ensureArgTypesAreCorrect, "
