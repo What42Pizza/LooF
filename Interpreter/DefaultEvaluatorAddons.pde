@@ -1161,7 +1161,6 @@ LooFEvaluatorFunction Function_KeysOf = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function valuesOf can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <LooFDataValue> InputValues = Input.HashMapValue.values();
@@ -1180,9 +1179,42 @@ LooFEvaluatorFunction Function_ValuesOf = new LooFEvaluatorFunction() {
 
 
 
+
+LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    
+    // get table data
+    ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+    HashMap <String, LooFDataValue> HashMapValue = Input.HashMapValue;
+    int ArraySize = ArrayValue.size();
+    int HashMapSize = HashMapValue.size();
+    int TotalSize = ArraySize + HashMapSize;
+    
+    if (TotalSize == 0) return new LooFDataValue();
+    
+    // choose item
+    int ChosenIndex = (int) (Math.random() * TotalSize);
+    
+    // lands in array part
+    if (ChosenIndex < ArraySize) {
+      return ArrayValue.get(ChosenIndex);
+    }
+    
+    // lands in hashmap part
+    ChosenIndex -= ArraySize;
+    return IndexCollection (HashMapValue.values(), ChosenIndex);
+    
+  }
+  @Override public boolean CanBePreEvaluated() {return false;}
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_RandomArrayItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
@@ -1199,11 +1231,10 @@ LooFEvaluatorFunction Function_RandomArrayItem = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_RandomHashmapItem = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <LooFDataValue> HashMapValues = Input.HashMapValue.values();
-    return GetRandomItemFromCollection (HashMapValues);
+    return IndexCollection (HashMapValues, (int) (Math.random() * HashMapValues.size()));
     
   }
   @Override public boolean CanBePreEvaluated() {return false;}

@@ -100,7 +100,7 @@ call Factorial, 10  -> FactorialResult
 
 function ConvertTableToString  -> TableIn, Seperator  throwsErrors {"InvalidArgType"}
 	errorIf (typeOf TableIn != "table"), "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
-	Seperator <defaultsTo ", "
+	Seperator <<defaultsTo ", "
 	errorIf (typeOf Seperator != "string"), "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}
 	
 	returnIf (lengthOf TableIn == 0), ""

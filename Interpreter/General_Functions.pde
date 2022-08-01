@@ -172,10 +172,9 @@ int ByteToInt (byte ByteIn) {
 
 
 // from stack overflow: https://stackoverflow.com/questions/21092086/get-random-element-from-collection by Peter Lawrey https://stackoverflow.com/users/57695/peter-lawrey
-<T> T GetRandomItemFromCollection (Collection <T> CollectionIn) {
-  int ChosenIndex = (int) (Math.random() * CollectionIn.size());
+<T> T IndexCollection (Collection <T> CollectionIn, int Index) {
   for (T CurrentItem : CollectionIn) {
-    if (--ChosenIndex < 0) return CurrentItem;
+    if (--Index < 0) return CurrentItem;
   }
   throw new AssertionError();
 }

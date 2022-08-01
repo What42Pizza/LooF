@@ -374,6 +374,7 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("lastItemOf", Function_LastItemOf);
     EvaluatorFunctions.putIfAbsent("keysOf", Function_KeysOf);
     EvaluatorFunctions.putIfAbsent("valuesOf", Function_ValuesOf);
+    EvaluatorFunctions.putIfAbsent("randomItem", Function_RandomItem);
     EvaluatorFunctions.putIfAbsent("randomArrayItem", Function_RandomArrayItem);
     EvaluatorFunctions.putIfAbsent("randomHashmapItem", Function_RandomHashmapItem);
     EvaluatorFunctions.putIfAbsent("randomByteArrayItem", Function_RandomHashmapItem);

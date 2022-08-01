@@ -1,0 +1,41 @@
+// Started 05/14/22
+
+
+
+$link GenerationFunctions.LOOF
+
+
+
+callOutside "Files", "get program path"  -> ProgramFolder
+DataFolder = ProgramFolder .. {"Data"}
+
+// check if files exist
+callOutside "Files", "check file exists", DataFolder .. {"Starts.txt"    }  -> StartsFileExists
+callOutside "Files", "check file exists", DataFolder .. {"Middles.txt"   }  -> MiddlesFileExists
+callOutside "Files", "check file exists", DataFolder .. {"Ends.txt"      }  -> EndsFileExists
+callOutside "Files", "check file exists", DataFolder .. {"Characters.txt"}  -> CharactersFileExists
+if not StartsFileExists    ;  error "No Starts.txt file was found."    , {"FileNotFound"}
+if not MiddlesFileExists   ;  error "No Middles.txt file was found."   , {"FileNotFound"}
+if not EndsFileExists      ;  error "No Ends.txt file was found."      , {"FileNotFound"}
+if not CharactersFileExists;  error "No Characters.txt file was found.", {"FileNotFound"}
+
+
+
+// load files
+callOutside "Files", "read file as strings", DataFolder .. {"Starts.txt"    }  -> StoryStarts
+callOutside "Files", "read file as strings", DataFolder .. {"Middles.txt"   }  -> StoryMiddles
+callOutside "Files", "read file as strings", DataFolder .. {"Ends.txt"      }  -> StoryEnds
+callOutside "Files", "read file as strings", DataFolder .. {"Characters.txt"}  -> StoryCharacters
+
+
+
+// generate story
+
+call GenerationFunctions.GenerateStory, StoryStarts, StoryMiddles, StoryEnds, StoryCharacters  -> GeneratedStory
+
+
+
+// save story
+callOutside "Files", "write to file", ProgramFolder .. {"Output", "Story.txt"}, GeneratedStory
+
+:exit

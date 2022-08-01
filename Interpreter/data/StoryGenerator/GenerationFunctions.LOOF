@@ -1,0 +1,50 @@
+function GenerateStory  -> StoryStarts, StoryMiddles, StoryEnds, StoryCharacters
+	call GenerateCharacters, StoryCharacters  -> Characters
+	call GenerateStoryBase, StoryStarts, StoryMiddles, StoryEnds  -> Story
+	
+	return Story
+end
+
+
+
+
+
+function GenerateCharacters  -> StoryCharacters
+	Characters = {}
+	MaxNumOfCharacters = min {lengthOf Characters, 10}
+	NumOfCharacters = randomInt {1, MaxNumOfCharacters}
+	loop i, 1, NumOfCharacters
+		Characters <<addItem randomItem StoryCharacters
+	repeat
+	call RemoveDuplicateItems, Characters
+	return Characters
+end
+
+
+
+
+
+function GenerateStoryBase  -> StoryStarts, StoryMiddles, StoryEnds
+	Story = {}
+	Story <<addItem randomItem StoryStarts
+	NumOfMiddles = randomInt {10, 20}
+	loop i, 1, NumOfMiddles
+		Story <<addItem randomItem StoryMiddles
+	repeat
+	Story <<addItem randomItem StoryEnds
+	call RemoveDuplicateItems, Story
+	return Story
+end
+
+
+
+
+
+function RemoveDuplicateItems  -> mut_TableIn
+	forEach CurrentItem, TableIn, i
+		DuplicateIndex = firstIndexOfItem {TableIn, CurrentItem, i + 1}
+		:print DuplicateIndex
+		if DuplicateIndex;  TableIn <<removeIndex DuplicateIndex
+	repeat
+	return
+end

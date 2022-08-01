@@ -451,6 +451,7 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
         }
         
         try {
+          EnsureFoldersExist (FileName);
           Files.write(Paths.get(FileName), BytesToWrite);
         } catch (IOException e) {
           throw (new LooFInterpreterException (Environment, "error while writing file data: " + e.toString(), new String[] {"FileWriteError"}));
@@ -502,6 +503,7 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
         BufferedImage ImageOut = new BufferedImage(ImageOutWidth, ImageOutHeight, BufferedImage.TYPE_4BYTE_ABGR); // from StackOverflow: https://stackoverflow.com/a/29428561/13325385
         ImageOut.setData(Raster.createRaster(ImageOut.getSampleModel(), new DataBufferByte(ImageOutPixels, ImageOutPixels.length), new Point()));
         try {
+          EnsureFoldersExist (FileName);
           ImageIO.write(ImageOut, FileExtention, new File (FileName));
         } catch (IOException e) {
           throw (new LooFInterpreterException (Environment, "error while reading file data: " + e.toString(), new String[] {"FileReadError"}));
@@ -581,6 +583,14 @@ Result <Tuple2 <File, String>> GetFileFromDataValue (LooFDataValue DataValueIn) 
   String FileName = FileNameResult.Some;
   Tuple2 Output = new Tuple2 (new File (FileName), FileName);
   return new Result (Output);
+}
+
+
+
+void EnsureFoldersExist (String FileName) {
+  FileName = FileName.substring(0, FileName.lastIndexOf('/'));
+  File TempFile = new File (FileName);
+  TempFile.mkdirs();
 }
 
 

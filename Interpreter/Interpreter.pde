@@ -6,9 +6,10 @@
 //final String FolderToCompile = "/BallBlastClone";
 //final String FolderToCompile = "/CustomSwitchStatement";
 //final String FolderToCompile = "/FakeOS/Entry";
-final String FolderToCompile = "/GraphicsTesting";
+//final String FolderToCompile = "/GraphicsTesting";
 //final String FolderToCompile = "/InterpreterTesting";
 //final String FolderToCompile = "/PossibleMacros";
+final String FolderToCompile = "/StoryGenerator";
 
 final boolean Windowed = true;
 final int WindowWidth = 512;

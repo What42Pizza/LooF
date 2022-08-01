@@ -4,6 +4,7 @@ function BuildGraph  -> AllData
 	Graph = {
 `		Properties: {
 `			Scaling: "square percent", // accepted values: "direct", "percent", "square percent"
+`			BackgroundColor: 0xFFFFFF,
 `		},
 `	}
 	
