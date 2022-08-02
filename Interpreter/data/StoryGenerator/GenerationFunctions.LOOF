@@ -42,9 +42,11 @@ end
 
 function RemoveDuplicateItems  -> mut_TableIn
 	forEach CurrentItem, TableIn, i
-		DuplicateIndex = firstIndexOfItem {TableIn, CurrentItem, i + 1}
-		:print DuplicateIndex
-		if DuplicateIndex;  TableIn <<removeIndex DuplicateIndex
+		DuplicateIndex = firstIndexOf {TableIn, CurrentItem, i + 1}
+		while DuplicateIndex
+			TableIn <<removeIndex DuplicateIndex
+			DuplicateIndex = firstIndexOf {TableIn, CurrentItem, i + 1}
+		repeat
 	repeat
 	return
 end

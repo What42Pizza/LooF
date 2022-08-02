@@ -378,9 +378,9 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("randomArrayItem", Function_RandomArrayItem);
     EvaluatorFunctions.putIfAbsent("randomHashmapItem", Function_RandomHashmapItem);
     EvaluatorFunctions.putIfAbsent("randomByteArrayItem", Function_RandomHashmapItem);
-    EvaluatorFunctions.putIfAbsent("firstIndexOfItem", Function_FirstIndexOfItem);
-    EvaluatorFunctions.putIfAbsent("lastIndexOfItem", Function_LastIndexOfItem);
-    //EvaluatorFunctions.putIfAbsent("allIndexesOfItem", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("firstIndexOf", Function_FirstIndexOf);
+    EvaluatorFunctions.putIfAbsent("lastIndexOf", Function_LastIndexOf);
+    EvaluatorFunctions.putIfAbsent("allIndexesOf", Function_AllIndexesOf);
     //EvaluatorFunctions.putIfAbsent("tableContainsItem", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("arrayContainsItem", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("hashmapContainsItem", NullEvaluatorFunction);

@@ -143,17 +143,17 @@ These use the value directly following the function. If the function takes in mu
   - returns a random item from the hashmap part of TableIn
 - **randomByteArrayItem ByteArrayIn**
   - returns a random int in ByteArrayIn
-- **firstIndexOfItem {TableIn (table or byteArray), Item (any)}**
+- **firstIndexOf {TableIn (table or byteArray), Item (any)}**
   - returns the index of the first found occurrence of Item in TableIn
-- **firstIndexOfItem {TableIn (table or byteArray), Item (any), StartIndex (int)}**
+- **firstIndexOf {TableIn (table or byteArray), Item (any), StartIndex (int)}**
   - returns the index of the first found occurrence of Item in TableIn starting at StartIndex
-- **lastIndexOfItem {TableIn (table or byteArray), Item (any)}**
+- **lastIndexOf {TableIn (table or byteArray), Item (any)}**
   - returns the index of the last found occurrence of Item in TableIn
-- **lastIndexOfItem  {TableIn (table or byteArray), Item (any), StartIndex (int)}**
+- **lastIndexOf  {TableIn (table or byteArray), Item (any), StartIndex (int)}**
   - returns the index of the last found occurrence of Item in TableIn starting at StartIndex
-- **allIndexesOfItem {TableIn (table or byteArray), Item (any)}**
+- **allIndexesOf {TableIn (table or byteArray), Item (any)}**
   - returns an array of all the indexes for the found occurrences of Item in TableIn
-- **tableContainsItem {TableIn, ItemToFind (any)}**
+- **tableContains {TableIn, ItemToFind (any)}**
   - returns true if the array part of TableIn contains ItemToFind or if the hashmap part of TableIn contains ItemToFind
 - **arrayContainsItem {TableIn, ItemToFind (any)}**
   - returns true if the array part of TableIn contains ItemToFind
@@ -201,17 +201,17 @@ These use the value directly following the function. If the function takes in mu
   - both StartIndex and EndIndex are modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
 - **replaceStrings {StringIn, StringToFind, ReplacementString}**
   - returns a string which is StringIn but with all occurrences of StringToFind replaced with ReplacementString. (`replaceStrings {"a b c", " ", ", "}` would evaluate to "a, b, c")
-- **firstIndexOfString {StringIn, StringToFind}**
+- **firstIndexOf {StringIn, StringToFind}**
   - returns the index of the first found occurrence of StringToFind in StringIn
-- **firstIndexOfString {StringIn, StringToFind, StartIndex (int)}**
+- **firstIndexOf {StringIn, StringToFind, StartIndex (int)}**
   - returns the index of the first found occurrence of StringToFind in StringIn starting at StartIndex
   - StartIndex is modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
-- **lastIndexOfString {StringIn, StringToFind})**
+- **lastIndexOf {StringIn, StringToFind})**
   - returns the index of the last found occurrence of StringToFind in StringIn
-- **lastIndexOfString {StringIn, StringToFind, StartIndex (int)}**
+- **lastIndexOf {StringIn, StringToFind, StartIndex (int)}**
   - returns the index of the last found occurrence of StringToFind in StringIn starting at StartIndex
   - StartIndex is modulo-ed by the length of StringIn (with -1 mapping correctly to endOf StringIn)
-- **allIndexesOfString {StringIn, StringToFind)**
+- **allIndexesOf {StringIn, StringToFind)**
   - returns an array of all the indexes for the found occurrences of StringToFind in StringIn
 - **splitString {StringIn, Position (int)}**
   - returns a table containing two strings which are StringIn split at Position. (`splitString {"abc", 1}` would evaluate to {"a", "bc"})

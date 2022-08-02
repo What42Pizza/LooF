@@ -1244,10 +1244,9 @@ LooFEvaluatorFunction Function_RandomHashmapItem = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_FirstIndexOfItem = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_FirstIndexOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
-    // ensure input is valid
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function firstIndexOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
@@ -1266,7 +1265,7 @@ LooFEvaluatorFunction Function_FirstIndexOfItem = new LooFEvaluatorFunction() {
     switch (FirstArg.ValueType) {
       
       case (DataValueType_Table):
-        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        ArrayList <LooFDataValue> ArrayValue = FirstArg.ArrayValue;
         int ArrayEndIndex = ArrayValue.size() - 1;
         for (int i = StartIndex; i < ArrayEndIndex; i ++) {
           if (ArrayValue.get(i).equals(SecondArg)) return new LooFDataValue ((long) i);
@@ -1276,7 +1275,7 @@ LooFEvaluatorFunction Function_FirstIndexOfItem = new LooFEvaluatorFunction() {
       case (DataValueType_ByteArray):
         if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function firstIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
         byte SecondArgByte = (byte) SecondArg.IntValue;
-        byte[] ByteArrayValue = Input.ByteArrayValue;
+        byte[] ByteArrayValue = FirstArg.ByteArrayValue;
         int ByteArrayEndIndex = ByteArrayValue.length - 1;
         for (int i = StartIndex; i < ByteArrayEndIndex; i ++) {
           if (ByteArrayValue[i] == SecondArgByte) return new LooFDataValue ((long) i);
@@ -1295,10 +1294,9 @@ LooFEvaluatorFunction Function_FirstIndexOfItem = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_LastIndexOfItem = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_LastIndexOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
-    // ensure input is valid
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function lastIndexOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
@@ -1316,7 +1314,7 @@ LooFEvaluatorFunction Function_LastIndexOfItem = new LooFEvaluatorFunction() {
     switch (FirstArg.ValueType) {
       
       case (DataValueType_Table):
-        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        ArrayList <LooFDataValue> ArrayValue = FirstArg.ArrayValue;
         int ArraySize = ArrayValue.size() - 1;
         if (ArraySize == 0) return new LooFDataValue (-1L);
         if (StartIndex >= ArraySize) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function lastIndexOfItem cannot have a starting index greater than or equal to the given table.", new String[] {"InvalidArgType"});
@@ -1328,7 +1326,7 @@ LooFEvaluatorFunction Function_LastIndexOfItem = new LooFEvaluatorFunction() {
       case (DataValueType_ByteArray):
         if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function lastIndexOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
         byte SecondArgByte = (byte) SecondArg.IntValue;
-        byte[] ByteArrayValue = Input.ByteArrayValue;
+        byte[] ByteArrayValue = FirstArg.ByteArrayValue;
         int ByteArraySize = ByteArrayValue.length - 1;
         if (ByteArraySize == 0) return new LooFDataValue (-1L);
         if (StartIndex >= ByteArraySize) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function lastIndexOfItem cannot have a starting index greater than or equal to the given table.", new String[] {"InvalidArgType"});
@@ -1349,10 +1347,9 @@ LooFEvaluatorFunction Function_LastIndexOfItem = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_AllIndexesOfItem = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_AllIndexesOf = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     
-    // ensure input is valid
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function allIndexesOfItem can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     ArrayList <LooFDataValue> InputItems = Input.ArrayValue;
     int InputItemsSize = InputItems.size();
@@ -1365,7 +1362,7 @@ LooFEvaluatorFunction Function_AllIndexesOfItem = new LooFEvaluatorFunction() {
     switch (FirstArg.ValueType) {
       
       case (DataValueType_Table):
-        ArrayList <LooFDataValue> ArrayValue = Input.ArrayValue;
+        ArrayList <LooFDataValue> ArrayValue = FirstArg.ArrayValue;
         int ArrayEndIndex = ArrayValue.size() - 1;
         for (int i = 0; i < ArrayEndIndex; i ++) {
           if (ArrayValue.get(i).equals(SecondArg)) AllIndexesList.add(new LooFDataValue ((long) i));
@@ -1375,7 +1372,7 @@ LooFEvaluatorFunction Function_AllIndexesOfItem = new LooFEvaluatorFunction() {
       case (DataValueType_ByteArray):
         if (SecondArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function allIndexesOfItem can only take an int as its second arg when the first arg is of type byteArray, but the second arg was of type " + DataValueTypeNames_PlusA[SecondArg.ValueType] + ".", new String[] {"InvalidArgType"});
         byte SecondArgByte = (byte) SecondArg.IntValue;
-        byte[] ByteArrayValue = Input.ByteArrayValue;
+        byte[] ByteArrayValue = FirstArg.ByteArrayValue;
         int ByteArrayEndIndex = ByteArrayValue.length - 1;
         for (int i = 0; i < ByteArrayEndIndex; i ++) {
           if (ByteArrayValue[i] == SecondArgByte) AllIndexesList.add(new LooFDataValue ((long) i));

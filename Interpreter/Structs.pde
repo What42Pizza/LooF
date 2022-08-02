@@ -608,6 +608,53 @@ class LooFDataValue implements Cloneable {
   
   
   
+  @Override
+  public boolean equals (Object OtherDataValue) {
+    LooFDataValue Other = (LooFDataValue) OtherDataValue;
+    if (Other == null) return false;
+    if (ValueType != Other.ValueType) return false;
+    switch (ValueType) {
+      
+      case (DataValueType_Null):
+        return true;
+      
+      case (DataValueType_Int):
+        return IntValue == Other.IntValue;
+      
+      case (DataValueType_Float):
+        return FloatValue == Other.FloatValue;
+      
+      case (DataValueType_String):
+        return StringValue.equals(Other.StringValue);
+      
+      case (DataValueType_Bool):
+        return BoolValue == Other.BoolValue;
+      
+      case (DataValueType_Table):
+        if (ArrayValue.size() != Other.ArrayValue.size() || HashMapValue.size() != Other.HashMapValue.size()) return false;
+        for (int i = 0; i < ArrayValue.size(); i ++) {
+          if (!ArrayValue.get(i).equals(Other.ArrayValue.get(i))) return false;
+        }
+        Set <String> HashMapKeys = HashMapValue.keySet();
+        for (String CurrentKey : HashMapKeys) {
+          if (!HashMapValue.get(CurrentKey).equals(Other.HashMapValue.getOrDefault(CurrentKey, null))) return false;
+        }
+        return false;
+      
+      case (DataValueType_ByteArray):
+        return ByteArrayValue.equals(Other.ByteArrayValue);
+      
+      case (DataValueType_Function):
+        return FunctionLineValue == Other.FunctionLineValue && FunctionPageValue.equals(Other.FunctionPageValue);
+      
+      default:
+        throw new AssertionError();
+      
+    }
+  }
+  
+  
+  
 }
 
 
