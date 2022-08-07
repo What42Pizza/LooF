@@ -70,15 +70,13 @@
 
 
 
+// this can't use ArrayList.indexOf() since that doesn't allow you to specify a starting index
 <T> int IndexOfItemInRange (ArrayList <T> ArrayIn, T ItemToFind, int MinIndex, int MaxIndex) {
-  int Output = ArrayIn.indexOf(ItemToFind);
-  if (Output != -1) {
-    println();
-    println ("\"" + ItemToFind + "\", " + MinIndex + ", " + MaxIndex);
-    printArray (ArrayIn);
+  MaxIndex = Math.min(MaxIndex, ArrayIn.size());
+  for (int i = MinIndex; i <= MaxIndex; i ++) {
+    if (ArrayIn.get(i).equals(ItemToFind)) return i;
   }
-  if (Output < MinIndex || Output > MaxIndex) return -1;
-  return Output;
+  return -1;
 }
 
 
