@@ -74,7 +74,7 @@ class LooFCompiler {
     
     
     // link CodeData-s
-    LinkAllCodeDatas (AllCodeDatas, AllExceptions);
+    LinkAllCodeDatas (AllCodeDatas, AllExceptions, CharsInQuotesCache);
     
     if (AllExceptions.size() > 0) {
       throw (new LooFCompilerException (AllExceptions));
@@ -650,11 +650,7 @@ class LooFCompiler {
   
   void RemoveLineEndComments (ArrayList <String> Code, int LineNumber, HashMap <String, boolean[]> CharsInQuotesCache) {
     String CurrentLine = Code.get(LineNumber);
-    boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
-    if (CharsInQuotes == null) {
-      CharsInQuotes = GetCharsInQuotes (CurrentLine);
-      CharsInQuotesCache.put(CurrentLine, CharsInQuotes);
-    }
+    boolean[] CharsInQuotes = GetCharsInQuotes_WithCache (CurrentLine, CharsInQuotesCache);
     
     // find index of comment
     int PossibleCommentIndex = CurrentLine.indexOf("//");
@@ -680,12 +676,7 @@ class LooFCompiler {
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
     String CurrentLine = Code.get(LineNumber);
-    
-    boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (CurrentLine, null);
-    if (CharsInQuotes == null) {
-      CharsInQuotes = GetCharsInQuotes (CurrentLine);
-      CharsInQuotesCache.put(CurrentLine, CharsInQuotes);
-    }
+    boolean[] CharsInQuotes = GetCharsInQuotes_WithCache (CurrentLine, CharsInQuotesCache);
     
     // find index of comment
     int PossibleCommentIndex = CurrentLine.indexOf("/*");
@@ -867,15 +858,7 @@ class LooFCompiler {
   
   ArrayList <Integer> GetAllPositionsOfString (String StringIn, HashMap <String, boolean[]> CharsInQuotesCache, String StringToFind, boolean IgnoreQuotes) {
     ArrayList <Integer> Output = new ArrayList <Integer> ();
-    
-    boolean[] CharsInQuotes = null;
-    if (!IgnoreQuotes) {
-      CharsInQuotes = CharsInQuotesCache.getOrDefault (StringIn, null);
-      if (CharsInQuotes == null) {
-        CharsInQuotes = GetCharsInQuotes (StringIn);
-        CharsInQuotesCache.put(StringIn, CharsInQuotes);
-      }
-    }
+    boolean[] CharsInQuotes = (!IgnoreQuotes) ? GetCharsInQuotes_WithCache (StringIn, CharsInQuotesCache) : null;
     
     int FoundIndex = StringIn.indexOf(StringToFind);
     while (FoundIndex != -1) {
@@ -884,22 +867,6 @@ class LooFCompiler {
     }
     return Output;
     
-  }
-  
-  
-  
-  boolean[] GetCharsInQuotes (String StringIn) {
-    boolean[] CharsInQuotes = new boolean [StringIn.length()];
-    int StartQuoteIndex = StringIn.indexOf('"');
-    while (StartQuoteIndex != -1) {
-      int EndQuoteIndex = StringIn.indexOf('"', StartQuoteIndex + 1);
-      if (EndQuoteIndex == -1) return CharsInQuotes;
-      for (int i = StartQuoteIndex + 1; i < EndQuoteIndex; i ++) {
-        CharsInQuotes[i] = true;
-      }
-      StartQuoteIndex = StringIn.indexOf('"', EndQuoteIndex + 1);
-    }
-    return CharsInQuotes;
   }
   
   
@@ -1263,7 +1230,7 @@ class LooFCompiler {
   
   
   
-  void LinkAllCodeDatas (HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompilerException> AllExceptions) {
+  void LinkAllCodeDatas (HashMap <String, LooFCodeData> AllCodeDatas, ArrayList <LooFCompilerException> AllExceptions, HashMap <String, boolean[]> CharsInQuotesCache) {
     Collection <LooFCodeData> AllCodeDatasCollection = AllCodeDatas.values();
     
     // simplify linking statements
@@ -1279,7 +1246,7 @@ class LooFCompiler {
     // replace function references
     for (LooFCodeData CodeData : AllCodeDatasCollection) {
       try {
-        ReplaceFunctionCalls (CodeData, AllCodeDatas);
+        ReplaceFunctionCalls (CodeData, AllCodeDatas, CharsInQuotesCache);
       } catch (LooFCompilerException e) {
         AllExceptions.add(e);
       }
@@ -1396,12 +1363,12 @@ class LooFCompiler {
   
   
   
-  void ReplaceFunctionCalls (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+  void ReplaceFunctionCalls (LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, HashMap <String, boolean[]> CharsInQuotesCache) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     for (int i = 0; i < Code.size(); i ++) {
       String CurrentLine = Code.get(i);
       if (CurrentLine.indexOf('$') == -1) continue;
-      String NewLine = ReplaceFunctionCallsForLine (CurrentLine, CodeData, AllCodeDatas, i);
+      String NewLine = ReplaceFunctionCallsForLine (CurrentLine, CodeData, AllCodeDatas, i, CharsInQuotesCache);
       Code.set(i, NewLine);
     }
   }
@@ -1410,12 +1377,24 @@ class LooFCompiler {
   
   
   
-  String ReplaceFunctionCallsForLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    int CurrentFunctionCallStart = CurrentLine.indexOf('$');
-    while (CurrentFunctionCallStart != -1) {
-      boolean SkipReplacement = CurrentFunctionCallStart > 0 && CurrentLine.charAt(CurrentFunctionCallStart - 1) == '\\';
-      if (!SkipReplacement) CurrentLine = ReplaceSingleFunctionCall (CurrentLine, CurrentFunctionCallStart, CodeData, AllCodeDatas, LineNumber);
+  String ReplaceFunctionCallsForLine (String CurrentLine, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber, HashMap <String, boolean[]> CharsInQuotesCache) {
+    int CurrentFunctionCallStart = 0;//CurrentLine.indexOf('$');
+    boolean[] CharsInQuotes = GetCharsInQuotes_WithCache (CurrentLine, CharsInQuotesCache);
+    while (true) {
       CurrentFunctionCallStart = CurrentLine.indexOf('$', CurrentFunctionCallStart + 1);
+      if (CurrentFunctionCallStart == -1) break;
+      
+      if (CharsInQuotes[CurrentFunctionCallStart]) continue;
+      
+      if (CurrentFunctionCallStart > 0  &&  CurrentLine.charAt(CurrentFunctionCallStart - 1) == '\\') {
+        CurrentLine = RemoveStringRange (CurrentLine, CurrentFunctionCallStart - 1, CurrentFunctionCallStart);
+        CharsInQuotes = GetCharsInQuotes_WithCache (CurrentLine, CharsInQuotesCache);
+        continue;
+      }
+      
+      CurrentLine = ReplaceSingleFunctionCall (CurrentLine, CurrentFunctionCallStart, CodeData, AllCodeDatas, LineNumber);
+      CharsInQuotes = GetCharsInQuotes_WithCache (CurrentLine, CharsInQuotesCache);
+      
     }
     return CurrentLine;
   }
@@ -1551,7 +1530,9 @@ class LooFCompiler {
           CurrentLineTokens.add(CurrToken);
           TokensFollowedBySpaces.add(PrevChar == ' ');
         }
-        int EndQuoteIndex = GetEndQuoteIndex (CurrentLine, i, CodeData, AllCodeDatas, LineNumber);
+        Result <Integer> EndQuoteIndexResult = GetEndQuoteIndex (CurrentLine, i);
+        if (EndQuoteIndexResult.Err) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + i + "."));
+        int EndQuoteIndex = EndQuoteIndexResult.Some;
         CurrentLineTokens.add(CurrentLine.substring(i, EndQuoteIndex + 1));
         TokensFollowedBySpaces.add((EndQuoteIndex == CurrentLineLength - 1) ? false : CurrentLine.charAt (EndQuoteIndex + 1) == ' ');
         i = EndQuoteIndex;
@@ -1586,19 +1567,6 @@ class LooFCompiler {
     }
     Tuple2 <ArrayList <String>, ArrayList <Boolean>> ReturnValue = new Tuple2 <ArrayList <String>, ArrayList <Boolean>> (CurrentLineTokens, TokensFollowedBySpaces);
     return ReturnValue;
-  }
-  
-  
-  
-  
-  
-  int GetEndQuoteIndex (String CurrentLine, int StartQuoteIndex, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    int EndQuoteIndex = CurrentLine.indexOf('"', StartQuoteIndex + 1);
-    while (true) {
-      if (EndQuoteIndex == -1) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + StartQuoteIndex + "."));
-      if (CurrentLine.charAt(EndQuoteIndex - 1) != '\\') return EndQuoteIndex;
-      EndQuoteIndex = CurrentLine.indexOf('"', EndQuoteIndex + 1);
-    }
   }
   
   
@@ -2222,13 +2190,13 @@ class LooFCompiler {
   
   int GetNextCommaIndex (ArrayList <String> CurrentLineTokens, int StartIndex, int TableBlockEnd, int TableBlockLevel, ArrayList <Integer> BlockLevels) {
     
-    int NextCommaIndex = FindTokenIndex (",", CurrentLineTokens, StartIndex, TableBlockEnd);
+    int NextCommaIndex = IndexOfItemInRange (CurrentLineTokens,",",  StartIndex, TableBlockEnd);
     if (NextCommaIndex == -1) return -1;
     int NextCommaLevel = BlockLevels.get(NextCommaIndex);
     if (NextCommaLevel < TableBlockLevel) return -1;
     
     while (NextCommaLevel > TableBlockLevel) {
-      NextCommaIndex = FindTokenIndex (",", CurrentLineTokens, NextCommaIndex + 1, TableBlockEnd);
+      NextCommaIndex = IndexOfItemInRange (CurrentLineTokens, ",", NextCommaIndex + 1, TableBlockEnd);
       if (NextCommaIndex == -1) return -1;
       NextCommaLevel = BlockLevels.get(NextCommaIndex);
       if (NextCommaLevel < TableBlockLevel) return -1;
@@ -2242,34 +2210,24 @@ class LooFCompiler {
   
   
   
-  int FindTokenIndex (String TokenToFind, ArrayList <String> CurrentLineTokens, int StartIndex) {
-    return FindTokenIndex (TokenToFind, CurrentLineTokens, StartIndex, CurrentLineTokens.size() - 1);
-  }
-  
-  int FindTokenIndex (String TokenToFind, ArrayList <String> CurrentLineTokens, int StartIndex, int EndIndex) {
-    for (int i = StartIndex; i <= EndIndex; i ++) {
-      if (CurrentLineTokens.get(i).equals(TokenToFind)) return i;
-    }
-    return -1;
-  }
-  
-  
-  
-  
-  
   void PasrseAndAddTableItem (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <LooFTokenBranch> ArrayItems, HashMap <String, LooFTokenBranch> HashMapItems, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     Tuple2 <String, LooFTokenBranch> ParsedTableItem = GetParsedTableItem (CurrentLineTokens, FormulaBlockStart, FormulaBlockEnd, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
-    if (ParsedTableItem.Value1 != null) {
-      HashMapItems.put(ParsedTableItem.Value1, ParsedTableItem.Value2);
+    String HashMapIndex = ParsedTableItem.Value1;
+    LooFTokenBranch ItemToAdd = ParsedTableItem.Value2;
+    
+    if (HashMapIndex != null) {
+      HashMapItems.put(HashMapIndex, ItemToAdd);
       return;
     }
-    ArrayItems.add(ParsedTableItem.Value2);
+    
+    ArrayItems.add(ItemToAdd);
   }
   
   
   
   Tuple2 <String, LooFTokenBranch> GetParsedTableItem (ArrayList <String> CurrentLineTokens, int FormulaBlockStart, int FormulaBlockEnd, ArrayList <Integer> BlockLevels, ArrayList <Integer> BlockEnds, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     
+    // hashmap item
     int PossibleColonIndex = FormulaBlockStart + 1;
     boolean IsHashMapItem = PossibleColonIndex < CurrentLineTokens.size() && CurrentLineTokens.get(PossibleColonIndex).equals(":");
     if (IsHashMapItem) {
@@ -2279,6 +2237,7 @@ class LooFCompiler {
       return new Tuple2 <String, LooFTokenBranch> (HashMapKey, ParsedFormula);
     }
     
+    // array item
     LooFTokenBranch ParsedFormula = GetParsedFormula (CurrentLineTokens, FormulaBlockStart, FormulaBlockEnd, BlockLevels, BlockEnds, AddonsData, CodeData, AllCodeDatas, LineNumber);
     return new Tuple2 <String, LooFTokenBranch> (null, ParsedFormula);
     

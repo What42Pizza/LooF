@@ -27,10 +27,12 @@
 - **$function FunctionName**
   - defines the starting location of a function
 - **$link FileName**
-  - gives the current file access to all the functions in FileName. Calls to functions in FileName have to be proceeded by the name of the linked file, with only a period instead of ".LOOF" (example: `call ExampleFileName.ExampleFunctionName`)
+  - gives the current file access to all the functions in FileName
 - **$link FileName as ShortenedFileName**
-  - gives the current file access to all the functions in FileName. Calls to functions in FileName have to be proceeded by ShortenedFileName and a period (example: `call ExampleShortendName.ExampleFunctionName`)
+  - gives the current file access to all the functions in FileName
 - **(anywhere in line) $FunctionName**
   - replaces $FunctionName with the values required to call FunctionName
+- **(anywhere in line) $FileName.FunctionName**
+  - replaces $FunctionName with the values required to call FunctionName
 
-**Note:** every time there is a '$' character in the middle of a line of code, the linker will try to replace it with newFunction. To stop this, you can add '\' directly before the '$'.
+**NOTE:** Every '$' character that's not in a string will be processed by the linker. If you want to use this character without it being processed by the linker, you can proceed it with '\', and the linker will remove the '\' instead of normal processing.

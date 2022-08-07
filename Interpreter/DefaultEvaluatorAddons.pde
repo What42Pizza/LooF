@@ -1203,7 +1203,7 @@ LooFEvaluatorFunction Function_RandomItem = new LooFEvaluatorFunction() {
     
     // lands in hashmap part
     ChosenIndex -= ArraySize;
-    return IndexCollection (HashMapValue.values(), ChosenIndex);
+    return GetCollectionIndex (HashMapValue.values(), ChosenIndex);
     
   }
   @Override public boolean CanBePreEvaluated() {return false;}
@@ -1234,7 +1234,7 @@ LooFEvaluatorFunction Function_RandomHashmapItem = new LooFEvaluatorFunction() {
     if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function randomValue can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     Collection <LooFDataValue> HashMapValues = Input.HashMapValue.values();
-    return IndexCollection (HashMapValues, (int) (Math.random() * HashMapValues.size()));
+    return GetCollectionIndex (HashMapValues, (int) (Math.random() * HashMapValues.size()));
     
   }
   @Override public boolean CanBePreEvaluated() {return false;}

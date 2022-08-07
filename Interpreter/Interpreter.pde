@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 08/02/22
+// Last updated 08/07/22
 
 
 
@@ -65,7 +65,7 @@ void setup() {
   
   try {
     Environment = LooFCompiler.CompileEnvironmentFromFolder(new File (dataPath("") + FolderToCompile), CompileSettings);
-  } catch (RuntimeException e) {
+  } catch (LooFCompilerException e) {
     throw e;
   }
   

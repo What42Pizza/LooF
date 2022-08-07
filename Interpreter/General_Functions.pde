@@ -70,6 +70,19 @@
 
 
 
+<T> int IndexOfItemInRange (ArrayList <T> ArrayIn, T ItemToFind, int MinIndex, int MaxIndex) {
+  int Output = ArrayIn.indexOf(ItemToFind);
+  if (Output != -1) {
+    println();
+    println ("\"" + ItemToFind + "\", " + MinIndex + ", " + MaxIndex);
+    printArray (ArrayIn);
+  }
+  if (Output < MinIndex || Output > MaxIndex) return -1;
+  return Output;
+}
+
+
+
 <T> void AddItemToArrayStart (T[] ArrayIn, T Item) {
   T[] ArrayOut = (T[]) Array.newInstance(Item.getClass(), ArrayIn.length + 1);
   for (int i = 0; i < ArrayIn.length; i ++) {
@@ -138,6 +151,46 @@ class StringComparator_ShortestToLongest implements Comparator <String> {
 
 
 
+boolean[] GetCharsInQuotes_WithCache (String StringIn, HashMap <String, boolean[]> CharsInQuotesCache) {
+  boolean[] CharsInQuotes = CharsInQuotesCache.getOrDefault (StringIn, null);
+  if (CharsInQuotes == null) {
+    CharsInQuotes = GetCharsInQuotes (StringIn);
+    CharsInQuotesCache.put(StringIn, CharsInQuotes);
+  }
+  return CharsInQuotes;
+}
+
+
+
+boolean[] GetCharsInQuotes (String StringIn) {
+  boolean[] CharsInQuotes = new boolean [StringIn.length()];
+  int StartQuoteIndex = StringIn.indexOf('"');
+  while (StartQuoteIndex != -1) {
+    int EndQuoteIndex = StringIn.indexOf('"', StartQuoteIndex + 1);
+    if (EndQuoteIndex == -1) return CharsInQuotes;
+    for (int i = StartQuoteIndex + 1; i < EndQuoteIndex; i ++) {
+      CharsInQuotes[i] = true;
+    }
+    StartQuoteIndex = StringIn.indexOf('"', EndQuoteIndex + 1);
+  }
+  return CharsInQuotes;
+}
+
+
+
+Result <Integer> GetEndQuoteIndex (String CurrentLine, int StartQuoteIndex) {
+  int EndQuoteIndex = CurrentLine.indexOf('"', StartQuoteIndex + 1);
+  while (true) {
+    if (EndQuoteIndex == -1) return new Result <Integer> ();
+    if (CurrentLine.charAt(EndQuoteIndex - 1) != '\\') return new Result <Integer> (EndQuoteIndex);
+    EndQuoteIndex = CurrentLine.indexOf('"', EndQuoteIndex + 1);
+  }
+}
+
+
+
+
+
 long CorrectModulo (long A, long B) {
   long FirstModulo = A % B;
   long PositiveResult = FirstModulo + B;
@@ -172,7 +225,7 @@ int ByteToInt (byte ByteIn) {
 
 
 // from stack overflow: https://stackoverflow.com/questions/21092086/get-random-element-from-collection by Peter Lawrey https://stackoverflow.com/users/57695/peter-lawrey
-<T> T IndexCollection (Collection <T> CollectionIn, int Index) {
+<T> T GetCollectionIndex (Collection <T> CollectionIn, int Index) {
   for (T CurrentItem : CollectionIn) {
     if (--Index < 0) return CurrentItem;
   }
@@ -508,6 +561,14 @@ String EnsureStringLength (String StringIn, int NeededLength, char FillChar) {
     StringIn += FillChar;
   }
   return StringIn;
+}
+
+
+
+
+
+String RemoveStringRange (String StringIn, int RangeStart, int RangeEnd) {
+  return StringIn.substring(0, RangeStart) + StringIn.substring (RangeEnd);
 }
 
 

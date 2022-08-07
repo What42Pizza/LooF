@@ -1,0 +1,26 @@
+Width = 512
+Height = 288
+
+call NewImage, Width, Height  -> mut_ImageToDisplay
+
+loop i, 40000, 80003
+	ImageToDisplay[i] = 255
+repeat
+
+callOutside "Graphics", "set frame", ImageToDisplay
+callOutside "Interpreter", "pause", 2
+
+:exit
+
+
+
+
+
+function NewImage  -> Width, Height
+	ImageOut = newByteArray (Width * Height * 4 + 4)
+	ImageOut[0] = Width && 0xFF
+	ImageOut[1] = (Width && 0xFF00) >> 8
+	ImageOut[2] = Height && 0xFF
+	ImageOut[3] = (Height && 0xFF00) >> 8
+	return ImageOut
+end

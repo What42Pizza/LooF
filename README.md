@@ -77,7 +77,7 @@ I'm also doing my best to make the error messages informative, easy to read, and
 
 
 function Factorial  -> In
-	reutrnIf (In == 1), 1
+	returnIf (In == 1), 1
 	call Factorial, In - 1  -> NextProduct
 	return In * NextProduct
 end
