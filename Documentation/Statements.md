@@ -61,7 +61,9 @@
 - **pop VarName**
   - Pops the first value of the general stack into VarName. Errors if the general stack is empty or if no more values have been pushed to the stack since the function started
 - **pop TableVarName, Item0, Item1, ...**
-  - Pops the first value of the general stack into TableVarName, then sets the var Item0 to index 0 of TableVarName, sets the var Item0 to index 1 of TableVarName, etc. If the number of items in TableVarName runs out, all remaining arguments will be set to null. Errors if the general stack is empty or if no more values have been pushed to the stack since the function started
+  - Pops the first value of the general stack into TableVarName, then sets the var Item0 to index 0 of TableVarName, sets the var Item0 to index 1 of TableVarName, etc. If the number of items in TableVarName runs out, all remaining arguments will be set to null
+- **popImmutable TableVarName, Item0, Item1, ...**
+  - Same as `pop`, but if the variable name does not start with "mut_", the value's lock level will be increased, meaning it is made immutable until the current function ends. If the variable name does start with "mut_", the lock level is not increased and the first four characters of the var name are ignored
 
 <br>
 
@@ -88,18 +90,24 @@
 
 <br>
 
-## If Statements
+## General Control Flow
 
 - **if Condition**
   - If Condition is truthy, executes the next statement (otherwise skips it)
 - **if Condition, Invert**
   - If Condition is truthy xor Invert is truthy, executes the next statement (otherwise skips it)
 - **skip**
-  - Jumps execution to after the first 'end' statement it can find that is on the same code block level. Errors if no suitable 'end' statement is found
+  - Jumps execution to just after the first 'end' statement it can find that is on the same code block level. Errors if no suitable 'end' statement is found
 - **skip IsFunction**
-  - Jumps execution to after the first 'end' statement it can find that is on the same code block level. If IsFunction is true, the matching 'end' statement will throw an error if executed to make sure you make the function return. Errors if no suitable 'end' statement is found
+  - Jumps execution to just after the first 'end' statement it can find that is on the same code block level. If IsFunction is true, the matching 'end' statement will throw an error if executed to make sure you make the function return. Errors if no suitable 'end' statement is found
 - **end**
   - Effectively nop; only useful because of 'skip' statements
+- **skipTo LabelName**
+  - Jumps execution to just after the next label named LabelName
+- **skipToIf Condition, LabelName**
+  - If Condition is truthy, jumps execution to just after the next label named LabelName
+- **Label LabelName**
+  - Effectively nop; only useful because of 'skipTo' statements
 
 <br>
 
@@ -189,4 +197,10 @@
 - **callOutside ModuleName (string), Arg1, Arg2, ...**
   - Calls the module ModuleName with the remaining arguments as arguments for the module
 - **TODO: Details (string)** (this is a statement, not something I need to add)
-  - Same as `error Details, {"TODO"}`
+  - Errors with Details as the error message.
+- **assert Condition**
+  - Same as statement `errorIf Condition, "assertion failed", {"AssertionFail"}`
+- **getGlobal**
+  - Pushes the global value to the general stack.
+- **setGobal NewValue**
+  - Sets the global value to NewValue.

@@ -1711,6 +1711,18 @@ LooFEvaluatorFunction Function_IsLocked = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_NotNull = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    
+    if (Input.ValueType == DataValueType_Null) throw (new LooFInterpreterException (Environment, "null value found", new String[] {"NullValue"}));
+    
+    return Input;
+    
+  }
+};
+
+
+
 
 
 LooFEvaluatorFunction Function_CloneValue = new LooFEvaluatorFunction() {

@@ -255,6 +255,7 @@ class LooFCompiler {
     
     InterpreterFunctions.putIfAbsent("push", InterpreterFunction_Push);
     InterpreterFunctions.putIfAbsent("pop", InterpreterFunction_Pop);
+    InterpreterFunctions.putIfAbsent("popImmutable", InterpreterFunction_PopImmutable);
     
     InterpreterFunctions.putIfAbsent("call", InterpreterFunction_Call);
     InterpreterFunctions.putIfAbsent("return", InterpreterFunction_Return);
@@ -265,6 +266,9 @@ class LooFCompiler {
     InterpreterFunctions.putIfAbsent("if", InterpreterFunction_If);
     InterpreterFunctions.putIfAbsent("skip", InterpreterFunction_Skip);
     InterpreterFunctions.putIfAbsent("end", InterpreterFunction_End);
+    InterpreterFunctions.putIfAbsent("skipTo", InterpreterFunction_SkipTo);
+    InterpreterFunctions.putIfAbsent("skipToIf", InterpreterFunction_SkipToIf);
+    InterpreterFunctions.putIfAbsent("label", InterpreterFunction_Label);
     
     InterpreterFunctions.putIfAbsent("loop", InterpreterFunction_Loop);
     InterpreterFunctions.putIfAbsent("forEach", InterpreterFunction_ForEach);
@@ -283,6 +287,9 @@ class LooFCompiler {
     
     InterpreterFunctions.putIfAbsent("callOutside", InterpreterFunction_CallOutside);
     InterpreterFunctions.putIfAbsent("TODO:", InterpreterFunction_TODO);
+    InterpreterFunctions.putIfAbsent("assert", InterpreterFunction_Assert);
+    InterpreterFunctions.putIfAbsent("getGlobal", InterpreterFunction_GetGlobal);
+    InterpreterFunctions.putIfAbsent("setGlobal", InterpreterFunction_SetGlobal);
     
     return InterpreterFunctions;
   }
@@ -421,6 +428,7 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("typeOf", Function_TypeOf);
     EvaluatorFunctions.putIfAbsent("isNumber", Function_IsNumber);
     EvaluatorFunctions.putIfAbsent("isLocked", Function_IsLocked);
+    EvaluatorFunctions.putIfAbsent("notNull", Function_NotNull);
     EvaluatorFunctions.putIfAbsent("cloneValue", Function_CloneValue);
     //EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
@@ -939,52 +947,45 @@ class LooFCompiler {
   
   
   
-  void ReplaceMultiLineString (LooFCodeData CodeData, int LineNumber, String[] ReplaceBefore, String[] ReplaceAfter) {
+  void ReplaceMultiLineString (LooFCodeData CodeData, int StartLine, String[] ReplaceBefore, String[] ReplaceAfter) {
     ArrayList <String> Code = CodeData.CodeArrayList;
     ArrayList <Integer> LineNumbers = CodeData.LineNumbers;
     ArrayList <String> LineFileOrigins = CodeData.LineFileOrigins;
-    int CurrentLineNumber = LineNumbers.get(LineNumber);
-    String CurrentLineFileOrigin = LineFileOrigins.get(LineNumber);
-    if (ReplaceBefore[0].equals("") && ReplaceAfter[0].equals("")) CurrentLineNumber ++;
+    ReplaceAfter = (String[]) ReplaceAfter.clone(); // this is needed since it's mutated
     
-    // remove the lines inside the replaced area
-    for (int i = 1; i < ReplaceBefore.length - 1; i ++) {
-      Code.remove(i + LineNumber);
-      LineNumbers.remove(i + LineNumber);
-      LineFileOrigins.remove(i + LineNumber);
+    // add the start of the line before the replaced area
+    String ReplacedAreaStart = Code.get(StartLine);
+    ReplacedAreaStart = ReplacedAreaStart.substring (0, ReplacedAreaStart.length() - ReplaceBefore[0].length());
+    ReplaceAfter[0] = ReplacedAreaStart + ReplaceAfter[0];
+    
+    // add the end of the line after the replaced area
+    String ReplacedAreaEnd = Code.get(StartLine + ReplaceBefore.length - 1);
+    ReplacedAreaEnd = ReplacedAreaEnd.substring (LastItemOf (ReplaceBefore).length());
+    ReplaceAfter[ReplaceAfter.length - 1] = ReplaceAfter[ReplaceAfter.length - 1] + ReplacedAreaEnd;
+    
+    // replace code (overlap between old and new code; doesn't mess with line numbers or file names)
+    int EndIndex = StartLine + Math.min(ReplaceBefore.length, ReplaceAfter.length);
+    for (int i = StartLine; i < EndIndex; i ++) {
+      Code.set(i, ReplaceAfter[i - StartLine]);
     }
     
-    // get edges of the replaced area
-    int AreaEndIndex = LineNumber + ReplaceBefore.length - 1;
-    String ReplacedAreaStart = Code.get(LineNumber);
-    String ReplacedAreaEnd = Code.get(AreaEndIndex);
-    ReplacedAreaStart = ReplacedAreaStart.substring (0, ReplacedAreaStart.length() - ReplaceBefore[0].length());
-    ReplacedAreaEnd = ReplacedAreaEnd.substring (LastItemOf (ReplaceBefore).length());
-    
-    // single line replacement
-    if (ReplaceAfter.length == 1) {
-      
-      Code.remove(LineNumber);
-      LineNumbers.remove(LineNumber);
-      LineFileOrigins.remove(LineNumber);
-      
-      Code.set(LineNumber, ReplacedAreaStart + ReplaceAfter[0] + ReplacedAreaEnd);
-      LineNumbers.set(LineNumber, CurrentLineNumber);
-      LineFileOrigins.set(LineNumber, CurrentLineFileOrigin);
-      
+    // add extra lines and duplicate the last line number & file name
+    if (ReplaceAfter.length > ReplaceBefore.length) {
+      int LineNumber = LineNumbers.get(EndIndex - 1);
+      String FileOrigin = LineFileOrigins.get(EndIndex - 1);
+      for (int i = EndIndex; i < StartLine + ReplaceAfter.length; i ++) {
+        Code.add(i, ReplaceAfter[i - StartLine]);
+        LineNumbers.add(i, LineNumber);
+        LineFileOrigins.add(i, FileOrigin);
+      }
       return;
     }
     
-    // multi-line replacement
-    ReplacedAreaStart += ReplaceAfter[0];
-    ReplacedAreaEnd = LastItemOf (ReplaceAfter) + ReplacedAreaEnd;
-    Code.set(LineNumber, ReplacedAreaStart.trim());
-    Code.set(AreaEndIndex, ReplacedAreaEnd.trim());
-    
-    for (int i = 1; i < ReplaceAfter.length - 1; i ++) {
-      Code.add(i + LineNumber, ReplaceAfter[i]);
-      LineNumbers.add(i + LineNumber, CurrentLineNumber);
-      LineFileOrigins.add(i + LineNumber, CurrentLineFileOrigin);
+    // remove old lines and remove line numbers & file names
+    for (int i = EndIndex; i < StartLine + ReplaceBefore.length; i ++) {
+      Code.remove(i);
+      LineNumbers.remove(i);
+      LineFileOrigins.remove(i);
     }
     
   }

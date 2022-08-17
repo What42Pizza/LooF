@@ -266,6 +266,8 @@ FunctionValueToPass = $this.ExampleFunction
   - returns whether Input is of type int or float
 - **isLocked Input (any)**
   - returns whether Input is locked
+- **notNull Input (any)**
+  - errors if Input is null, returns Input otherwise
 - **cloneValue Input (any)**
   - returns a clone of Input
   - useful for having a local mutable copy of a locked value 

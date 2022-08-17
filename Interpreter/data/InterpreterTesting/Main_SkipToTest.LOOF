@@ -1,0 +1,18 @@
+function Test
+	
+	skipTo "Test"
+	
+	:print "non"
+	
+	label "Test"
+	
+	:print "yes"
+	
+	return
+end
+
+
+
+call Test
+
+:exit

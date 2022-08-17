@@ -36,6 +36,52 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
     
     // pop into rest of args
     if (PoppedValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "attempted to pop table values into vars, but the popped value was of type " + DataValueTypeNames[PoppedValue.ValueType] + ".", new String[] {"NonTableValueOnGeneralStack", "InvalidArgType"}));
+    ArrayList <LooFDataValue> PoppedValueItems = PoppedValue.ArrayValue;
+    int EndIndex = Math.min (PoppedValueItems.size() + 1, Args.length);
+    for (int i = 1; i < EndIndex; i ++) {
+      String VarName = Args[i].StringValue;
+      LooFDataValue VarValue = PoppedValueItems.get(i - 1);
+      LooFInterpreter.SetVariableValue (VarName, VarValue, Environment);
+    }
+    
+    // fill remaining args with null
+    for (int i = EndIndex; i < Args.length; i ++) {
+      LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
+    }
+    
+  }
+  
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+    LooFCompiler.SimplifyAllOutputVars (CurrentStatement, CodeData, AllCodeDatas, LineNumber);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {return "'pop'";}
+};
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_PopImmutable = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = Statement.Args;
+    
+    // if there's no value to pop
+    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackInitialGeneralStackSizes)) {
+      for (int i = 0; i < Args.length; i ++) {
+        LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
+      }
+      return;
+    }
+    
+    // pop first value into first arg
+    LooFDataValue PoppedValue = RemoveLastItem (Environment.GeneralStack);
+    LooFTokenBranch FirstArg = Args[0];
+    LooFInterpreter.SetVariableValue (FirstArg.StringValue, PoppedValue, Environment);
+    if (Args.length == 1) return;
+    
+    // pop into rest of args
+    if (PoppedValue.ValueType != DataValueType_Table) throw (new LooFInterpreterException (Environment, "attempted to pop table values into vars, but the popped value was of type " + DataValueTypeNames[PoppedValue.ValueType] + ".", new String[] {"NonTableValueOnGeneralStack", "InvalidArgType"}));
     ArrayList <LooFDataValue> ValuesToLock = new ArrayList <LooFDataValue> ();
     ArrayList <LooFDataValue> PoppedValueItems = PoppedValue.ArrayValue;
     int EndIndex = Math.min (PoppedValueItems.size() + 1, Args.length);
@@ -63,7 +109,7 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
     LooFCompiler.SimplifyAllOutputVars (CurrentStatement, CodeData, AllCodeDatas, LineNumber);
   }
-  @Override public String toString (LooFStatement CurrentStatement) {return "'pop'";}
+  @Override public String toString (LooFStatement CurrentStatement) {return "'popImmutable'";}
 };
 
 
@@ -357,6 +403,111 @@ class LooFAdditionalEndStatementData extends LooFAdditionalStatementData {
   }
   
 }
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_SkipTo = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFAdditionalSkipToStatementData AdditionalData = (LooFAdditionalSkipToStatementData) Statement.AdditionalData;
+    
+    Environment.CurrentLineNumber = AdditionalData.MatchingLabelStatementIndex + 1;
+    Environment.IncLineNumber = false;
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+    LooFTokenBranch[] Args = CurrentStatement.Args;
+    LooFDataValue LabelNameValue = LooFInterpreter.EvaluateFormula (Args[0], null, CodeData, AllCodeDatas);
+    if (LabelNameValue.ValueType != DataValueType_String) ThrowLooFException (null, CodeData, AllCodeDatas, "'skipTo' statements must take a string as its first arg, but the first arg was of type " + DataValueTypeNames[LabelNameValue.ValueType], new String[] {"InvalidArgType"});
+    String LabelName = LabelNameValue.StringValue;
+    int MatchingLabelStatementIndex = FindNextLabelStatement (LabelName, LineNumber + 1, CodeData.Statements, CodeData, AllCodeDatas);
+    CurrentStatement.AdditionalData = new LooFAdditionalSkipToStatementData (MatchingLabelStatementIndex);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {
+    LooFAdditionalSkipToStatementData AdditionalData = (LooFAdditionalSkipToStatementData) CurrentStatement.AdditionalData;
+    if (AdditionalData == null) return "'skipTo'";
+    return "'skipTo' (label at: " + AdditionalData.MatchingLabelStatementIndex + ")";
+  }
+};
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_SkipToIf = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = Statement.Args;
+    LooFAdditionalSkipToStatementData AdditionalData = (LooFAdditionalSkipToStatementData) Statement.AdditionalData;
+    
+    LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    if (!Condition) return;
+    
+    Environment.CurrentLineNumber = AdditionalData.MatchingLabelStatementIndex + 1;
+    Environment.IncLineNumber = false;
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 2, CodeData, AllCodeDatas, LineNumber);
+    LooFTokenBranch[] Args = CurrentStatement.Args;
+    LooFDataValue LabelNameValue = LooFInterpreter.EvaluateFormula (Args[1], null, CodeData, AllCodeDatas);
+    if (LabelNameValue.ValueType != DataValueType_String) ThrowLooFException (null, CodeData, AllCodeDatas, "'skipToIf' statements must take a string as its second arg, but the second arg was of type " + DataValueTypeNames[LabelNameValue.ValueType], new String[] {"InvalidArgType"});
+    String LabelName = LabelNameValue.StringValue;
+    int MatchingLabelStatementIndex = FindNextLabelStatement (LabelName, LineNumber + 1, CodeData.Statements, CodeData, AllCodeDatas);
+    CurrentStatement.AdditionalData = new LooFAdditionalSkipToStatementData (MatchingLabelStatementIndex);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {
+    LooFAdditionalSkipToStatementData AdditionalData = (LooFAdditionalSkipToStatementData) CurrentStatement.AdditionalData;
+    if (AdditionalData == null) return "'skipToIf'";
+    return "'skipToIf' (label at: " + AdditionalData.MatchingLabelStatementIndex + ")";
+  }
+};
+
+
+
+class LooFAdditionalSkipToStatementData extends LooFAdditionalStatementData {
+  
+  int MatchingLabelStatementIndex;
+  
+  public LooFAdditionalSkipToStatementData (int MatchingLabelStatementIndex) {
+    this.MatchingLabelStatementIndex = MatchingLabelStatementIndex;
+  }
+  
+}
+
+
+
+int FindNextLabelStatement (String LabelName, int StartingLineNumber, LooFStatement[] Statements, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+  for (int i = StartingLineNumber; i < Statements.length; i ++) {
+    LooFStatement CurrentStatement = Statements[i];
+    if (CurrentStatement.Args.length != 1 || !CurrentStatement.Name.equals("label")) continue;
+    LooFDataValue LabelNameValue = LooFInterpreter.EvaluateFormula (CurrentStatement.Args[0], null, CodeData, AllCodeDatas);
+    if (LabelNameValue.ValueType != DataValueType_String) continue;
+    if (LabelNameValue.StringValue.equals(LabelName)) return i;
+  }
+  throw (new LooFCompilerException (CodeData, AllCodeDatas, StartingLineNumber - 1, "could not find any label named \"" + LabelName + "\"."));
+}
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_Label = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+    LooFTokenBranch[] Args = CurrentStatement.Args;
+    LooFDataValue LabelNameValue = LooFInterpreter.EvaluateFormula (Args[0], null, CodeData, AllCodeDatas);
+    if (LabelNameValue.ValueType != DataValueType_String) ThrowLooFException (null, CodeData, AllCodeDatas, "'label' statements must take a string as its second arg, but the second arg was of type " + DataValueTypeNames[LabelNameValue.ValueType], new String[] {"InvalidArgType"});
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {
+    return "'label'";
+  }
+};
 
 
 
@@ -1012,7 +1163,7 @@ LooFInterpreterFunction InterpreterFunction_TODO = new LooFInterpreterFunction()
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     LooFAdditionalTODOStatementData AdditionalData = (LooFAdditionalTODOStatementData) Statement.AdditionalData;
     
-    throw (new LooFInterpreterException (Environment, AdditionalData.Details, new String[] {"TODO"}));
+    throw (new LooFInterpreterException (Environment, "unresolved TODO: \"" + AdditionalData.Details + "\"", new String[] {"TODO"}));
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
@@ -1042,3 +1193,61 @@ class LooFAdditionalTODOStatementData extends LooFAdditionalStatementData {
   }
   
 }
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_Assert = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = Statement.Args;
+    
+    LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    if (Condition) return;
+    
+    throw (new LooFInterpreterException (Environment, "assertion failed", new String[] {"AssertionFail"}));
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {
+    return "'assert'";
+  }
+};
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_GetGlobal = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    
+    LooFDataValue GlobalValue = Environment.GlobalValue;
+    Environment.GeneralStack.add(GlobalValue);
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 0, CodeData, AllCodeDatas, LineNumber);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {return "'getGlobal'";}
+};
+
+
+
+
+
+LooFInterpreterFunction InterpreterFunction_SetGlobal = new LooFInterpreterFunction() {
+  @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
+    LooFTokenBranch[] Args = Statement.Args;
+    
+    LooFDataValue NewValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    Environment.GlobalValue = NewValue;
+    
+  }
+  @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
+    LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Bounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
+  }
+  @Override public String toString (LooFStatement CurrentStatement) {return "'getGlobal'";}
+};

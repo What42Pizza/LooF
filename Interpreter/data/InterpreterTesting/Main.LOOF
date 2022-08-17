@@ -1,2 +1,4 @@
-Test = \$
+Test = null
+
+:print notNull Test
 :exit

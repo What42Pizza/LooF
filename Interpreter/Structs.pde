@@ -149,6 +149,8 @@ class LooFEnvironment {
   
   HashMap <LooFInterpreterModule, LooFModuleData> ModuleDatas;
   
+  LooFDataValue GlobalValue = new LooFDataValue();
+  
   
   
   boolean IsStopped = false;
