@@ -668,3 +668,174 @@ LooFInterpreterModule InterpreterModule_Graphics = new LooFInterpreterModule() {
   }
   
 };
+
+
+
+
+
+
+
+
+
+
+LooFInterpreterModule InterpreterModule_Input = new LooFInterpreterModule() {
+  
+  @Override
+  public void HandleCall (LooFTokenBranch[] Args, LooFEnvironment Environment, LooFModuleData ModuleDataIn) {
+    LooFDataValue FirstArg = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
+    LooFInputModuleData ModuleData = (LooFInputModuleData) ModuleDataIn;
+    if (FirstArg.ValueType != DataValueType_String) throw (new LooFInterpreterException (Environment, "the first arg given to the Input module must be a string, but the first arg was of type " + DataValueTypeNames[FirstArg.ValueType] + ".", new String[] {"InvalidArgType"}));
+    switch (FirstArg.StringValue) {
+      
+      
+      
+      case ("get mouse data"): {
+        if (Args.length != 1) throw (new LooFInterpreterException (Environment, "the message \"get mouse data\" does not take any arguments.", new String[] {"InvalidArgsLength"}));
+        
+        Point MousePosition = MouseInfo.getPointerInfo().getLocation();
+        int AbsoluteMouseX = (int) MousePosition.getX();
+        int AbsoluteMouseY = (int) MousePosition.getY();
+        
+        HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
+        TableToPushItems.put("XPos"        , new LooFDataValue (mouseX        ));
+        TableToPushItems.put("YPos"        , new LooFDataValue (mouseY        ));
+        TableToPushItems.put("AbsoluteXPos", new LooFDataValue (AbsoluteMouseX));
+        TableToPushItems.put("AbsoluteYPos", new LooFDataValue (AbsoluteMouseY));
+        
+        LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+        
+      return;}
+      
+      
+      
+      case ("get mouse events"): {
+        if (Args.length != 1) throw (new LooFInterpreterException (Environment, "the message \"get mouse events\" does not take any arguments.", new String[] {"InvalidArgsLength"}));
+        LooFInterpreterModuleData InterpreterModuleData = (LooFInterpreterModuleData) Environment.ModuleDatas.get(InterpreterModule_Interpreter);
+        long StartMillis = InterpreterModuleData.StartMillis;
+        LooFInputHandler InputHandler = ModuleData.InputHandler;
+        
+        ArrayList <LooFDataValue> ClickEvents = new ArrayList <LooFDataValue> ();
+        ArrayList <LooFDataValue> DownEvents  = new ArrayList <LooFDataValue> ();
+        ArrayList <LooFDataValue> UpEvents    = new ArrayList <LooFDataValue> ();
+        ArrayList <LooFDataValue> EnterEvents = new ArrayList <LooFDataValue> ();
+        ArrayList <LooFDataValue> ExitEvents  = new ArrayList <LooFDataValue> ();
+        
+        for (MouseEvent CurrentEvent : InputHandler.ClickEvents) ClickEvents.add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
+        for (MouseEvent CurrentEvent : InputHandler.DownEvents ) DownEvents .add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
+        for (MouseEvent CurrentEvent : InputHandler.UpEvents   ) UpEvents   .add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
+        for (MouseEvent CurrentEvent : InputHandler.EnterEvents) EnterEvents.add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
+        for (MouseEvent CurrentEvent : InputHandler.ExitEvents ) ExitEvents .add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
+        
+        InputHandler.ClickEvents.clear();
+        InputHandler.DownEvents.clear();
+        InputHandler.UpEvents.clear();
+        InputHandler.EnterEvents.clear();
+        InputHandler.ExitEvents.clear();
+        
+        HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
+        TableToPushItems.put("ClickEvents", new LooFDataValue (ClickEvents, new HashMap <String, LooFDataValue> ()));
+        TableToPushItems.put("DownEvents" , new LooFDataValue (DownEvents , new HashMap <String, LooFDataValue> ()));
+        TableToPushItems.put("UpEvents"   , new LooFDataValue (UpEvents   , new HashMap <String, LooFDataValue> ()));
+        TableToPushItems.put("EnterEvents", new LooFDataValue (EnterEvents, new HashMap <String, LooFDataValue> ()));
+        TableToPushItems.put("ExitEvents" , new LooFDataValue (ExitEvents , new HashMap <String, LooFDataValue> ()));
+        
+        LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
+        LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+        
+      return;}
+      
+      
+      
+      default:
+        throw (new LooFInterpreterException (Environment, "cannot understand the message \"" + FirstArg.StringValue + "\".", new String[] {"UnknownModuleMessage"}));
+      
+    }
+  }
+  
+  @Override
+  public LooFModuleData CreateModuleData() {
+    return new LooFInputModuleData (new LooFInputHandler());
+  }
+  
+};
+
+
+
+class LooFInputModuleData extends LooFModuleData {
+  
+  LooFInputHandler InputHandler;
+  
+  public LooFInputModuleData (LooFInputHandler InputHandler) {
+    this.InputHandler = InputHandler;
+  }
+  
+}
+
+
+
+
+
+class LooFInputHandler implements MouseListener {
+  
+  
+  
+  ArrayList <MouseEvent> ClickEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> DownEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> UpEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> EnterEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> ExitEvents = new ArrayList <MouseEvent> ();
+  
+  
+  
+  public LooFInputHandler() {
+    Component ProcessingComponent = (Component) surface.getNative();
+    ProcessingComponent.addMouseListener(this);
+  }
+  
+  
+  
+  public void mouseClicked (MouseEvent e) {
+    ClickEvents.add(e);
+  }
+  
+  public void mousePressed (MouseEvent e) {
+    DownEvents.add(e);
+  }
+  
+  public void mouseReleased (MouseEvent e) {
+    UpEvents.add(e);
+  }
+  
+  public void mouseEntered (MouseEvent e) {
+    EnterEvents.add(e);
+  }
+  
+  public void mouseExited (MouseEvent e) {
+    ExitEvents.add(e);
+  }
+  
+  
+  
+}
+
+
+
+
+
+LooFDataValue CreateLooFMouseEvent (MouseEvent Event, long StartMillis) {
+  HashMap <String, LooFDataValue> EventData = new HashMap <String, LooFDataValue> ();
+  
+  EventData.put("ButtonNum"   , new LooFDataValue (Event.getButton()));
+  EventData.put("Count"       , new LooFDataValue (Event.getClickCount()));
+  EventData.put("XPos"        , new LooFDataValue (Event.getX()));
+  EventData.put("YPos"        , new LooFDataValue (Event.getY()));
+  EventData.put("AbsoluteXPos", new LooFDataValue (Event.getXOnScreen()));
+  EventData.put("AbsoluteYPos", new LooFDataValue (Event.getYOnScreen()));
+  EventData.put("Millis"      , new LooFDataValue (Event.getWhen() - StartMillis));
+  EventData.put("ShiftDown"   , new LooFDataValue (Event.isShiftDown()));
+  EventData.put("ControlDown" , new LooFDataValue (Event.isControlDown()));
+  EventData.put("AltDown"     , new LooFDataValue (Event.isAltDown()));
+  
+  return new LooFDataValue (new ArrayList <LooFDataValue> (), EventData);
+}

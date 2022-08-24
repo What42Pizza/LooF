@@ -211,6 +211,7 @@ class LooFCompiler {
     InterpreterModules.putIfAbsent("Console", InterpreterModule_Console);
     InterpreterModules.putIfAbsent("Files", InterpreterModule_Files);
     InterpreterModules.putIfAbsent("Graphics", InterpreterModule_Graphics);
+    InterpreterModules.putIfAbsent("Input", InterpreterModule_Input);
     
     return InterpreterModules;
   }

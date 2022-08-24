@@ -88,6 +88,19 @@
   - Sets the internal data about the graphics to NewProperties.
 
 <br>
+
+### Input:
+
+- **get mouse data**
+  - Pushes data about the mouse to the general stack.
+  - Return data: {XPos (int), YPos (int), AbsoluteXPos (int), AbsoluteYPos (int), Mouse1Down (bool), Mouse2Down (bool), Mouse3Down (bool)}
+- **get mouse events**
+  - Pushes data about mouse events to the general stack.
+  - Return data: {ClickEvents: {Event1, ...}, DownEvents: {Event1, ...}, UpEvents: {Event1, ...}, EnterEvents: {Event1, ...}, ExitEvents: {Event1, ...}}
+  - Event data: {ButtonNum (int), Count (int), XPos (int), YPos (int), AbsoluteXPos (int), AbsoluteYPos (int), Millis (int), ShiftDown (bool), ControlDown (bool), AltDown (bool)}
+- **get keyboard data**
+
+<br>
 <br>
 <br>
 

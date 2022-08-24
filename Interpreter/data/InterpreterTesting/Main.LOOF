@@ -1,4 +1,9 @@
-Test = null
-
-:print notNull Test
-:exit
+loop
+	
+	callOutside "Input", "get mouse events"  -> MouseEvents
+	ClickEvents = MouseEvents["ClickEvents"]
+	:print lengthOf ClickEvents
+	
+	callOutside "Interpreter", "pause", 0.5
+	
+repeat

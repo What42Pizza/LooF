@@ -1,0 +1,42 @@
+Total Items: 17
+
+currently executes ~3,000,000 lines of code per second!
+
+base Guide.md on: https://clojure.org/guides/learn/syntax
+
+
+
+Main:
+
+add newImage (eval func)
+
+add #assert (pre-processor) & assert (interp func)
+
+add popExact interp func? (find better name)
+
+make the compiler conditionally not allow non-tables following eval funcs
+
+make commas in formula errors better and explain that you might want to replace the formula with a table because it's funciton argumnets
+
+go through the code and add everything to the documentation
+
+Finish the main interpreter
+	finish evaluator functions
+	finish interpreter modules
+
+test the interpreter (even more)
+
+make the interpreter be able to save and load environment data
+
+make the compiler be able to add files in runtime
+
+switch to another IDE / environment?
+
+add better documentation:
+	CompilerSettings
+	challenges
+	creating addons
+
+get Ridge to try it out
+
+add rendering functions to Graphics module
