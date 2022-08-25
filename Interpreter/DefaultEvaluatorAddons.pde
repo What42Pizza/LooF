@@ -1756,8 +1756,8 @@ LooFEvaluatorFunction Function_TimeSince = new LooFEvaluatorFunction() {
     
     double InputAsNum = GetDataValueNumber_Unsafe (Input, Environment, CodeData, AllCodeDatas, "timeSince");
     long ProgramStartMillis = InterpreterModuleData.StartMillis;
-    long CurrentProgramRunTime = System.currentTimeMillis() - ProgramStartMillis;
-    double TimeSinceInput_Millis = (double) CurrentProgramRunTime - InputAsNum;
+    long CurrentProgramRuntime = System.currentTimeMillis() - ProgramStartMillis;
+    double TimeSinceInput_Millis = (double) CurrentProgramRuntime - InputAsNum * 1000;
     
     return new LooFDataValue (TimeSinceInput_Millis / 1000.0);
     

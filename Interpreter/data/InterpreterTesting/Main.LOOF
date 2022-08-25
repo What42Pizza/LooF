@@ -1,9 +1,36 @@
+TargetFramerate = 120
+
+
+
+callOutside "Graphics", "get properties"  -> GraphicsData
+FrameWidth  = GraphicsData["Width" ]
+FrameHeight = GraphicsData["Height"]
+
+Frame = newByteArray (FrameWidth * FrameHeight * 4 + 4)
+Frame[0] = FrameWidth && 0xFF
+Frame[1] = FrameWidth && 0xFF00 >> 8
+Frame[2] = FrameHeight && 0xFF
+Frame[3] = FrameHeight && 0xFF00 >> 8
+
+FrameTimeDelta = 1 / TargetFramerate
+
+
+
+i = 4
+
 loop
+	StartTime = timeSince 0
 	
 	callOutside "Input", "get mouse events"  -> MouseEvents
 	ClickEvents = MouseEvents["ClickEvents"]
 	:print lengthOf ClickEvents
 	
-	callOutside "Interpreter", "pause", 0.5
+	Frame[i+1] = 255
+	Frame[i+2] = 255
+	Frame[i+3] = 255
+	i += 4
 	
+	callOutside "Graphics", "set frame", Frame
+	
+	callOutside "Interpreter", "pause until", StartTime + FrameTimeDelta
 repeat

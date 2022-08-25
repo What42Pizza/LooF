@@ -157,4 +157,6 @@ void draw() {
     exit();
   }
   
+  println (frameRate);
+  
 }

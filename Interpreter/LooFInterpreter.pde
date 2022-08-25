@@ -11,34 +11,42 @@ class LooFInterpreter {
   
   
   
-  void ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) throws LooFInterpreterException  {
+  int ExecuteNextEnvironmentStatements (LooFEnvironment Environment, int NumOfStatements) throws LooFInterpreterException  {
     if (Environment.IsStopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     
     if (Environment.IsPaused) {
       long CurrentTimeMillis = System.currentTimeMillis();
-      if (CurrentTimeMillis < Environment.PauseEndMillis) return;
+      if (CurrentTimeMillis < Environment.PauseEndMillis) return 0;
       Environment.IsPaused = false;
     }
     
     for (int i = 0; i < NumOfStatements; i ++) {
       ExecuteNextStatement (Environment);
-      if (Environment.IsStopped || Environment.IsPaused) return;
+      if (Environment.IsStopped || Environment.IsPaused) return i;
     }
+    
+    return NumOfStatements;
     
   }
   
   
   
-  void ExecuteStatementsUntilBreak (LooFEnvironment Environment) throws LooFInterpreterException {
+  int ExecuteStatementsUntilBreak (LooFEnvironment Environment) throws LooFInterpreterException {
     if (Environment.IsStopped) throw (new LooFInterpreterException (Environment, "this environment is in a stopped state.", new String[0]));
     
     if (Environment.IsPaused) {
       long CurrentTimeMillis = System.currentTimeMillis();
-      if (CurrentTimeMillis < Environment.PauseEndMillis) return;
+      if (CurrentTimeMillis < Environment.PauseEndMillis) return 0;
       Environment.IsPaused = false;
     }
     
-    while (!(Environment.IsStopped || Environment.IsPaused))  ExecuteNextStatement (Environment);
+    int StatementsExecuted = 0;
+    while (!(Environment.IsStopped || Environment.IsPaused)) {
+      StatementsExecuted ++;
+      ExecuteNextStatement (Environment);
+    }
+    
+    return StatementsExecuted;
     
   }
   
