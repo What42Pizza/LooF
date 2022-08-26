@@ -1,5 +1,5 @@
 // Started 04/02/22
-// Last updated 08/24/22
+// Last updated 08/26/22
 
 
 
@@ -14,7 +14,7 @@ final String FolderToCompile = "/InterpreterTesting";
 final boolean Windowed = true;
 final int WindowWidth = 512;
 final int WindowHeight = 288;
-final int TargetFramerate = 60;
+final int TargetFramerate = 1000;
 
 
 
@@ -157,6 +157,6 @@ void draw() {
     exit();
   }
   
-  println (frameRate);
+  //println (frameRate);
   
 }

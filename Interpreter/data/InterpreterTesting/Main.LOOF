@@ -1,4 +1,4 @@
-TargetFramerate = 120
+TargetFramerate = 30
 
 
 
@@ -6,31 +6,103 @@ callOutside "Graphics", "get properties"  -> GraphicsData
 FrameWidth  = GraphicsData["Width" ]
 FrameHeight = GraphicsData["Height"]
 
-Frame = newByteArray (FrameWidth * FrameHeight * 4 + 4)
-Frame[0] = FrameWidth && 0xFF
-Frame[1] = FrameWidth && 0xFF00 >> 8
-Frame[2] = FrameHeight && 0xFF
-Frame[3] = FrameHeight && 0xFF00 >> 8
+Frame = newImage {FrameWidth, FrameHeight}
 
-FrameTimeDelta = 1 / TargetFramerate
+FrameTimeDelta = 1.0 / TargetFramerate
 
 
 
-i = 4
+setGlobal {
+`	MouseX: 0,
+`	MouseY: 0,
+`	Mouse1Down: false,
+`	Mouse2Down: false,
+`	Mouse3Down: false,
+`}
+
+
+
+
+
+FrameCounter = 0
+LastFrameTime = 0
 
 loop
 	StartTime = timeSince 0
 	
-	callOutside "Input", "get mouse events"  -> MouseEvents
-	ClickEvents = MouseEvents["ClickEvents"]
-	:print lengthOf ClickEvents
+	call UpdateGlobal
+	getGlobal  -> Global
 	
-	Frame[i+1] = 255
-	Frame[i+2] = 255
-	Frame[i+3] = 255
-	i += 4
+	
+	
+	if Global["Mouse1Down"] then
+		MouseX = Global["MouseX"]
+		MouseY = Global["MouseY"]
+		call SetPixel, Frame, MouseX, MouseY, 255, 255, 255
+	end
+	
+	
+	
+	callOutside "Input", "get mouse events"  -> MouseEvents
+	callOutside "Input", "clear mouse events"
+	UpEvents = MouseEvents["UpEvents"]
+	
+	forEach UpEvent, UpEvents
+		if UpEvent["ButtonNum"] != 1; continue
+		XPos = UpEvent["XPos"]
+		YPos = UpEvent["YPos"]
+		call SetPixel, Frame, XPos, YPos, 255, 0, 0
+	repeat
+	
+	
 	
 	callOutside "Graphics", "set frame", Frame
 	
+	FrameCounter ++
+	if timeSince LastFrameTime >= 1 then
+		:print FrameCounter
+		FrameCounter = 0
+		LastFrameTime ++
+	end
+	
 	callOutside "Interpreter", "pause until", StartTime + FrameTimeDelta
 repeat
+
+
+
+
+
+
+
+
+
+
+function SetPixel  args: mut ImageIn, XPos, YPos, NewRed, NewGreen, NewBlue, NewAlpha
+	NewAlpha <<defaultsTo 255
+	
+	Index = getImageIndex {XPos, YPos, ImageIn}
+	ImageIn[Index] = NewAlpha
+	ImageIn[Index+1] = NewGreen
+	ImageIn[Index+2] = NewBlue
+	ImageIn[Index+3] = NewRed
+	
+	return
+end
+
+
+
+
+
+function UpdateGlobal
+	getGlobal  -> Global
+	
+	callOutside "Input", "get mouse data"  -> MouseData
+	Global["MouseX"] = MouseData["XPos"]
+	Global["MouseY"] = MouseData["YPos"]
+	Global["Mouse1Down"] = MouseData["Mouse1Down"]
+	Global["Mouse2Down"] = MouseData["Mouse2Down"]
+	Global["Mouse2Down"] = MouseData["Mouse2Down"]
+	
+	setGlobal Global
+	return
+end

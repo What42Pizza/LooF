@@ -378,9 +378,9 @@ LooFInterpreterModule InterpreterModule_Files = new LooFInterpreterModule() {
         byte[] ImageInData = new byte [ImageInPixels.length + 4];
         int ImageInWidth = ImageIn.getWidth();
         int ImageInHeight = ImageIn.getHeight();
-        ImageInData[0] = (byte) ( ImageInWidth  & 0xFF  );
+        ImageInData[0] = (byte) ( ImageInWidth  & 0xFF        );
         ImageInData[1] = (byte) ((ImageInWidth  & 0xFF00) >> 8);
-        ImageInData[2] = (byte) ( ImageInHeight & 0xFF  );
+        ImageInData[2] = (byte) ( ImageInHeight & 0xFF        );
         ImageInData[3] = (byte) ((ImageInHeight & 0xFF00) >> 8);
         System.arraycopy(ImageInPixels, 0, ImageInData, 4, ImageInPixels.length);
         
@@ -628,10 +628,10 @@ LooFInterpreterModule InterpreterModule_Graphics = new LooFInterpreterModule() {
         pixels = new color [width * height];
         int NewFrameIndex = 4;
         for (int i = 0; i < pixels.length; i ++) {
-          byte Blue  = NewFrameData[NewFrameIndex + 1];
-          byte Green = NewFrameData[NewFrameIndex + 2];
-          byte Red   = NewFrameData[NewFrameIndex + 3];
-          int CurrentPixel = Red + (Green << 8) + (Blue << 16) + (0xFF000000);
+          int Blue  = ByteToInt (NewFrameData[NewFrameIndex + 1]);
+          int Green = ByteToInt (NewFrameData[NewFrameIndex + 2]);
+          int Red   = ByteToInt (NewFrameData[NewFrameIndex + 3]);
+          int CurrentPixel = (255 << 24) + (Red << 16) + (Green << 8) + (Blue << 0);
           pixels[i] = CurrentPixel;
           NewFrameIndex += 4;
         }
@@ -691,16 +691,21 @@ LooFInterpreterModule InterpreterModule_Input = new LooFInterpreterModule() {
       
       case ("get mouse data"): {
         if (Args.length != 1) throw (new LooFInterpreterException (Environment, "the message \"get mouse data\" does not take any arguments.", new String[] {"InvalidArgsLength"}));
+        LooFInputHandler InputHandler = ModuleData.InputHandler;
+        boolean[] MouseButtonsDown = InputHandler.MouseButtonsDown;
         
         Point MousePosition = MouseInfo.getPointerInfo().getLocation();
         int AbsoluteMouseX = (int) MousePosition.getX();
         int AbsoluteMouseY = (int) MousePosition.getY();
         
         HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
-        TableToPushItems.put("XPos"        , new LooFDataValue (mouseX        ));
-        TableToPushItems.put("YPos"        , new LooFDataValue (mouseY        ));
-        TableToPushItems.put("AbsoluteXPos", new LooFDataValue (AbsoluteMouseX));
-        TableToPushItems.put("AbsoluteYPos", new LooFDataValue (AbsoluteMouseY));
+        TableToPushItems.put("XPos"        , new LooFDataValue (mouseX             ));
+        TableToPushItems.put("YPos"        , new LooFDataValue (mouseY             ));
+        TableToPushItems.put("AbsoluteXPos", new LooFDataValue (AbsoluteMouseX     ));
+        TableToPushItems.put("AbsoluteYPos", new LooFDataValue (AbsoluteMouseY     ));
+        TableToPushItems.put("Mouse1Down"  , new LooFDataValue (MouseButtonsDown[0]));
+        TableToPushItems.put("Mouse2Down"  , new LooFDataValue (MouseButtonsDown[1]));
+        TableToPushItems.put("Mouse3Down"  , new LooFDataValue (MouseButtonsDown[2]));
         
         LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
         LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
@@ -727,12 +732,6 @@ LooFInterpreterModule InterpreterModule_Input = new LooFInterpreterModule() {
         for (MouseEvent CurrentEvent : InputHandler.EnterEvents) EnterEvents.add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
         for (MouseEvent CurrentEvent : InputHandler.ExitEvents ) ExitEvents .add (CreateLooFMouseEvent (CurrentEvent, StartMillis));
         
-        InputHandler.ClickEvents.clear();
-        InputHandler.DownEvents.clear();
-        InputHandler.UpEvents.clear();
-        InputHandler.EnterEvents.clear();
-        InputHandler.ExitEvents.clear();
-        
         HashMap <String, LooFDataValue> TableToPushItems = new HashMap <String, LooFDataValue> ();
         TableToPushItems.put("ClickEvents", new LooFDataValue (ClickEvents, new HashMap <String, LooFDataValue> ()));
         TableToPushItems.put("DownEvents" , new LooFDataValue (DownEvents , new HashMap <String, LooFDataValue> ()));
@@ -742,6 +741,20 @@ LooFInterpreterModule InterpreterModule_Input = new LooFInterpreterModule() {
         
         LooFDataValue TableToPush = new LooFDataValue (new ArrayList <LooFDataValue> (), TableToPushItems);
         LooFInterpreter.PushValuesToStack (new LooFDataValue[] {TableToPush}, Environment);
+        
+      return;}
+      
+      
+      
+      case ("clear mouse events"): {
+        if (Args.length != 1) throw (new LooFInterpreterException (Environment, "the message \"clear mouse events\" does not take any arguments.", new String[] {"InvalidArgsLength"}));
+        LooFInputHandler InputHandler = ModuleData.InputHandler;
+        
+        InputHandler.ClickEvents.clear();
+        InputHandler.DownEvents.clear();
+        InputHandler.UpEvents.clear();
+        InputHandler.EnterEvents.clear();
+        InputHandler.ExitEvents.clear();
         
       return;}
       
@@ -781,10 +794,12 @@ class LooFInputHandler implements MouseListener {
   
   
   ArrayList <MouseEvent> ClickEvents = new ArrayList <MouseEvent> ();
-  ArrayList <MouseEvent> DownEvents = new ArrayList <MouseEvent> ();
-  ArrayList <MouseEvent> UpEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> DownEvents  = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> UpEvents    = new ArrayList <MouseEvent> ();
   ArrayList <MouseEvent> EnterEvents = new ArrayList <MouseEvent> ();
-  ArrayList <MouseEvent> ExitEvents = new ArrayList <MouseEvent> ();
+  ArrayList <MouseEvent> ExitEvents  = new ArrayList <MouseEvent> ();
+  
+  boolean[] MouseButtonsDown = new boolean [3];
   
   
   
@@ -801,10 +816,22 @@ class LooFInputHandler implements MouseListener {
   
   public void mousePressed (MouseEvent e) {
     DownEvents.add(e);
+    
+    int CurrentButton = e.getButton();
+    if (CurrentButton >= 1 && CurrentButton <= 3) {
+      MouseButtonsDown [CurrentButton - 1] = true;
+    }
+    
   }
   
   public void mouseReleased (MouseEvent e) {
     UpEvents.add(e);
+    
+    int CurrentButton = e.getButton();
+    if (CurrentButton >= 1 && CurrentButton <= 3) {
+      MouseButtonsDown [CurrentButton - 1] = false;
+    }
+    
   }
   
   public void mouseEntered (MouseEvent e) {

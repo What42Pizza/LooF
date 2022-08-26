@@ -1,4 +1,4 @@
-## EVERYTHING HERE IS EXTREMELY LIKELY TO CHANGE
+## EVERYTHING HERE IS EXTREMELY LIKELY TO CHANGE AND EXTREMELY INTERCONNECTED WITH PROCESSING 3
 
 <br>
 <br>
@@ -98,6 +98,7 @@
   - Pushes data about mouse events to the general stack.
   - Return data: {ClickEvents: {Event1, ...}, DownEvents: {Event1, ...}, UpEvents: {Event1, ...}, EnterEvents: {Event1, ...}, ExitEvents: {Event1, ...}}
   - Event data: {ButtonNum (int), Count (int), XPos (int), YPos (int), AbsoluteXPos (int), AbsoluteYPos (int), Millis (int), ShiftDown (bool), ControlDown (bool), AltDown (bool)}
+- **clear mouse events**
 - **get keyboard data**
 
 <br>

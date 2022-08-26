@@ -1735,6 +1735,27 @@ LooFEvaluatorFunction Function_CloneValue = new LooFEvaluatorFunction() {
 
 
 
+LooFEvaluatorFunction Function_TimeSince = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    LooFInterpreterModule InterpreterModule = Environment.AddonsData.InterpreterModules.getOrDefault("Interpreter", null);
+    if (InterpreterModule == null) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot call timeSince without the Interpreter module.", new String[] {"MissingInterpreterModule"});
+    LooFInterpreterModuleData InterpreterModuleData = (LooFInterpreterModuleData) Environment.ModuleDatas.get(InterpreterModule);
+    
+    double InputAsNum = GetDataValueNumber_Unsafe (Input, Environment, CodeData, AllCodeDatas, "timeSince");
+    long ProgramStartMillis = InterpreterModuleData.StartMillis;
+    long CurrentProgramRuntime = System.currentTimeMillis() - ProgramStartMillis;
+    double TimeSinceInput = CurrentProgramRuntime / 1000.0 - InputAsNum;
+    
+    return new LooFDataValue (TimeSinceInput);
+    
+  }
+  @Override public boolean CanBePreEvaluated() {return false;}
+};
+
+
+
+
+
 LooFEvaluatorFunction Function_NewByteArray = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     if (Input.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newByteArray takes an int as its first argument, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
@@ -1748,19 +1769,90 @@ LooFEvaluatorFunction Function_NewByteArray = new LooFEvaluatorFunction() {
 
 
 
-LooFEvaluatorFunction Function_TimeSince = new LooFEvaluatorFunction() {
+LooFEvaluatorFunction Function_NewImage = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    LooFInterpreterModule InterpreterModule = Environment.AddonsData.InterpreterModules.getOrDefault("Interpreter", null);
-    if (InterpreterModule == null) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot call timeSince without the Interpreter module.", new String[] {"MissingInterpreterModule"});
-    LooFInterpreterModuleData InterpreterModuleData = (LooFInterpreterModuleData) Environment.ModuleDatas.get(InterpreterModule);
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newImage can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> Args = Input.ArrayValue;
+    if (Args.size() != 2) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newImage takes 2 args, but " + Args.size() + " were found.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
     
-    double InputAsNum = GetDataValueNumber_Unsafe (Input, Environment, CodeData, AllCodeDatas, "timeSince");
-    long ProgramStartMillis = InterpreterModuleData.StartMillis;
-    long CurrentProgramRuntime = System.currentTimeMillis() - ProgramStartMillis;
-    double TimeSinceInput_Millis = (double) CurrentProgramRuntime - InputAsNum * 1000;
+    LooFDataValue WidthArg  = Args.get(0);
+    LooFDataValue HeightArg = Args.get(1);
+    if (WidthArg .ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newImage takes an int as its first arg, but the first arg was of type "   + DataValueTypeNames[WidthArg .ValueType] + ".", new String[] {"InvalidArgType"});
+    if (HeightArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function newImage takes an int as its second arg, but the second arg was of type " + DataValueTypeNames[HeightArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    long ImageWidth  = WidthArg .IntValue;
+    long ImageHeight = HeightArg.IntValue;
     
-    return new LooFDataValue (TimeSinceInput_Millis / 1000.0);
+    if (ImageWidth  > 65535) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot create an image with a width higher than 65535.", new String[] {"InvalidArgValue"});
+    if (ImageHeight > 65535) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot create an image height a width higher than 65535.", new String[] {"InvalidArgValue"});
+    if (ImageWidth  < 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot create an image with a width less than 0.", new String[] {"InvalidArgValue"});
+    if (ImageHeight < 0) ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot create an image with a height less than 0.", new String[] {"InvalidArgValue"});
+    
+    byte[] ImageData = new byte [(int) (ImageWidth * ImageHeight * 4 + 4)];
+    ImageData[0] = (byte) ( ImageWidth  & 0xFF        );
+    ImageData[1] = (byte) ((ImageWidth  & 0xFF00) >> 8);
+    ImageData[2] = (byte) ( ImageHeight & 0xFF        );
+    ImageData[3] = (byte) ((ImageHeight & 0xFF00) >> 8);
+    
+    return new LooFDataValue (ImageData);
     
   }
-  @Override public boolean CanBePreEvaluated() {return false;}
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_GetImageWidth = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_ByteArray) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageWidth takes a byteArray as its first argument, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    byte[] ImageData = Input.ByteArrayValue;
+    if (ImageData.length < 4) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the given byteArray is not a valid image (length is " + ImageData.length + ", but it must be at least 4).", new String[] {"InvalidArgValue"});
+    
+    int Width = ImageData[0] + (ImageData[1] << 8);
+    return new LooFDataValue (Width);
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_GetImageHeight = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_ByteArray) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageHeight takes a byteArray as its first argument, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    byte[] ImageData = Input.ByteArrayValue;
+    if (ImageData.length < 4) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the given byteArray is not a valid image (length is " + ImageData.length + ", but it must be at least 4).", new String[] {"InvalidArgValue"});
+    
+    int Height = ImageData[2] + (ImageData[3] << 8);
+    return new LooFDataValue (Height);
+    
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_GetImageIndex = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    if (Input.ValueType != DataValueType_Table) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageIndex can only take a table, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    ArrayList <LooFDataValue> Args = Input.ArrayValue;
+    if (Args.size() != 3) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageIndex takes 3 args, but " + Args.size() + " were found.", new String[] {"IncorrectNumOfArgs", "InvalidArgType"});
+    
+    LooFDataValue XArg = Args.get(0);
+    LooFDataValue YArg = Args.get(1);
+    LooFDataValue ImageArg = Args.get(2);
+    if (XArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageIndex takes an int as its first arg, but the first arg was of type "   + DataValueTypeNames[XArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (YArg.ValueType != DataValueType_Int) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageIndex takes an int as its second arg, but the second arg was of type " + DataValueTypeNames[YArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (ImageArg.ValueType != DataValueType_ByteArray) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getImageIndex takes a byteArray as its third arg, but the third arg was of type " + DataValueTypeNames[ImageArg.ValueType] + ".", new String[] {"InvalidArgType"});
+    long XPos  = XArg.IntValue;
+    long YPos = YArg.IntValue;
+    byte[] ImageData = ImageArg.ByteArrayValue;
+    if (ImageData.length < 4) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the given byteArray is not a valid image (length is " + ImageData.length + ", but it must be at least 4).", new String[] {"InvalidArgValue"});
+    int Width = ImageData[0] + (ImageData[1] << 8);
+    
+    return new LooFDataValue ((XPos + YPos * Width) * 4 + 4);
+    
+  }
 };

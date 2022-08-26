@@ -433,9 +433,13 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("cloneValue", Function_CloneValue);
     //EvaluatorFunctions.putIfAbsent("serialize", NullEvaluatorFunction);
     //EvaluatorFunctions.putIfAbsent("deserialize", NullEvaluatorFunction);
-    EvaluatorFunctions.putIfAbsent("newByteArray", Function_NewByteArray);
     EvaluatorFunctions.putIfAbsent("timeSince", Function_TimeSince);
     //EvaluatorFunctions.putIfAbsent("switch", NullEvaluatorFunction);
+    EvaluatorFunctions.putIfAbsent("newByteArray", Function_NewByteArray);
+    EvaluatorFunctions.putIfAbsent("newImage", Function_NewImage);
+    EvaluatorFunctions.putIfAbsent("getImageWidth", Function_GetImageWidth);
+    EvaluatorFunctions.putIfAbsent("getImageHeight", Function_GetImageHeight);
+    EvaluatorFunctions.putIfAbsent("getImageIndex", Function_GetImageIndex);
     
     return EvaluatorFunctions;
   }

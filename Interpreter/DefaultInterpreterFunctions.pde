@@ -1225,7 +1225,7 @@ LooFInterpreterFunction InterpreterFunction_GetGlobal = new LooFInterpreterFunct
   @Override public void HandleFunctionCall (LooFStatement Statement, LooFEnvironment Environment) {
     
     LooFDataValue GlobalValue = Environment.GlobalValue;
-    Environment.GeneralStack.add(GlobalValue);
+    LooFInterpreter.PushValuesToStack(new LooFDataValue[] {GlobalValue}, Environment);
     
   }
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
