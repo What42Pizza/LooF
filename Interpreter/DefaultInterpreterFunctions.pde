@@ -549,7 +549,7 @@ LooFInterpreterFunction InterpreterFunction_Loop = new LooFInterpreterFunction()
     LooFDataValue NextValueVarValue = Operation_Add.HandleOperation (ValueVarValue, IncrementValue, Environment, null, null);
     
     Result <Boolean> IncrementSignResult = GetDataValueSign (IncrementValue);
-    if (IncrementSignResult.Err) throw (new LooFInterpreterException (Environment, "the increment arg has to be of type int or float, but the arg was of type " + DataValueTypeNames[IncrementValue.ValueType] + ".", new String[] {"InvalidArgType"}));
+    if (IncrementSignResult.None) throw (new LooFInterpreterException (Environment, "the increment arg has to be of type int or float, but the arg was of type " + DataValueTypeNames[IncrementValue.ValueType] + ".", new String[] {"InvalidArgType"}));
     LooFEvaluatorOperation OperationToUse = IncrementSignResult.Some ? Operation_LessThanOrEqual : Operation_GreaterThanOrEqual;
     
     LooFDataValue ContinueLoopValue = OperationToUse.HandleOperation (NextValueVarValue, LoopEndValue, Environment, null, null);

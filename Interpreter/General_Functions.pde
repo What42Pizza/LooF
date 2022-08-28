@@ -825,7 +825,7 @@ boolean GetDataValueTruthiness (LooFDataValue Input, LooFEnvironment Environment
       return Input.BoolValue;
     
     case (DataValueType_Table):
-      return Input.ArrayValue.size() > 0;
+      return Input.ArrayValue.size() + Input.HashMapValue.size() > 0;
     
     case (DataValueType_ByteArray):
       ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
@@ -963,7 +963,7 @@ Result <String[]> GetStringArrayFromDataValue (LooFDataValue DataValueIn) {
   String[] Output = new String [ArrayIn.size()];
   for (int i = 0; i < Output.length; i ++) {
     LooFDataValue CurrentValue = ArrayIn.get(i);
-    if (CurrentValue.ValueType != DataValueType_String) return (new Result()).SetErrCause(DataValueTypeNames[CurrentValue.ValueType]);
+    if (CurrentValue.ValueType != DataValueType_String) return Result.Err(DataValueTypeNames[CurrentValue.ValueType]);
     Output[i] = CurrentValue.StringValue;
   }
   return new Result (Output);

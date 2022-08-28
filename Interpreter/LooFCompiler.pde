@@ -426,6 +426,10 @@ class LooFCompiler {
     EvaluatorFunctions.putIfAbsent("getFunctionLine", Function_GetFunctionLine);
     EvaluatorFunctions.putIfAbsent("getFunctionFile", Function_GetFunctionFile);
     
+    EvaluatorFunctions.putIfAbsent("Some", Function_Some);
+    EvaluatorFunctions.putIfAbsent("None", Function_None);
+    EvaluatorFunctions.putIfAbsent("Err", Function_Err);
+    
     EvaluatorFunctions.putIfAbsent("typeOf", Function_TypeOf);
     EvaluatorFunctions.putIfAbsent("isNumber", Function_IsNumber);
     EvaluatorFunctions.putIfAbsent("isLocked", Function_IsLocked);
@@ -1537,7 +1541,7 @@ class LooFCompiler {
           TokensFollowedBySpaces.add(PrevChar == ' ');
         }
         Result <Integer> EndQuoteIndexResult = GetEndQuoteIndex (CurrentLine, i);
-        if (EndQuoteIndexResult.Err) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + i + "."));
+        if (EndQuoteIndexResult.None) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "could not find a matching end-quote for the quote at char " + i + "."));
         int EndQuoteIndex = EndQuoteIndexResult.Some;
         CurrentLineTokens.add(CurrentLine.substring(i, EndQuoteIndex + 1));
         TokensFollowedBySpaces.add((EndQuoteIndex == CurrentLineLength - 1) ? false : CurrentLine.charAt (EndQuoteIndex + 1) == ' ');
@@ -1969,7 +1973,8 @@ class LooFCompiler {
   
   
   void EnsureFormulaTokensAreValid (LooFTokenBranch[] FormulaChildren, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
-    if (FormulaChildren.length == 0) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "empty formulas are not allowed."));
+    //if (FormulaChildren.length == 0) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "empty formulas are not allowed."));
+    if (FormulaChildren.length == 0) return;
     
     LooFTokenBranch FirstToken = FormulaChildren[0];
     switch (FirstToken.TokenType) {

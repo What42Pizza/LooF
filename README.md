@@ -76,7 +76,7 @@ I'm also doing my best to make the error messages informative, easy to read, and
 
 
 
-function Factorial  -> In
+function Factorial  args: In
 	returnIf (In == 1), 1
 	call Factorial, In - 1  -> NextProduct
 	return In * NextProduct
@@ -98,7 +98,7 @@ call Factorial, 10  -> FactorialResult
 
 #include Basics.LOOF
 
-function ConvertTableToString  -> TableIn, Seperator  throwsErrors {"InvalidArgType"}
+function ConvertTableToString  args: TableIn, Seperator  throwsErrors {"InvalidArgType"}
 	errorIf (typeOf TableIn != "table"), "function ConvertTableToString must take a table as its first arg.", {"InvalidArgType"}
 	Seperator <<defaultsTo ", "
 	errorIf (typeOf Seperator != "string"), "function ConvertTableToString must take a string or null as its second arg.", {"InvalidArgType"}

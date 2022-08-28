@@ -102,7 +102,7 @@ end
 
 OR
 
-function ExampleFunction  -> Arg1, Arg2, etc
+function ExampleFunction  args: Arg1, Arg2, etc
 	// do stuff
 	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
 end
@@ -116,7 +116,7 @@ end
 
 OR
 
-function ExampleFunction  -> Arg1, Arg2, etc  throwsErrors {"ErrorType1", "ErrorType2", etc}
+function ExampleFunction  args: Arg1, Arg2, etc  throwsErrors {"ErrorType1", "ErrorType2", etc}
 	// do stuff
 	return // ALWAYS HAVE RETURN AT THE END OF YOUR FUNCTION
 end
@@ -137,7 +137,7 @@ OR
 
 skip
 $function ExampleFunction
-	pop ARGS, Arg1, Arg2, etc
+	popImmutable ARGS, Arg1, Arg2, etc
 	// do stuff
 	return
 end
@@ -155,7 +155,7 @@ OR
 
 skip
 $function ExampleFunction
-	pop ARGS, Arg1, Arg2, etc
+	popImmutable ARGS, Arg1, Arg2, etc
 	setpassedErrors {"ErrorType1", "ErrorType2", etc}
 	// do stuff
 	return

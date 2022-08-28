@@ -258,6 +258,21 @@ FunctionValueToPass = $this.ExampleFunction
 
 <br>
 
+#### Option / Result Clone:
+
+- **Some Input (any)**
+  - returns `{Some: Input}`
+- **None Input (any)**
+  - returns `{None: true}`
+  - this is intended to be used like `return None()`
+- **Err ErrCause (string)**
+  - returns `{None: true, Err: true, ErrCause: ErrCause}`
+- **Err Input (any)**
+  - returns `{None: true, Err: true}`
+  - this is intended to be used like `return Err()`
+
+<br>
+
 #### Misc:
 
 - **typeOf Input (any)**

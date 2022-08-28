@@ -986,24 +986,36 @@ class FloatIntPairComparator implements Comparator <FloatIntPair> {
 
 
 
-class Result <T> {
+static class Result <T>{
   
-  T Some;
-  boolean Err;
-  String ErrCause = null;
+  T Some = null;
+  boolean None = false;
+  String Err = null;
   
   public Result (T Some) {
     this.Some = Some;
-    this.Err = false;
   }
   
   public Result() {
-    this.Err = true;
+    this.None = true;
   }
   
-  public Result SetErrCause (String ErrCause) {
-    this.ErrCause = ErrCause;
-    return this;
+  static Result Err (String Err) {
+    Result Output = new Result();
+    Output.Err = Err;
+    return Output;
+  }
+  
+  static Result Err (Result ErrCause) {
+    Result Output = new Result();
+    Output.Err = ErrCause.Err;
+    return Output;
+  }
+  
+  static Result Err() {
+    Result Output = new Result();
+    Output.Err = "";
+    return Output;
   }
   
 }

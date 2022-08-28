@@ -610,7 +610,7 @@ LooFEvaluatorFunction Function_Sign = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
     Result <Boolean> InputSign = GetDataValueSign (Input);
     
-    if (InputSign.Err) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
+    if (InputSign.None) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function sign can only take an int or a float, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     
     return new LooFDataValue (InputSign.Some ? 1 : -1);
     
@@ -1678,6 +1678,39 @@ LooFEvaluatorFunction Function_GetFunctionFile = new LooFEvaluatorFunction() {
     if (Input.ValueType != DataValueType_Function) ThrowLooFException (Environment, CodeData, AllCodeDatas, "the evaluator function getFunctionFile can only take a function, not " + DataValueTypeNames_PlusA[Input.ValueType] + ".", new String[] {"InvalidArgType"});
     if (Input.FunctionPageValue == null) return new LooFDataValue();
     return new LooFDataValue (Input.FunctionPageValue);
+  }
+};
+
+
+
+
+
+LooFEvaluatorFunction Function_Some = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    HashMap <String, LooFDataValue> Output = new HashMap <String, LooFDataValue> ();
+    Output.put("Some", Input);
+    return new LooFDataValue (new ArrayList <LooFDataValue> (), Output);
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_None = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    HashMap <String, LooFDataValue> Output = new HashMap <String, LooFDataValue> ();
+    Output.put("None", new LooFDataValue (true));
+    return new LooFDataValue (new ArrayList <LooFDataValue> (), Output);
+  }
+};
+
+
+
+LooFEvaluatorFunction Function_Err = new LooFEvaluatorFunction() {
+  @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+    HashMap <String, LooFDataValue> Output = new HashMap <String, LooFDataValue> ();
+    Output.put("Err", new LooFDataValue (true));
+    if (Input.ValueType == DataValueType_String) Output.put("ErrCause", Input);
+    return new LooFDataValue (new ArrayList <LooFDataValue> (), Output);
   }
 };
 

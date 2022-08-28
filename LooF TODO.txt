@@ -1,4 +1,4 @@
-Total Items: 17
+Total Items: 18
 
 currently executes ~3,000,000 lines of code per second!
 
@@ -8,9 +8,7 @@ base Guide.md on: https://clojure.org/guides/learn/syntax
 
 Main:
 
-add newImage (eval func)
-
-add #assert (pre-processor) & assert (interp func)
+add #assert (pre-processor)
 
 add popExact interp func? (find better name)
 
@@ -36,6 +34,10 @@ add better documentation:
 	CompilerSettings
 	challenges
 	creating addons
+
+add more compiler settings:
+	change the starting file
+	change the file extention
 
 get Ridge to try it out
 
