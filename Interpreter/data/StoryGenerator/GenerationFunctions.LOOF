@@ -1,4 +1,4 @@
-function GenerateStory  -> StoryStarts, StoryMiddles, StoryEnds, StoryCharacters
+function GenerateStory  args: StoryStarts, StoryMiddles, StoryEnds, StoryCharacters
 	call GenerateCharacters, StoryCharacters  -> Characters
 	call GenerateStoryBase, StoryStarts, StoryMiddles, StoryEnds  -> Story
 	
@@ -9,7 +9,7 @@ end
 
 
 
-function GenerateCharacters  -> StoryCharacters
+function GenerateCharacters  args: StoryCharacters
 	Characters = {}
 	MaxNumOfCharacters = min {lengthOf Characters, 10}
 	NumOfCharacters = randomInt {1, MaxNumOfCharacters}
@@ -24,7 +24,7 @@ end
 
 
 
-function GenerateStoryBase  -> StoryStarts, StoryMiddles, StoryEnds
+function GenerateStoryBase  args: StoryStarts, StoryMiddles, StoryEnds
 	Story = {}
 	Story <<addItem randomItem StoryStarts
 	NumOfMiddles = randomInt {10, 20}
@@ -40,7 +40,7 @@ end
 
 
 
-function RemoveDuplicateItems  -> mut_TableIn
+function RemoveDuplicateItems  args: mut_TableIn
 	forEach CurrentItem, TableIn, i
 		DuplicateIndex = firstIndexOf {TableIn, CurrentItem, i + 1}
 		while DuplicateIndex

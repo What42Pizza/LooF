@@ -1,4 +1,4 @@
-function AddItem  -> ItemIn, TableIn
+function AddItem  args: ItemIn, TableIn
 	TableIn[lengthOf TableIn] = ItemIn // this should crash
 	return
 end

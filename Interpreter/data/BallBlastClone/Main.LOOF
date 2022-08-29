@@ -72,7 +72,7 @@ repeat
 
 
 
-function UpdateAll  -> GameData, BallsData, BulletsData
+function UpdateAll  args: GameData, BallsData, BulletsData
 	
 	if GameData["Playing"] and not GameData["Paused"] then
 		call BallsHandler.UpdateAllBalls, BallsData, BulletsData

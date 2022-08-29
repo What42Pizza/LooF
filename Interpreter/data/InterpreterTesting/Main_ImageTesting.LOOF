@@ -16,7 +16,7 @@ callOutside "Interpreter", "pause", 2
 
 
 
-function NewImage  -> Width, Height
+function NewImage  args: Width, Height
 	ImageOut = newByteArray (Width * Height * 4 + 4)
 	ImageOut[0] = Width && 0xFF
 	ImageOut[1] = (Width && 0xFF00) >> 8

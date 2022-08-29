@@ -806,7 +806,7 @@ String ConvertLooFDataValueTableToString (LooFDataValue DataValueIn) {
 
 
 
-boolean GetDataValueTruthiness (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
+boolean GetDataValueTruthiness (LooFDataValue Input) {
   switch (Input.ValueType) {
     
     case (DataValueType_Null):
@@ -819,16 +819,16 @@ boolean GetDataValueTruthiness (LooFDataValue Input, LooFEnvironment Environment
       return Input.FloatValue > 0;
     
     case (DataValueType_String):
-      return Input.StringValue.length() > 0;
+      return true;
     
     case (DataValueType_Bool):
       return Input.BoolValue;
     
     case (DataValueType_Table):
-      return Input.ArrayValue.size() + Input.HashMapValue.size() > 0;
+      return true;
     
     case (DataValueType_ByteArray):
-      ThrowLooFException (Environment, CodeData, AllCodeDatas, "cannot cast byteArray to bool.", new String[] {"InvalidCast", "InalidArgType"});
+      return true;
     
     case (DataValueType_Function):
       return true;

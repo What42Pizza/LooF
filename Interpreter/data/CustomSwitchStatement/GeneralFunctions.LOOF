@@ -1,5 +1,5 @@
-function Switch  -> Input, Cases, Default, RunFunctions, FunctionArgs  throwsErrors {"InvalidArgType"}
-	RunFunctions defaultsTo true
+function Switch  args: Input, Cases, Default, RunFunctions, FunctionArgs  throwsErrors {"InvalidArgType"}
+	RunFunctions <<defaultsTo true
 	errorIf (typeOf Input != "string"), "First arg (Input) must be of type string.", {"InvalidArgType"}
 	errorIf (typeOf Cases != "table"), "Second arg (Cases) must be of type table.", {"InvalidArgType"}
 	

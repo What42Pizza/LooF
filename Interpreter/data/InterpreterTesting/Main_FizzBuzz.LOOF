@@ -1,4 +1,4 @@
-function FizzBuzz  -> Input
+function FizzBuzz  args: Input
 	Output = ""
 	Output ..= (Input % 3 == 0) and "Fizz" or ""
 	Output ..= (Input % 5 == 0) and "Buzz" or ""

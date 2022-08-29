@@ -1,4 +1,4 @@
-function Factorial  -> Input
+function Factorial  args: Input
 	returnIf (Input == 1), 1
 	call Factorial, Input - 1  -> NextResult
 	return Input * NextResult

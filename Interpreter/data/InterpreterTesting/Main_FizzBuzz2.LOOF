@@ -1,4 +1,4 @@
-function FizzBuzz2  -> Input
+function FizzBuzz2  args: Input
 	Output = ""
 	if Input % 3 == 0 then
 		Output ..= "Fizz"

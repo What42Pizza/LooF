@@ -1,4 +1,4 @@
-function UpdateAllBalls  -> BallsData, BulletsData
+function UpdateAllBalls  args: BallsData, BulletsData
 	AllBalls = BallsData["AllBalls"]
 	
 	// update balls
@@ -24,7 +24,7 @@ end
 
 
 
-function UpdateBall  -> CurrentBall, BallsData, BulletsData, NewBalls
+function UpdateBall  args: CurrentBall, BallsData, BulletsData, NewBalls
 	Size = CurrentBall["Size"]
 	XPos = CurrentBall["XPos"]
 	YPos = CurrentBall["YPos"]
@@ -88,7 +88,7 @@ end
 
 
 
-function CheckIfBallCollidsWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsData
+function CheckIfBallCollidsWithBullet  args: CurrentBall, CurrentBullet, BallsData, BulletsData
 	call F.DistanceBetweenObjects, CurrentBall, CurrentBullet  -> Dsitance
 	call GetBallRadius, CurrentBall, BallsData  -> BallRadius
 	CollisionDistance = BallRadius + BulletsData["BulletRadius"]
@@ -97,7 +97,7 @@ end
 
 
 
-function CollideWithBullet  -> CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
+function CollideWithBullet  args: CurrentBall, CurrentBullet, BallsData, BulletsData, NewBalls
 	
 	// deal damage
 	BulletDamage = BulletsData["BulletDamage"]
@@ -114,7 +114,7 @@ end
 
 
 
-function SplitBall  -> Ball, BallsData, NewBalls
+function SplitBall  args: Ball, BallsData, NewBalls
 	
 	NewSize = Ball["Size"] - 1
 	NewHealth = Ball["Health"] / 2
@@ -141,7 +141,7 @@ end
 
 
 
-function SpawnNewBalls  -> BallsData
+function SpawnNewBalls  args: BallsData
 	call GetNumberOfSize0Balls, BallsData["AllBalls"]  -> NumberOfSize0Balls
 	if NumberOfSize0Balls < BallsData["MaxSize0Balls"]
 		call SpawnNewBall, BallsData
@@ -150,7 +150,7 @@ end
 
 
 
-function GetNumberOfSize0Balls  -> AllBalls
+function GetNumberOfSize0Balls  args: AllBalls
 	Total = 0
 	forEach CurrentBall, AllBalls
 		Total = Total + 2 ^ CurrentBall["Size"]
@@ -162,7 +162,7 @@ end
 
 
 
-function SpawnNewBall  -> BallsData
+function SpawnNewBall  args: BallsData
 	StartingXPos = (chance 50) and -0.2 or 1.2
 	StartingYPos = 0.75 + random 0.25
 	Size = randomInt (BallsData["MaxBallSize"])
@@ -173,7 +173,7 @@ end
 
 
 
-function GetNewBallStruct  -> Type, Size, Health, XPos, YPos, XVel, YVel  throwsErrors {"InvalidArgType"}
+function GetNewBallStruct  args: Type, Size, Health, XPos, YPos, XVel, YVel  throwsErrors {"InvalidArgType"}
 	:ensureArgTypesAreCorrect ARGS, {"string", "number", "number", "number", "number", "number", "number"}
 	NewBall = {}
 	NewBall["Type"] = Type
@@ -189,7 +189,7 @@ end
 
 
 
-function GetBallRadius  -> Ball, BallsData
+function GetBallRadius  args: Ball, BallsData
 	BallSize = Ball["Size"]
 	BallRadius = (BallSize + 1) * BallsData["Size"]
 	return BallRadius

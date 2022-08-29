@@ -21,12 +21,7 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
     LooFTokenBranch[] Args = Statement.Args;
     
     // if there's no value to pop
-    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackInitialGeneralStackSizes)) {
-      for (int i = 0; i < Args.length; i ++) {
-        LooFInterpreter.SetVariableValue (Args[i].StringValue, new LooFDataValue(), Environment);
-      }
-      return;
-    }
+    if (Environment.GeneralStack.size() <= LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "there are no additional values to pop.", new String[] {"EmptyStack"}));
     
     // pop first value into first arg
     LooFDataValue PoppedValue = RemoveLastItem (Environment.GeneralStack);
@@ -54,6 +49,12 @@ LooFInterpreterFunction InterpreterFunction_Pop = new LooFInterpreterFunction() 
   @Override public void FinishStatement (LooFStatement CurrentStatement, LooFAddonsData AddonsData, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas, int LineNumber) {
     LooFCompiler.EnsureStatementHasCorrectNumberOfArgs_Unbounded (CurrentStatement, 1, CodeData, AllCodeDatas, LineNumber);
     LooFCompiler.SimplifyAllOutputVars (CurrentStatement, CodeData, AllCodeDatas, LineNumber);
+    if (LineNumber == 0) return;
+    LooFStatement[] Statements = CodeData.Statements;
+    LooFStatement PrevStatement = Statements[LineNumber - 1];
+    if (!PrevStatement.Name.equals("skip")) return;
+    LooFAdditionalSkipStatementData SkipData = (LooFAdditionalSkipStatementData) PrevStatement.AdditionalData;
+    if (SkipData.StartsFunction) throw (new LooFCompilerException (CodeData, AllCodeDatas, LineNumber, "cannot use 'pop' (or '  -> ') to get function args; 'popImmutable' (or '  args: ') must be used instead."));
   }
   @Override public String toString (LooFStatement CurrentStatement) {return "'pop'";}
 };
@@ -241,7 +242,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnIf = new LooFInterpreterFuncti
     LooFTokenBranch[] Args = Statement.Args;
     
     LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
+    if (!GetDataValueTruthiness (FirstArgValue)) return;
     
     if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
@@ -268,7 +269,7 @@ LooFInterpreterFunction InterpreterFunction_ReturnRawIf = new LooFInterpreterFun
     LooFTokenBranch[] Args = Statement.Args;
     
     LooFDataValue FirstArgValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    if (!GetDataValueTruthiness (FirstArgValue, Environment, null, null)) return;
+    if (!GetDataValueTruthiness (FirstArgValue)) return;
     
     if (Environment.GeneralStack.size() != LastItemOf (Environment.CallStackInitialGeneralStackSizes)) throw (new LooFInterpreterException (Environment, "the size of the general stack is not the same as when the function was called.", new String[] {"IncorrectGeneralStackSize"}));
     
@@ -303,11 +304,11 @@ LooFInterpreterFunction InterpreterFunction_If = new LooFInterpreterFunction() {
     LooFTokenBranch[] Args = Statement.Args;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     
     if (Args.length == 2) {
       LooFDataValue SecondConditionValue = LooFInterpreter.EvaluateFormula (Args[1], Environment, null, null);
-      boolean SecondCondition = GetDataValueTruthiness (SecondConditionValue, Environment, null, null);
+      boolean SecondCondition = GetDataValueTruthiness (SecondConditionValue);
       Condition ^= SecondCondition;
     }
     
@@ -442,7 +443,7 @@ LooFInterpreterFunction InterpreterFunction_SkipToIf = new LooFInterpreterFuncti
     LooFAdditionalSkipToStatementData AdditionalData = (LooFAdditionalSkipToStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     if (!Condition) return;
     
     Environment.CurrentLineNumber = AdditionalData.MatchingLabelStatementIndex + 1;
@@ -653,7 +654,7 @@ LooFInterpreterFunction InterpreterFunction_While = new LooFInterpreterFunction(
     LooFAdditionalLoopingStatementData AdditionalData = (LooFAdditionalLoopingStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     
     if (!Condition) {
       Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
@@ -725,7 +726,7 @@ LooFInterpreterFunction InterpreterFunction_RepeatIf = new LooFInterpreterFuncti
     LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     
     if (Condition) {
       Environment.CurrentLineNumber = AdditionalData.MatchingLoopingStatementIndex;
@@ -782,7 +783,7 @@ LooFInterpreterFunction InterpreterFunction_ContinueIf = new LooFInterpreterFunc
     LooFAdditionalRepeatingStatementData AdditionalData = (LooFAdditionalRepeatingStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     
     if (Condition) {
       Environment.CurrentLineNumber = AdditionalData.MatchingLoopingStatementIndex;
@@ -849,7 +850,7 @@ LooFInterpreterFunction InterpreterFunction_BreakIf = new LooFInterpreterFunctio
     LooFAdditionalBreakStatementData AdditionalData = (LooFAdditionalBreakStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     
     if (Condition) {
       Environment.CurrentLineNumber = AdditionalData.MatchingRepeatStatementIndex + 1;
@@ -922,7 +923,7 @@ LooFInterpreterFunction InterpreterFunction_ErrorIf = new LooFInterpreterFunctio
     LooFAdditionalErrorStatementData AdditionalData = (LooFAdditionalErrorStatementData) Statement.AdditionalData;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     if (!Condition) return;
     
     String ErrorMessage = GetErrorStatementErrorMessage (Args[1], AdditionalData, Environment, "second");
@@ -1203,7 +1204,7 @@ LooFInterpreterFunction InterpreterFunction_Assert = new LooFInterpreterFunction
     LooFTokenBranch[] Args = Statement.Args;
     
     LooFDataValue ConditionValue = LooFInterpreter.EvaluateFormula (Args[0], Environment, null, null);
-    boolean Condition = GetDataValueTruthiness (ConditionValue, Environment, null, null);
+    boolean Condition = GetDataValueTruthiness (ConditionValue);
     if (Condition) return;
     
     throw (new LooFInterpreterException (Environment, "assertion failed", new String[] {"AssertionFail"}));

@@ -1,12 +1,12 @@
-function UpdateAll  -> mut_AllData
-	call UpdateImage, AllData.TestImageData
+function UpdateAll  args: mut_AllData
+	call UpdateImage, AllData["TestImageData"]
 	return
 end
 
 
 
-function UpdateImage  -> mut_ImageData
-	ImageData.XPos += 0.01
-	ImageData.YPos += 0.01
+function UpdateImage  args: mut_ImageData
+	ImageData["XPos"] += 0.01
+	ImageData["YPos"] += 0.01
 	return
 end

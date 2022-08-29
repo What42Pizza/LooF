@@ -1,4 +1,4 @@
-function Factorial  -> Input
+function Factorial  args: Input
 	returnIf (Input == 1), Input
 	
 	error "test", {"test"}

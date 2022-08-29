@@ -5,13 +5,13 @@ callOutside "Files", "load image", ProgramFolder .. {"TestImage.png"}  -> TestIm
 
 
 Images = {
-	TestImage: TestImage,
-}
+`	TestImage: TestImage,
+`}
 
 TestImageData = {
-	XPos: 0.5,
-	YPos: 0.5,
-}
+`	XPos: 0.5,
+`	YPos: 0.5,
+`}
 
 
 AllData = {

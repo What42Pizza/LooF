@@ -1,4 +1,4 @@
-function DistanceBetweenObjects  -> Object1, Object2
+function DistanceBetweenObjects  args: Object1, Object2
 	DeltaX = Object1["XPos"] - Object2["XPos"]
 	DeltaY = Object1["YPos"] - Object2["YPos"]
 	DistanceSquared = DeltaX * DeltaX + DeltaY * DeltaY

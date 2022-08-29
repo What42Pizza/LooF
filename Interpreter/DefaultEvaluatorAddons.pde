@@ -1622,7 +1622,7 @@ LooFEvaluatorFunction Function_ToString = new LooFEvaluatorFunction() {
 
 LooFEvaluatorFunction Function_ToBool = new LooFEvaluatorFunction() {
   @Override public LooFDataValue HandleFunctionCall (LooFDataValue Input, LooFEnvironment Environment, LooFCodeData CodeData, HashMap <String, LooFCodeData> AllCodeDatas) {
-    return new LooFDataValue (GetDataValueTruthiness (Input, Environment, CodeData, AllCodeDatas));
+    return new LooFDataValue (GetDataValueTruthiness (Input));
   }
 };
 

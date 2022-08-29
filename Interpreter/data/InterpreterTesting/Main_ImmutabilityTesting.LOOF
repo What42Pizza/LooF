@@ -1,4 +1,4 @@
-function TestFunc  -> mut_TableToEdit
+function TestFunc  args: mut TableToEdit
 	TableToEdit[0] = 10
 	return
 end

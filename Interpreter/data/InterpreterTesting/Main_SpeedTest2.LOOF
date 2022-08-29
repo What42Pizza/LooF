@@ -21,7 +21,7 @@ repeat
 
 /*
 // un-optimized
-function BubbleSort  -> ListToSort
+function BubbleSort  args: ListToSort
 	loop PassNum, endOf ListToSort
 		loop i, endOf ListToSort - 1
 			continueIf ListToSort[i] <= ListToSort[i + 1]
@@ -40,7 +40,7 @@ end
 
 ///*
 // optimized
-function BubbleSort  -> ListToSort
+function BubbleSort  args: ListToSort
 	loop PassNum, endOf ListToSort
 		loop i, endOf ListToSort - 1 - PassNum
 			CurrentItem = ListToSort[i]
@@ -58,7 +58,7 @@ end
 
 
 
-function CreateRandomList  -> ListSize
+function CreateRandomList  args: ListSize
 	Output = {}
 	loop i, ListSize
 		Output[i] = random 1000000
@@ -68,7 +68,7 @@ end
 
 
 
-function CheckListIsSorted  -> ListToSort
+function CheckListIsSorted  args: ListToSort
 	forEach Item, ListToSort, i
 		returnIf i == endOf ListToSort
 		errorIf (Item > ListToSort[i + 1]), "List is not sorted", {"ListNotSorted"}

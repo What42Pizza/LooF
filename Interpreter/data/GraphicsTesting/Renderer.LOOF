@@ -1,4 +1,4 @@
-function BuildGraph  -> AllData
+function BuildGraph  args: AllData
 	
 	// start graph
 	Graph = {
@@ -21,7 +21,7 @@ end
 
 
 
-function AddImage  -> mut_Graph, ImageToAdd, XPos, YPos
+function AddImage  args: mut Graph, ImageToAdd, XPos, YPos
 	
 	Graph <<addItem {
 `		"image",
